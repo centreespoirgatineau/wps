@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css">
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css?v=<%= v %>">
+<link rel="icon" href="/static/icon.svg?v=<%= v %>" type="image/svg+xml">
 <meta name="csrf" content="<%= csrf %>">
 </head>
 <body>
@@ -42,6 +42,6 @@
   <%- body %>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="/static/app.js" defer></script>
+<script src="/static/app.js?v=<%= v %>" defer></script>
 </body>
 </html>

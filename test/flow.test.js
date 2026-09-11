@@ -84,7 +84,7 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(loc, '/admin');
   let r = await admin.get('/admin');
   assert.equal(r.status, 200);
-  assert.match(r.text, /Tableau de bord/);
+  assert.match(r.text, /Accueil/);
   const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
 
   // Create two contacts

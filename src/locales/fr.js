@@ -155,7 +155,7 @@ export default {
 
   // ---- admin ----
   'admin.title': 'Administration',
-  'admin.dashboard': 'Tableau de bord',
+  'admin.dashboard': 'Accueil',
   'admin.new_offer': 'Nouvelle offre',
   'admin.offers': 'Offres',
   'admin.contacts': 'Contacts',

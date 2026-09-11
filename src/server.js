@@ -1,4 +1,6 @@
 import path from 'node:path';
+import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { config } from './config.js';
 import { App, HttpError } from './lib/http.js';
@@ -17,6 +19,12 @@ import { twilioRoutes } from './routes/twilio.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const db = openDb(config.dbPath);
 
+// Static assets are addressed by content hash (?v=…) so browsers never keep a stale stylesheet.
+const assetVersion = createHash('sha1')
+  .update(fs.readFileSync(path.join(here, 'public/app.css')))
+  .update(fs.readFileSync(path.join(here, 'public/app.js')))
+  .digest('hex').slice(0, 10);
+
 // Default settings on first run.
 if (!db.setting('pickup_name')) {
   db.setSetting('pickup_name', 'Centre Espoir de Gatineau');
@@ -33,6 +41,7 @@ app.use((ctx) => {
   ctx.set('X-Frame-Options', 'DENY');
   ctx.set('Referrer-Policy', 'same-origin');
   ctx.set('X-Robots-Tag', 'noindex, nofollow');
+  if (!ctx.path.startsWith('/static/') && !ctx.path.startsWith('/media/')) ctx.set('Cache-Control', 'no-store');
   ctx.set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
 });
 
@@ -73,6 +82,7 @@ app.use((ctx) => {
       adminFresh: adminFresh(ctx),
       csrf: ctx.state.session?.csrf || '',
       path: ctx.path,
+      v: assetVersion,
       langSwitchUrl: u.pathname + u.search,
       flash: ctx.state.flash || null,
       pendingCount: isAdmin(ctx) ? db.get(`SELECT COUNT(*) n FROM join_requests WHERE status = 'pending'`).n : 0,
@@ -87,7 +97,7 @@ app.use((ctx) => {
   ctx.partial = (view, locals) => ctx.html(renderPartial(view, ctx.locals(locals)));
 });
 
-app.static('/static', path.join(here, 'public'), { maxAge: 86400 });
+app.static('/static', path.join(here, 'public'), { maxAge: 365 * 86400 });
 
 publicRoutes(app, db);
 contactRoutes(app, db);
