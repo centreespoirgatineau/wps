@@ -106,7 +106,8 @@ obtains the certificate automatically.
 
 | Task | Command (on the VPS) |
 |---|---|
-| Update after a code change | `sudo bash /opt/wps/update.sh` |
+| Update after a code change | automatic within 2 minutes of a push to `main` once `autoupdate.sh` is in cron (see below); or `sudo bash /opt/wps/update.sh` by hand |
+| Enable auto-deploy (once) | `(crontab -l 2>/dev/null; echo "*/2 * * * * bash /opt/wps/autoupdate.sh") \| crontab -` — log in `/var/log/wps-autoupdate.log` |
 | Logs | `docker compose -f /opt/wps/docker-compose.yml logs -f` |
 | Backup (DB + photos → `/opt/wps/backups`) | `sudo bash /opt/wps/backup.sh` — add to cron: `0 3 * * * bash /opt/wps/backup.sh` |
 | Change a setting (e.g. Twilio number) | `nano /opt/wps/.env` then `sudo bash /opt/wps/update.sh` |
