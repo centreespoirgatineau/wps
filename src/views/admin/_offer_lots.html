@@ -35,7 +35,7 @@
   <div class="fold-body">
     <% if (!sms.length) { %><div class="tiny"><%= t('sms.none') %></div><% } %>
     <ul class="list">
-      <% for (const s of sms) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' ? 'warn' : ''; %>
+      <% for (const s of sms) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' || st === 'skipped' ? 'warn' : ''; %>
       <li>
         <div class="grow"><strong><%= s.first_name || '' %> <%= s.last_name || '' %></strong><div class="meta"><%= s.organization || fmtPhone(s.to_phone) %> · <%= fmtShort(s.created_at) %><% if (s.error) { %> · <span style="color:var(--danger)"><%= s.error %></span><% } %></div></div>
         <span class="badge <%= cls %>"><%= t('sms.status.' + st) %></span>

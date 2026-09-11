@@ -14,31 +14,30 @@
 <meta name="csrf" content="<%= csrf %>">
 </head>
 <body>
-<header class="top">
+<header class="top<%= contact ? '' : ' plain' %>">
   <div class="wrap bar">
     <a class="home" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>" aria-label="Accueil"><%- include('_mark', { small: true }) %></a>
-    <nav class="nav">
-      <% if (!contact) { %>
-        <a class="lang" href="<%= langSwitchUrl %>" rel="nofollow"><%= t('lang.other') %></a>
-      <% } else if (!isAdmin) { %>
-        <a href="/reglages" class="icon-btn <%= path === '/reglages' ? 'on' : '' %>" aria-label="<%= t('settings.title') %>" title="<%= t('settings.title') %>">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-        </a>
-      <% } %>
+    <% if (contact && isAdmin) { %>
+    <nav class="tabs grow">
+      <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>"><%= t('admin.dashboard') %></a>
+      <a href="/admin/offres" class="<%= path.startsWith('/admin/offres') || path.startsWith('/offres') ? 'on' : '' %>"><%= t('admin.offers') %></a>
+      <a href="/admin/contacts" class="<%= path.startsWith('/admin/contacts') ? 'on' : '' %>"><%= t('admin.contacts') %></a>
+      <a href="/admin/demandes" class="<%= path.startsWith('/admin/demandes') ? 'on' : '' %>"><%= t('admin.requests') %><% if (pendingCount) { %> <span class="pill"><%= pendingCount %></span><% } %></a>
+      <a href="/admin/sms" class="<%= path.startsWith('/admin/sms') ? 'on' : '' %>"><%= t('admin.sms') %></a>
+      <a href="/admin/parametres" class="<%= path.startsWith('/admin/parametres') ? 'on' : '' %>"><%= t('admin.settings') %></a>
     </nav>
+    <% } else if (contact) { %>
+    <nav class="nav">
+      <a href="/reglages" class="icon-btn <%= path === '/reglages' ? 'on' : '' %>" aria-label="<%= t('settings.title') %>" title="<%= t('settings.title') %>">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </a>
+    </nav>
+    <% } else { %>
+    <nav class="nav"><a class="lang" href="<%= langSwitchUrl %>" rel="nofollow"><%= t('lang.other') %></a></nav>
+    <% } %>
   </div>
-  <% if (contact && isAdmin) { %>
-  <nav class="tabs wrap">
-    <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>"><%= t('admin.dashboard') %></a>
-    <a href="/admin/offres" class="<%= path.startsWith('/admin/offres') || path.startsWith('/offres') ? 'on' : '' %>"><%= t('admin.offers') %></a>
-    <a href="/admin/contacts" class="<%= path.startsWith('/admin/contacts') ? 'on' : '' %>"><%= t('admin.contacts') %></a>
-    <a href="/admin/demandes" class="<%= path.startsWith('/admin/demandes') ? 'on' : '' %>"><%= t('admin.requests') %><% if (pendingCount) { %> <span class="pill"><%= pendingCount %></span><% } %></a>
-    <a href="/admin/sms" class="<%= path.startsWith('/admin/sms') ? 'on' : '' %>"><%= t('admin.sms') %></a>
-    <a href="/admin/parametres" class="<%= path.startsWith('/admin/parametres') ? 'on' : '' %>"><%= t('admin.settings') %></a>
-  </nav>
-  <% } %>
 </header>
-<main class="wrap">
+<main class="wrap<%= centered ? ' centered' : '' %>">
   <% if (flash) { %><div class="banner <%= flash.type === 'error' ? 'error' : 'ok' %> mb"><%= flash.text %></div><% } %>
   <%- body %>
 </main>

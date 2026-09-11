@@ -133,7 +133,7 @@ export function contactRoutes(app, db) {
     const lots = db.all(`SELECT l.id, l.offer_id FROM lots l JOIN offers o ON o.id = l.offer_id WHERE l.reserved_by = ? AND l.status = 'reserved' AND o.status = 'active'`, ctx.state.contact.id);
     for (const l of lots) { rules.adminSetLot(db, l.id, 'free'); sse.publish(l.offer_id, 'refresh', { reason: 'freed' }); }
     destroySession(db, ctx);
-    ctx.render('login', { title: ctx.t('login.title'), step: 'phone', phone: '', info: ctx.t('me.opted_out') });
+    ctx.render('login', { centered: true, title: ctx.t('login.title'), step: 'phone', phone: '', info: ctx.t('me.opted_out') });
   });
 
   // Private media (photos)

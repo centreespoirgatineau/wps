@@ -13,6 +13,13 @@ export function smsConfigured() {
  */
 export async function sendSms(db, { to, body, kind = 'other', contactId = null, offerId = null }) {
   const now = Date.now();
+  // Test accounts are never texted, whatever the caller.
+  if (contactId && db.get('SELECT no_sms FROM contacts WHERE id = ?', contactId)?.no_sms) {
+    const { lastInsertRowid } = db.run(
+      `INSERT INTO sms_log(contact_id, offer_id, to_phone, kind, body, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'skipped', ?, ?)`,
+      contactId, offerId, to, kind, body, now, now);
+    return lastInsertRowid;
+  }
   const { lastInsertRowid: logId } = db.run(
     `INSERT INTO sms_log(contact_id, offer_id, to_phone, kind, body, status, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, 'queued', ?, ?)`,

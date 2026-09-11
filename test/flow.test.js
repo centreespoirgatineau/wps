@@ -249,6 +249,31 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.match(r.text, /Current offers/);
 });
 
+test('test accounts: link-only sign-in, never texted', async () => {
+  const admin = client();
+  await loginByCode(admin, '(819) 555-0001');
+  let r = await admin.get('/admin');
+  const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+  r = await admin.post('/admin/contacts', { form: { _csrf: csrf, first_name: 'Testeur', organization: 'Test', phone: '(819) 555-0100', lang: 'fr', no_sms: '1' } });
+  const id = /\/admin\/contacts\/(\d+)/.exec(r.location)[1];
+  // Phone login refused with a hint
+  const t = client();
+  r = await t.post('/connexion', { form: { phone: '(819) 555-0100' } });
+  assert.match(r.text, /lien personnel/);
+  assert.doesNotMatch(r.text, /name="code"/);
+  // Any SMS to this contact is skipped, not sent
+  r = await admin.post(`/admin/contacts/${id}/sms`, { form: { _csrf: csrf, kind: 'test' } });
+  r = await admin.get('/admin/sms');
+  assert.match(r.text, /Compte de test/);
+  // Link works
+  r = await admin.get(`/admin/contacts/${id}`);
+  const token = /\/r\/([A-Za-z0-9]+)</.exec(r.text)[1];
+  r = await t.get(`/r/${token}`);
+  assert.equal(r.status, 303);
+  r = await t.get('/offres');
+  assert.equal(r.status, 200);
+});
+
 test('admin pages need admin role; link sessions need a fresh code for admin', async () => {
   const admin = client();
   await loginByCode(admin, '(819) 555-0001');

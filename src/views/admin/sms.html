@@ -3,7 +3,7 @@
 <div class="card">
   <% if (!rows.length) { %><div class="empty"><%= t('sms.none') %></div><% } %>
   <ul class="list">
-    <% for (const s of rows) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' ? 'warn' : ''; %>
+    <% for (const s of rows) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' || st === 'skipped' ? 'warn' : ''; %>
     <li>
       <div class="grow">
         <strong><%= s.first_name ? s.first_name + ' ' + (s.last_name || '') : fmtPhone(s.to_phone) %></strong> <span class="badge"><%= t('sms.kind.' + s.kind) %></span>

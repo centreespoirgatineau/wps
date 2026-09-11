@@ -44,6 +44,7 @@ export default {
   'login.code_invalid': 'Incorrect code.',
   'login.code_expired': 'This code has expired. Request a new one.',
   'login.what_is_this': 'What is this platform?',
+  'login.test_account': 'This test account signs in only through its personal link (Admin → Contacts → Copy link).',
   'login.opted_out': 'You left the list. To come back, submit a new request.',
 
   // ---- about ----
@@ -297,6 +298,7 @@ export default {
   'sms.status.failed': 'Failed',
   'sms.status.undelivered': 'Undelivered',
   'sms.status.dry_run': 'Simulated',
+  'sms.status.skipped': 'Test account',
   'sms.none': 'No texts sent yet.',
   'sms.not_configured': 'Twilio is not configured: texts are simulated. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM.',
 

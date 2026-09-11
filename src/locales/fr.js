@@ -44,6 +44,7 @@ export default {
   'login.code_invalid': 'Code incorrect.',
   'login.code_expired': 'Ce code a expiré. Demandez-en un nouveau.',
   'login.what_is_this': 'Qu’est-ce que cette plateforme ?',
+  'login.test_account': 'Ce compte de test se connecte uniquement par son lien personnel (Admin → Contacts → Copier le lien).',
   'login.opted_out': 'Vous vous êtes retiré de la liste. Pour revenir, faites une nouvelle demande.',
 
   // ---- about ----
@@ -297,6 +298,7 @@ export default {
   'sms.status.failed': 'Échec',
   'sms.status.undelivered': 'Non livré',
   'sms.status.dry_run': 'Simulé',
+  'sms.status.skipped': 'Compte de test',
   'sms.none': 'Aucun texto envoyé pour le moment.',
   'sms.not_configured': 'Twilio n’est pas configuré : les textos sont simulés. Renseignez TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN et TWILIO_FROM.',
 

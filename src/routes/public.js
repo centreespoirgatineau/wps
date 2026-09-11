@@ -18,12 +18,12 @@ function homeFor(ctx) {
 export function publicRoutes(app, db) {
   app.get('/', (ctx) => {
     if (ctx.state.contact) return ctx.redirect(homeFor(ctx));
-    ctx.render('login', { title: ctx.t('login.title'), step: 'phone', phone: '' });
+    ctx.render('login', { centered: true, title: ctx.t('login.title'), step: 'phone', phone: '' });
   });
 
   app.get('/connexion', (ctx) => {
     if (ctx.state.contact && !ctx.query.next) return ctx.redirect(homeFor(ctx));
-    ctx.render('login', { title: ctx.t('login.title'), step: 'phone', phone: '', next: safeNext(ctx.query.next) });
+    ctx.render('login', { centered: true, title: ctx.t('login.title'), step: 'phone', phone: '', next: safeNext(ctx.query.next) });
   });
 
   // Step 1: phone → code
@@ -31,7 +31,7 @@ export function publicRoutes(app, db) {
     const body = await ctx.body();
     const next = safeNext(body.next);
     const phone = normalizePhone(body.phone);
-    const view = (extra) => ctx.render('login', { title: ctx.t('login.title'), step: 'phone', phone: body.phone || '', next, ...extra });
+    const view = (extra) => ctx.render('login', { centered: true, title: ctx.t('login.title'), step: 'phone', phone: body.phone || '', next, ...extra });
     if (!phone) return view({ error: ctx.t('login.invalid_phone') });
     if (!rateLimit(db, `login:ip:${ctx.ip}`, 20, 15 * MIN) || !rateLimit(db, `login:phone:${phone}`, 5, 15 * MIN)) {
       return view({ error: ctx.t('error.too_many') });
@@ -39,8 +39,9 @@ export function publicRoutes(app, db) {
     const contact = db.get('SELECT * FROM contacts WHERE phone = ? AND status != ?', phone, 'removed');
     if (!contact) return view({ unknown: true, phoneE164: phone });
     if (contact.status === 'opted_out') return view({ error: ctx.t('login.opted_out'), unknown: true, phoneE164: phone });
+    if (contact.no_sms) return view({ error: ctx.t('login.test_account') });
     const code = await issueLoginCode(db, contact);
-    ctx.render('login', {
+    ctx.render('login', { centered: true,
       title: ctx.t('login.title'), step: 'code', phone: body.phone, phoneE164: phone, next,
       info: ctx.t('login.code_sent', { phone: formatPhone(phone) }),
       devCode: config.env === 'development' || config.twilio.dryRun ? code : null,
@@ -56,7 +57,7 @@ export function publicRoutes(app, db) {
     if (!rateLimit(db, `code:ip:${ctx.ip}`, 30, 15 * MIN)) throw new HttpError(429);
     const result = verifyLoginCode(db, phone, body.code || '');
     if (result !== 'ok') {
-      return ctx.render('login', {
+      return ctx.render('login', { centered: true,
         title: ctx.t('login.title'), step: 'code', phone: formatPhone(phone), phoneE164: phone, next,
         error: ctx.t(result === 'expired' ? 'login.code_expired' : 'login.code_invalid'),
       });
