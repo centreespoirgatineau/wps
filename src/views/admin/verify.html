@@ -1,0 +1,16 @@
+<div class="hero">
+  <%- include('_mark') %>
+  <h1><%= t('admin.verify_title') %></h1>
+  <p><%= t('admin.verify_body', { h: config.adminFreshHours, phone: fmtPhone(contact.phone) }) %></p>
+</div>
+<div class="card mt">
+  <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
+  <form method="post" action="/admin/verifier" class="stack" autocomplete="off">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <label class="field"><span><%= t('login.code') %></span>
+      <input class="code" type="text" name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus required></label>
+    <button class="btn primary block" type="submit"><%= t('login.verify') %></button>
+  </form>
+  <p class="center mt"><a href="/admin/verifier?next=<%= encodeURIComponent(next) %>"><%= t('login.resend') %></a></p>
+</div>

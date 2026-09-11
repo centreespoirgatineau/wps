@@ -1,0 +1,15 @@
+{
+  "name": "wps",
+  "version": "1.0.0",
+  "description": "Food-surplus SMS reservation platform (zero external dependencies)",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning src/server.js",
+    "dev": "node --no-warnings=ExperimentalWarning --watch src/server.js",
+    "test": "node --no-warnings=ExperimentalWarning --test \"test/**/*.test.js\"",
+    "admin": "node --no-warnings=ExperimentalWarning scripts/make-admin.js"
+  },
+  "dependencies": {}
+}

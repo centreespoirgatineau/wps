@@ -1,0 +1,8 @@
+<nav class="tabs">
+  <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>"><%= t('admin.dashboard') %></a>
+  <a href="/admin/offres" class="<%= path.startsWith('/admin/offres') ? 'on' : '' %>"><%= t('admin.offers') %></a>
+  <a href="/admin/contacts" class="<%= path.startsWith('/admin/contacts') ? 'on' : '' %>"><%= t('admin.contacts') %></a>
+  <a href="/admin/demandes" class="<%= path.startsWith('/admin/demandes') ? 'on' : '' %>"><%= t('admin.requests') %><% if (typeof pendingCount !== 'undefined' && pendingCount) { %> · <%= pendingCount %><% } %></a>
+  <a href="/admin/sms" class="<%= path.startsWith('/admin/sms') ? 'on' : '' %>"><%= t('admin.sms') %></a>
+  <a href="/admin/parametres" class="<%= path.startsWith('/admin/parametres') ? 'on' : '' %>"><%= t('admin.settings') %></a>
+</nav>

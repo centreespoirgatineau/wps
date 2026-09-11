@@ -1,0 +1,16 @@
+# Only when NOTHING else uses ports 80/443 on the VPS:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.caddy.yml up -d
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: wps-caddy
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [wps]
+volumes:
+  caddy_data:
+  caddy_config:

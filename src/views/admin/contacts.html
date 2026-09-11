@@ -1,0 +1,24 @@
+<%- include('admin/_tabs') %>
+<div class="page-head">
+  <h1><%= t('contacts.title') %> <span class="badge"><%= contacts.filter(c => c.status === 'active').length %></span></h1>
+  <div class="actions"><a class="btn primary sm" href="/admin/contacts/nouveau">+ <%= t('contacts.add') %></a></div>
+</div>
+<form method="get" action="/admin/contacts" class="mb"><input type="search" name="q" value="<%= q %>" placeholder="<%= t('contacts.search') %>"></form>
+
+<div class="card">
+  <% if (!contacts.length) { %><div class="empty"><%= t('contacts.none') %></div><% } %>
+  <ul class="list">
+    <% for (const c of contacts) { %>
+    <li>
+      <a class="grow" href="/admin/contacts/<%= c.id %>" style="color:inherit">
+        <strong><%= c.first_name %> <%= c.last_name %>
+          <% if (c.role === 'admin') { %><span class="badge accent"><%= t('contacts.role.admin') %></span><% } %>
+          <% if (c.status !== 'active') { %><span class="badge warn"><%= t('contacts.status.' + c.status) %></span><% } %>
+        </strong>
+        <div class="meta"><%= c.organization %> · <%= fmtPhone(c.phone) %> · <%= c.lang.toUpperCase() %></div>
+        <div class="tiny"><%= t('contacts.reservations') %> : <%= c.reservations %> · <%= t('contacts.no_shows') %> : <%= c.no_shows %> · <%= t('contacts.last_seen') %> : <%= c.last_seen ? fmtShort(c.last_seen) : t('contacts.never') %></div>
+      </a>
+    </li>
+    <% } %>
+  </ul>
+</div>

@@ -1,0 +1,22 @@
+<div class="page-head"><h1><%= t('join.title') %></h1></div>
+<p class="muted"><%= t('join.intro') %></p>
+<div class="card mt">
+  <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
+  <form method="post" action="/demande">
+    <div class="grid-2">
+      <label class="field"><span><%= t('join.first_name') %></span><input type="text" name="first_name" value="<%= form.first_name || '' %>" autocomplete="given-name" required></label>
+      <label class="field"><span><%= t('join.last_name') %></span><input type="text" name="last_name" value="<%= form.last_name || '' %>" autocomplete="family-name"></label>
+    </div>
+    <label class="field"><span><%= t('join.organization') %></span><input type="text" name="organization" value="<%= form.organization || '' %>" autocomplete="organization" required></label>
+    <label class="field"><span><%= t('join.phone') %></span><input type="tel" name="phone" inputmode="tel" autocomplete="tel" placeholder="<%= t('login.phone_placeholder') %>" value="<%= form.phone || '' %>" data-phone required></label>
+    <div class="field"><span><%= t('join.lang') %></span>
+      <div class="seg">
+        <label><input type="radio" name="lang" value="fr" <%= (form.lang || 'fr') === 'fr' ? 'checked' : '' %>><span>Français</span></label>
+        <label><input type="radio" name="lang" value="en" <%= form.lang === 'en' ? 'checked' : '' %>><span>English</span></label>
+      </div>
+    </div>
+    <label class="field"><span><%= t('join.message') %> <small>(<%= t('optional') %>)</small></span><textarea name="message" maxlength="1000"><%= form.message || '' %></textarea></label>
+    <button class="btn primary block" type="submit"><%= t('join.submit') %></button>
+  </form>
+</div>
+<p class="center mt-l"><a href="/a-propos"><%= t('login.what_is_this') %></a></p>

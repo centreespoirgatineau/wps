@@ -1,0 +1,12 @@
+<%# locals: fieldName, files (array of filenames), multiple (bool), max, label %>
+<div class="field" data-photo-field="<%= fieldName %>" data-multiple="<%= multiple ? 1 : 0 %>" data-max="<%= multiple ? max : 1 %>">
+  <span><%= label %> <% if (!multiple) { %><small>(<%= t('optional') %>)</small><% } %></span>
+  <div class="photos <%= multiple ? '' : 'two' %>">
+    <% for (const f of (files || [])) { %>
+      <div class="ph" data-file="<%= f %>"><img src="/media/<%= f %>" alt=""><input type="hidden" name="<%= fieldName %>" value="<%= f %>"><button type="button" class="rm" aria-label="×">×</button></div>
+    <% } %>
+    <div class="ph add" role="button" tabindex="0">+ <%= t('offer.form.add_photos') %></div>
+  </div>
+  <input type="file" accept="image/*" <%= multiple ? 'multiple' : '' %> hidden>
+  <% if (multiple) { %><div class="hint"><%= t('offer.form.photos_hint', { n: max }) %></div><% } %>
+</div>

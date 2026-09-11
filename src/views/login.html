@@ -1,0 +1,45 @@
+<div class="hero">
+  <%- include('_mark') %>
+  <h1><%= step === 'code' ? t('login.title') : appName %></h1>
+  <% if (step !== 'code') { %><p><%= t('login.intro') %></p><% } %>
+</div>
+
+<div class="card mt">
+  <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
+  <% if (info) { %><div class="banner ok mb"><%= info %></div><% } %>
+
+  <% if (step === 'code') { %>
+    <form method="post" action="/connexion/code" class="stack" autocomplete="off">
+      <input type="hidden" name="phone" value="<%= phoneE164 %>">
+      <% if (next) { %><input type="hidden" name="next" value="<%= next %>"><% } %>
+      <label class="field">
+        <span><%= t('login.code') %></span>
+        <input class="code" type="text" name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus required>
+      </label>
+      <% if (devCode) { %><div class="banner info tiny">dev/dry-run code: <code><%= devCode %></code></div><% } %>
+      <button class="btn primary block" type="submit"><%= t('login.verify') %></button>
+    </form>
+    <form method="post" action="/connexion" class="row between mt">
+      <input type="hidden" name="phone" value="<%= phoneE164 %>">
+      <% if (next) { %><input type="hidden" name="next" value="<%= next %>"><% } %>
+      <button class="link-btn" type="submit"><%= t('login.resend') %></button>
+      <a href="/connexion"><%= t('login.change_phone') %></a>
+    </form>
+  <% } else { %>
+    <form method="post" action="/connexion" class="stack">
+      <% if (next) { %><input type="hidden" name="next" value="<%= next %>"><% } %>
+      <label class="field">
+        <span><%= t('login.phone') %></span>
+        <input class="big" type="tel" name="phone" inputmode="tel" autocomplete="tel" placeholder="<%= t('login.phone_placeholder') %>" value="<%= phone %>" data-phone autofocus required>
+      </label>
+      <% if (unknown) { %>
+        <div class="banner warn"><%= t('login.unknown_phone') %>
+          <div class="mt-s"><a class="btn sm secondary" href="/demande?phone=<%= encodeURIComponent(phoneE164) %>"><%= t('login.request_access') %></a></div>
+        </div>
+      <% } %>
+      <button class="btn primary block" type="submit"><%= t('login.get_code') %></button>
+    </form>
+  <% } %>
+</div>
+
+<p class="center mt-l"><a href="/a-propos"><%= t('login.what_is_this') %></a></p>

@@ -1,0 +1,13 @@
+# Traefik (Coolify / Dokploy / your own): merge into the `wps` service of
+# docker-compose.yml and put the container on Traefik's network.
+#   networks: [default, proxy]      # 'proxy' = Traefik's network name
+#   labels:
+#     - traefik.enable=true
+#     - traefik.http.routers.wps.rule=Host(`wps.davidhatin.com`)
+#     - traefik.http.routers.wps.entrypoints=websecure
+#     - traefik.http.routers.wps.tls.certresolver=letsencrypt   # your resolver name
+#     - traefik.http.services.wps.loadbalancer.server.port=8080
+#     - traefik.http.services.wps.loadbalancer.responseforwarding.flushinterval=-1
+# networks:
+#   proxy:
+#     external: true

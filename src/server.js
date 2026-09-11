@@ -1,0 +1,118 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { config } from './config.js';
+import { App, HttpError } from './lib/http.js';
+import { openDb } from './lib/db.js';
+import { render, renderPartial } from './lib/view.js';
+import { translator, normalizeLang, fromAcceptLanguage } from './lib/i18n.js';
+import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
+import { startScheduler } from './lib/scheduler.js';
+import { formatPhone } from './lib/phone.js';
+import { formatDate, formatDateTimeShort, hmToH } from './lib/time.js';
+import { publicRoutes } from './routes/public.js';
+import { contactRoutes } from './routes/contact.js';
+import { adminRoutes } from './routes/admin.js';
+import { twilioRoutes } from './routes/twilio.js';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+export const db = openDb(config.dbPath);
+
+// Default settings on first run.
+if (!db.setting('pickup_name')) {
+  db.setSetting('pickup_name', 'Centre Espoir de Gatineau');
+  db.setSetting('pickup_address', '791 boulevard Maloney Est, Gatineau, QC J8P 1H8');
+  db.setSetting('pickup_details', '');
+}
+if (!db.setting('app_name')) db.setSetting('app_name', config.appName);
+
+const app = new App();
+
+// --- security headers, language, view helpers ---
+app.use((ctx) => {
+  ctx.set('X-Content-Type-Options', 'nosniff');
+  ctx.set('X-Frame-Options', 'DENY');
+  ctx.set('Referrer-Policy', 'same-origin');
+  ctx.set('X-Robots-Tag', 'noindex, nofollow');
+  ctx.set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
+});
+
+app.use(loadSession(db));
+
+app.use((ctx) => {
+  // Language: ?lang= (and persist) > contact preference > cookie > Accept-Language > default
+  let lang;
+  if (ctx.query.lang) {
+    lang = normalizeLang(ctx.query.lang, config.defaultLang);
+    ctx.setCookie('wps_lang', lang, { httpOnly: false, secure: config.isHttps(), maxAge: 365 * 86400, path: '/' });
+    if (ctx.state.contact && ctx.state.contact.lang !== lang) {
+      db.run('UPDATE contacts SET lang = ?, updated_at = ? WHERE id = ?', lang, Date.now(), ctx.state.contact.id);
+      ctx.state.contact.lang = lang;
+    }
+    // Clean the URL
+    const u = new URL(ctx.url); u.searchParams.delete('lang');
+    return ctx.redirect(u.pathname + (u.search || ''));
+  }
+  lang = ctx.state.contact?.lang || normalizeLang(ctx.cookies.wps_lang, '') || fromAcceptLanguage(ctx.req.headers['accept-language'], config.defaultLang);
+  ctx.state.lang = lang;
+  ctx.t = translator(lang);
+
+  // Flash message (one-shot, cookie based)
+  if (ctx.cookies.wps_flash) {
+    try { ctx.state.flash = JSON.parse(ctx.cookies.wps_flash); } catch {}
+    ctx.clearCookie('wps_flash', { path: '/' });
+  }
+  ctx.flash = (type, text) => ctx.setCookie('wps_flash', JSON.stringify({ type, text }), { secure: config.isHttps(), path: '/', maxAge: 60 });
+
+  ctx.locals = (locals = {}) => {
+    const u = new URL(ctx.url); u.searchParams.set('lang', ctx.t('lang.other_code'));
+    return {
+      t: ctx.t, lang, config,
+      appName: db.setting('app_name', config.appName),
+      contact: ctx.state.contact || null,
+      isAdmin: isAdmin(ctx),
+      adminFresh: adminFresh(ctx),
+      csrf: ctx.state.session?.csrf || '',
+      path: ctx.path,
+      langSwitchUrl: u.pathname + u.search,
+      flash: ctx.state.flash || null,
+      fmtPhone: formatPhone,
+      fmtDate: (ms, withTime) => formatDate(ms, config.timezone, lang, withTime),
+      fmtShort: (ms) => formatDateTimeShort(ms, config.timezone, lang),
+      hmToH: (hm) => hmToH(hm, lang),
+      ...locals,
+    };
+  };
+  ctx.render = (view, locals) => ctx.html(render(view, ctx.locals(locals)));
+  ctx.partial = (view, locals) => ctx.html(renderPartial(view, ctx.locals(locals)));
+});
+
+app.static('/static', path.join(here, 'public'), { maxAge: 86400 });
+
+publicRoutes(app, db);
+contactRoutes(app, db);
+adminRoutes(app, db);
+twilioRoutes(app, db);
+
+app.onError((err, ctx) => {
+  if (!(err instanceof HttpError) || err.status >= 500) console.error(err);
+  if (!ctx.t) ctx.t = translator(config.defaultLang);
+  if (!ctx.render) ctx.render = (view, locals) => ctx.text(locals?.message || 'Error');
+  const status = err.status || 500;
+  if (ctx.req.headers.accept?.includes('application/json') || ctx.req.headers['x-csrf']) {
+    return ctx.json({ error: err.csrf ? ctx.t('error.csrf') : status === 404 ? ctx.t('error.not_found') : status === 403 ? ctx.t('error.forbidden') : ctx.t('error.generic') }, status);
+  }
+  ctx.status(status);
+  const message = err.csrf ? ctx.t('error.csrf') : status === 404 ? ctx.t('error.not_found') : status === 403 ? ctx.t('error.forbidden') : status === 429 ? ctx.t('error.too_many') : ctx.t('error.generic');
+  try { ctx.render('error', { title: message, message, status }); }
+  catch { ctx.text(message); }
+});
+
+startScheduler(db);
+
+app.listen(config.port, config.host, () => {
+  console.log(`wps listening on http://${config.host}:${config.port} (${config.appUrl}) tz=${config.timezone} sms=${config.twilio.dryRun || !config.twilio.accountSid ? 'dry-run' : 'twilio'}`);
+});
+
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.on(sig, () => { console.log(`\n${sig} received, closing`); try { db.close(); } catch {} process.exit(0); });
+}

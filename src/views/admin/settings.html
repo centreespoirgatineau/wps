@@ -1,0 +1,25 @@
+<%- include('admin/_tabs') %>
+<div class="page-head"><h1><%= t('settings.title') %></h1></div>
+<form method="post" action="/admin/parametres" class="stack">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="card">
+    <label class="field"><span><%= t('settings.app_name') %></span><input type="text" name="app_name" value="<%= s.app_name %>" maxlength="40"></label>
+  </div>
+  <div class="card">
+    <h3 class="mb"><%= t('settings.default_pickup') %></h3>
+    <label class="field"><span><%= t('offer.form.pickup_name') %></span><input type="text" name="pickup_name" value="<%= s.pickup_name %>"></label>
+    <label class="field"><span><%= t('offer.form.pickup_address') %></span><input type="text" name="pickup_address" value="<%= s.pickup_address %>"></label>
+    <label class="field"><span><%= t('offer.form.pickup_details') %></span><textarea name="pickup_details"><%= s.pickup_details %></textarea></label>
+    <%- include('admin/_photo_field', { fieldName: 'pickup_photo', files: s.pickup_photo ? [s.pickup_photo] : [], multiple: false, max: 1, label: t('offer.form.pickup_photo') }) %>
+  </div>
+  <button class="btn primary block" type="submit"><%= t('btn.save') %></button>
+</form>
+<div class="section-title"><%= t('settings.info') %></div>
+<div class="card flat tiny">
+  <dl class="kv">
+    <dt>URL</dt><dd><code><%= config.appUrl %></code></dd>
+    <dt>SMS</dt><dd><%= smsOk ? 'Twilio ✓' : t('sms.status.dry_run') %></dd>
+    <dt>Fuseau</dt><dd><%= config.timezone %></dd>
+    <dt>Webhooks</dt><dd><code><%= config.appUrl %>/twilio/status</code><br><code><%= config.appUrl %>/twilio/inbound</code></dd>
+  </dl>
+</div>

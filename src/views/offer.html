@@ -1,0 +1,98 @@
+<div id="offer" data-cancel-text="<%= t('offer.cancel_confirm') %>" data-offer="<%= offer.id %>" data-active="<%= offer.active ? 1 : 0 %>" data-me="<%= myId %>" data-last-msg="<%= messages.length ? messages[messages.length - 1].id : 0 %>">
+
+<div class="page-head">
+  <div class="grow">
+    <h1><%= offer.title %></h1>
+    <div class="tiny mt-s">
+      <% if (offer.active) { %><%= t('offer.published', { date: fmtDate(offer.published_at, true) }) %><% } else { %><%= t('offer.ended', { date: fmtDate(offer.ended_at || offer.expires_at || offer.created_at, true) }) %><% } %>
+      <% if (isAdmin) { %> · <a href="/admin/offres/<%= offer.id %>"><%= t('nav.admin') %></a><% } %>
+    </div>
+    <div class="tiny mt-s"><span class="badge"><%= t('offer.you') %> <%= contact.first_name %> · <%= fmtPhone(contact.phone) %></span></div>
+  </div>
+  <%- include('_status_badge', { status: offer.effective }) %>
+</div>
+
+<% if (offer.photos.length) { %>
+<div class="photos <%= offer.photos.length === 1 ? 'one' : offer.photos.length === 2 ? 'two' : '' %>">
+  <% for (const p of offer.photos) { %><a href="/media/<%= p.file %>" target="_blank" rel="noopener"><img src="/media/<%= p.file %>" alt="" loading="lazy"></a><% } %>
+</div>
+<% } %>
+
+<div class="card">
+  <dl class="kv">
+    <dt><%= t('offer.lot_content') %></dt><dd><strong><%= offer.lot_description %></strong></dd>
+    <dt><%= t('offer.lots') %></dt><dd><%= offer.lot_count %> · <span class="muted"><%= t('offer.max_hint', { n: offer.max_per_contact }) %></span></dd>
+  </dl>
+  <% if (offer.description) { %><p class="mt-s" style="white-space:pre-line"><%= offer.description %></p><% } %>
+</div>
+
+<div class="card">
+  <div class="row between">
+    <h3><%= t('offer.pickup') %></h3>
+    <a class="btn sm secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(offer.pickup_address) %>"><%= t('offer.map') %></a>
+  </div>
+  <div class="mt-s">
+    <strong><%= offer.pickup_name %></strong><br>
+    <span class="muted"><%= offer.pickup_address %></span>
+    <div class="mt-s">
+      <% if (offer.pickup_from && offer.pickup_to) { %><%= t('offer.pickup_window', { from: hmToH(offer.pickup_from), to: hmToH(offer.pickup_to) }) %>
+      <% } else if (offer.pickup_from) { %><%= t('offer.pickup_from', { from: hmToH(offer.pickup_from) }) %>
+      <% } else if (offer.pickup_to) { %><%= t('offer.pickup_to', { to: hmToH(offer.pickup_to) }) %>
+      <% } else { %><%= t('offer.pickup_today') %><% } %>
+    </div>
+    <% if (offer.pickup_details) { %><p class="mt-s muted" style="white-space:pre-line"><%= offer.pickup_details %></p><% } %>
+    <% if (offer.pickup_photo) { %><div class="photos one mt-s"><a href="/media/<%= offer.pickup_photo %>" target="_blank" rel="noopener"><img src="/media/<%= offer.pickup_photo %>" alt="" loading="lazy"></a></div><% } %>
+  </div>
+</div>
+
+<div class="section-title"><%= t('offer.lots') %></div>
+<div id="lots"><%- include('_lots') %></div>
+
+<div class="section-title"><%= t('chat.title') %></div>
+<div class="card">
+  <div id="chat" class="chat">
+    <% if (!messages.length) { %><div class="tiny center" id="chat-empty"><%= t('chat.empty') %></div><% } %>
+    <% for (const m of messages) { %>
+      <div class="msg <%= m.contact_id === myId ? 'mine' : '' %>" data-id="<%= m.id %>">
+        <span class="by"><%= m.contact_id === myId ? t('chat.you') : (m.first_name + (m.last_name ? ' ' + m.last_name[0] + '.' : '') + (m.organization ? ' · ' + m.organization : '')) %> · <%= fmtShort(m.created_at) %></span>
+        <%= m.body %>
+      </div>
+    <% } %>
+  </div>
+  <% if (offer.active && contact.status === 'active') { %>
+    <form id="chat-form" class="chat-form">
+      <textarea name="body" rows="1" maxlength="1000" placeholder="<%= t('chat.placeholder') %>" required></textarea>
+      <button class="btn primary" type="submit" aria-label="<%= t('chat.send') %>">↑</button>
+    </form>
+  <% } else { %>
+    <div class="tiny mt-s"><%= t('chat.closed') %></div>
+  <% } %>
+</div>
+
+<!-- Rules modal -->
+<div class="modal" id="rules-modal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <h2 id="rules-title"><%= t('offer.rules_title') %></h2>
+    <p class="muted"><%= t('offer.rules_intro') %></p>
+    <%- include('_rules') %>
+    <label class="check line mt"><input type="checkbox" id="rules-ok"><span><%= t('offer.rules_accept') %></span></label>
+    <div class="actions">
+      <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
+      <button class="btn primary" type="button" id="rules-confirm" disabled><%= t('offer.rules_confirm') %></button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal (cancel reservation) -->
+<div class="modal" id="confirm-modal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <h2 id="confirm-title"></h2>
+    <p class="muted" id="confirm-body"></p>
+    <div class="actions">
+      <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
+      <button class="btn danger" type="button" id="confirm-yes"><%= t('btn.confirm') %></button>
+    </div>
+  </div>
+</div>
+
+</div>

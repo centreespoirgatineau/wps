@@ -1,0 +1,7 @@
+<%- include('admin/_tabs') %>
+<div class="page-head">
+  <h1><%= t('admin.offers') %></h1>
+  <div class="actions"><a class="btn primary sm" href="/admin/offres/nouvelle">+ <%= t('admin.new_offer') %></a></div>
+</div>
+<% if (!offers.length) { %><div class="card flat empty"><%= t('dash.no_active') %></div><% } %>
+<% for (const o of offers) { %><%- include('_offer_card', { o, adminView: true }) %><% } %>

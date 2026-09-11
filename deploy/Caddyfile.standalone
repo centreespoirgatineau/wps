@@ -1,0 +1,6 @@
+DOMAIN {
+    reverse_proxy wps:8080 {
+        flush_interval -1
+    }
+    request_body { max_size 5MB }
+}

@@ -1,0 +1,19 @@
+<a class="card card-link" href="<%= (typeof adminView !== 'undefined' && adminView) ? '/admin/offres/' + o.id : '/offres/' + o.id %>">
+  <div class="row between">
+    <div class="grow">
+      <h2><%= o.title %></h2>
+      <div class="muted" style="font-size:.9rem"><%= o.lot_description %></div>
+    </div>
+    <%- include('_status_badge', { status: o.effective }) %>
+  </div>
+  <div class="row between mt-s tiny">
+    <span><%= o.published_at ? fmtShort(o.published_at) : fmtShort(o.created_at) %></span>
+    <span>
+      <% if (o.active) { %>
+        <% if (o.counts.available === 0) { %><%= t('offers.all_taken') %><% } else { %><%= t(o.counts.available === 1 ? 'offers.lots_free_1' : 'offers.lots_free', { n: o.counts.available, total: o.counts.total }) %><% } %>
+      <% } else { %>
+        <%= t('dash.reserved_of', { reserved: o.counts.reserved, total: o.counts.total }) %>
+      <% } %>
+    </span>
+  </div>
+</a>

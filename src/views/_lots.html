@@ -1,0 +1,45 @@
+<% if (!offer.active) { %>
+  <div class="banner info mb"><%= t('offer.inactive') %></div>
+<% } else if (!check.ok && check.reason === 'cooldown') { %>
+  <div class="banner accent mb" id="cooldown" data-until="<%= check.until %>"><%- t('offer.cooldown', { time: '<span class="countdown">…</span>' }) %></div>
+<% } else if (!check.ok && check.reason === 'no_show') { %>
+  <div class="banner warn mb"><%= t('offer.noshow_block') %></div>
+<% } else if (!check.ok && check.reason === 'max') { %>
+  <div class="banner ok mb"><%= t('offer.max_reached', { n: check.max }) %></div>
+<% } else if (!check.ok && check.reason === 'contact_inactive') { %>
+  <div class="banner warn mb"><%= t('login.opted_out') %></div>
+<% } %>
+
+<% for (const l of offer.lots) {
+     const mine = l.reserved_by === myId;
+     const free = l.status === 'available';
+     const cls = free ? 'free' : mine ? 'mine' : 'taken'; %>
+<div class="lot <%= cls %>" data-lot="<%= l.id %>">
+  <div class="n"><%= l.number %></div>
+  <div class="grow">
+    <% if (free) { %>
+      <div><strong><%= t('offer.lot', { n: l.number }) %></strong> <span class="badge accent"><%= t('offer.available') %></span></div>
+      <div class="tiny"><%= offer.lot_description %></div>
+    <% } else { %>
+      <div class="who">
+        <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong>
+          <% if (l.status === 'picked_up') { %><span class="badge ok"><%= t('offer.picked_up') %></span><% } else if (l.status === 'no_show') { %><span class="badge danger"><%= t('offer.no_show') %></span><% } else if (!mine) { %><span class="badge"><%= t('offer.reserved') %></span><% } %>
+        </div>
+        <% if (!mine) { %><div class="org"><%= l.organization %></div>
+          <div class="contact-links">
+            <a href="tel:<%= l.phone %>"><%= fmtPhone(l.phone) %></a>
+            <a href="sms:<%= l.phone %>"><%= t('offer.text') %></a>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+  <% if (free && offer.active && check.ok) { %>
+    <button class="btn primary sm" type="button" data-reserve="<%= l.id %>"><%= t('offer.reserve') %></button>
+  <% } else if (free && offer.active && check.reason === 'cooldown') { %>
+    <button class="btn primary sm" type="button" data-reserve="<%= l.id %>" disabled data-wait><%= t('offer.reserve') %></button>
+  <% } else if (mine && l.status === 'reserved' && offer.active) { %>
+    <button class="btn ghost sm" type="button" data-cancel="<%= l.id %>" title="<%= t('offer.cancel_reservation') %>">✕</button>
+  <% } %>
+</div>
+<% } %>

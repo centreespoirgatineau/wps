@@ -1,0 +1,23 @@
+# The app is reachable ONLY from the VPS itself (127.0.0.1:8087).
+# Your existing reverse proxy forwards wps.davidhatin.com to it.
+services:
+  wps:
+    build: .
+    image: wps:latest
+    container_name: wps
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8087:8080"
+    volumes:
+      - ./data:/data
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp

@@ -1,0 +1,8 @@
+# Add to your existing Caddyfile (host Caddy → use 127.0.0.1:8087;
+# Caddy running in Docker on a shared network → use wps:8080).
+wps.davidhatin.com {
+    reverse_proxy 127.0.0.1:8087 {
+        flush_interval -1
+    }
+    request_body { max_size 5MB }
+}

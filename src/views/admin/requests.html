@@ -1,0 +1,27 @@
+<%- include('admin/_tabs', { pendingCount: pending.length }) %>
+<div class="page-head"><h1><%= t('requests.title') %></h1></div>
+<% if (!pending.length) { %><div class="card flat empty"><%= t('requests.none') %></div><% } %>
+<% for (const r of pending) { %>
+<div class="card">
+  <div class="row between">
+    <div class="grow"><strong><%= r.first_name %> <%= r.last_name %></strong> <span class="badge"><%= r.lang.toUpperCase() %></span>
+      <div class="meta muted"><%= r.organization %> · <%= fmtPhone(r.phone) %></div>
+      <div class="tiny"><%= t('requests.received', { date: fmtShort(r.created_at) }) %></div>
+    </div>
+  </div>
+  <% if (r.message) { %><p class="mt-s" style="white-space:pre-line"><%= r.message %></p><% } %>
+  <div class="row mt">
+    <form method="post" action="/admin/demandes/<%= r.id %>/approuver"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn primary sm" type="submit">✓ <%= t('requests.approve') %></button></form>
+    <form method="post" action="/admin/demandes/<%= r.id %>/refuser" data-confirm="<%= t('requests.refuse') %> ?"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost sm" type="submit"><%= t('requests.refuse') %></button></form>
+  </div>
+</div>
+<% } %>
+<% if (history.length) { %>
+<div class="section-title"><%= t('requests.history') %></div>
+<div class="card"><ul class="list">
+  <% for (const r of history) { %>
+  <li><div class="grow"><strong><%= r.first_name %> <%= r.last_name %></strong><div class="meta"><%= r.organization %> · <%= fmtPhone(r.phone) %> · <%= fmtShort(r.decided_at) %></div></div>
+    <span class="badge <%= r.status === 'approved' ? 'ok' : 'danger' %>"><%= r.status === 'approved' ? t('requests.approve') : t('requests.refuse') %></span></li>
+  <% } %>
+</ul></div>
+<% } %>

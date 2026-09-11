@@ -1,0 +1,64 @@
+<%- include('admin/_tabs') %>
+<div class="page-head"><h1><%= title %></h1></div>
+<% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
+
+<form method="post" action="<%= contactId ? '/admin/contacts/' + contactId : '/admin/contacts' %>" class="stack">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="card">
+    <div class="grid-2">
+      <label class="field"><span><%= t('contacts.first_name') %></span><input type="text" name="first_name" value="<%= form.first_name || '' %>" required></label>
+      <label class="field"><span><%= t('contacts.last_name') %></span><input type="text" name="last_name" value="<%= form.last_name || '' %>"></label>
+    </div>
+    <label class="field"><span><%= t('contacts.organization') %></span><input type="text" name="organization" value="<%= form.organization || '' %>"></label>
+    <label class="field"><span><%= t('contacts.phone') %></span><input type="tel" name="phone" inputmode="tel" data-phone value="<%= form.phone ? fmtPhone(form.phone) : '' %>" placeholder="<%= t('login.phone_placeholder') %>" required></label>
+    <div class="grid-2">
+      <label class="field"><span><%= t('contacts.lang') %></span>
+        <select name="lang"><option value="fr" <%= form.lang === 'fr' ? 'selected' : '' %>>Français</option><option value="en" <%= form.lang === 'en' ? 'selected' : '' %>>English</option></select></label>
+      <label class="field"><span><%= t('contacts.role') %></span>
+        <select name="role" <%= contactId && contact.id === contactId ? 'disabled' : '' %>><option value="user" <%= form.role !== 'admin' ? 'selected' : '' %>><%= t('contacts.role.user') %></option><option value="admin" <%= form.role === 'admin' ? 'selected' : '' %>><%= t('contacts.role.admin') %></option></select></label>
+    </div>
+    <label class="field"><span><%= t('contacts.status') %></span>
+      <select name="status"><option value="active" <%= (form.status || 'active') === 'active' ? 'selected' : '' %>><%= t('contacts.status.active') %></option><option value="opted_out" <%= form.status === 'opted_out' ? 'selected' : '' %>><%= t('contacts.status.opted_out') %></option></select></label>
+    <label class="field"><span><%= t('contacts.notes') %></span><textarea name="notes" maxlength="2000"><%= form.notes || '' %></textarea></label>
+    <button class="btn primary block" type="submit"><%= t('btn.save') %></button>
+  </div>
+</form>
+
+<% if (contactId) { %>
+<div class="section-title"><%= t('contacts.personal_link') %></div>
+<div class="card">
+  <code><%= link %></code>
+  <div class="row wrap-row mt" style="gap:8px">
+    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="link"><button class="btn sm secondary" type="submit"><%= t('contacts.send_link') %></button></form>
+    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="test"><button class="btn sm secondary" type="submit"><%= t('contacts.send_test') %></button></form>
+    <form method="post" action="/admin/contacts/<%= contactId %>/lien" data-confirm="<%= t('contacts.regenerate_confirm') %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn sm ghost" type="submit"><%= t('contacts.regenerate') %></button></form>
+  </div>
+</div>
+
+<% if (penalties && penalties.length) { %>
+<div class="section-title"><%= t('offer.admin.penalties') %></div>
+<div class="card"><ul class="list">
+  <% for (const p of penalties) { %>
+  <li><div class="grow"><span class="badge <%= p.type === 'no_show' ? 'danger' : 'accent' %>"><%= t('offer.admin.penalty.' + p.type) %></span> <span class="tiny"><%= p.status %> · <%= fmtShort(p.created_at) %></span></div>
+    <form method="post" action="/admin/penalites/<%= p.id %>/lever"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="/admin/contacts/<%= contactId %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.clear_penalty') %></button></form></li>
+  <% } %>
+</ul></div>
+<% } %>
+
+<% if (history && history.length) { %>
+<div class="section-title"><%= t('contacts.reservations') %></div>
+<div class="card"><ul class="list">
+  <% for (const h of history) { %>
+  <li><div class="grow"><a href="/admin/offres/<%= h.offer_id %>"><%= h.title %></a> · <%= t('offer.lot', { n: h.number }) %><div class="meta"><%= fmtShort(h.reserved_at) %></div></div>
+    <span class="badge <%= h.status === 'picked_up' ? 'ok' : h.status === 'no_show' ? 'danger' : '' %>"><%= t(h.status === 'picked_up' ? 'offer.picked_up' : h.status === 'no_show' ? 'offer.no_show' : 'offer.reserved') %></span></li>
+  <% } %>
+</ul></div>
+<% } %>
+
+<% if (contact.id !== contactId) { %>
+<form method="post" action="/admin/contacts/<%= contactId %>/supprimer" class="mt-l center" data-confirm="<%= t('btn.delete') %> ?">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <button class="btn ghost" type="submit" style="color:var(--danger)"><%= t('btn.delete') %></button>
+</form>
+<% } %>
+<% } %>

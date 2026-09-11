@@ -1,0 +1,23 @@
+<div class="page-head">
+  <h1><%= t('offers.title') %></h1>
+  <% if (isAdmin) { %><div class="actions"><a class="btn sm primary" href="/admin/offres/nouvelle">+ <%= t('admin.new_offer') %></a></div><% } %>
+</div>
+
+<% if (contact.status === 'opted_out') { %><div class="banner warn mb"><%= t('login.opted_out') %></div><% } %>
+
+<div class="section-title"><%= t('offers.active') %></div>
+<% if (!active.length) { %>
+  <div class="card flat empty"><%= t('offers.none_active') %></div>
+<% } %>
+<% for (const o of active) { %>
+  <%- include('_offer_card', { o }) %>
+<% } %>
+
+<div class="section-title"><%= t('offers.past') %></div>
+<% if (!past.length) { %>
+  <div class="card flat empty"><%= t('offers.none_past') %></div>
+<% } %>
+<% for (const o of past) { %>
+  <%- include('_offer_card', { o }) %>
+<% } %>
+<p class="center tiny mt-l"><a href="/a-propos"><%= t('login.what_is_this') %></a></p>

@@ -1,0 +1,7 @@
+data/
+.env*
+test/
+docs/
+deploy/
+*.md
+.git

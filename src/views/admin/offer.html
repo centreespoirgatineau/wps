@@ -1,0 +1,31 @@
+<%- include('admin/_tabs') %>
+<div id="admin-offer" data-offer="<%= offer.id %>">
+<div class="page-head">
+  <div class="grow">
+    <h1><%= offer.title %></h1>
+    <div class="tiny mt-s"><%= offer.lot_description %> · <%= offer.published_at ? fmtDate(offer.published_at, true) : '' %> · <a href="/offres/<%= offer.id %>"><%= t('offer.admin.view_as_user') %></a></div>
+  </div>
+  <%- include('_status_badge', { status: offer.effective }) %>
+</div>
+
+<% if (offer.active) { %>
+<form method="post" action="/admin/offres/<%= offer.id %>/fermer" data-confirm="<%= t('offer.admin.close_confirm') %>" class="mb">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <button class="btn secondary sm" type="submit"><%= t('offer.admin.close') %></button>
+</form>
+<% } %>
+
+<div id="admin-lots"><%- include('admin/_offer_lots') %></div>
+
+<% if (penalties.length) { %>
+<div class="section-title"><%= t('offer.admin.penalties') %></div>
+<div class="card">
+  <ul class="list">
+    <% for (const p of penalties) { %>
+    <li><div class="grow"><strong><%= p.first_name %> <%= p.last_name %></strong><div class="meta"><%= p.organization %> · <span class="badge <%= p.type === 'no_show' ? 'danger' : 'accent' %>"><%= t('offer.admin.penalty.' + p.type) %></span></div></div>
+      <form method="post" action="/admin/penalites/<%= p.id %>/lever"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="/admin/offres/<%= offer.id %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.clear_penalty') %></button></form></li>
+    <% } %>
+  </ul>
+</div>
+<% } %>
+</div>
