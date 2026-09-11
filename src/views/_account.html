@@ -1,0 +1,25 @@
+<div class="card">
+  <div class="row between">
+    <div class="grow"><strong><%= contact.first_name %> <%= contact.last_name %></strong><div class="tiny"><%= contact.organization || '' %><%= contact.organization ? ' · ' : '' %><%= fmtPhone(contact.phone) %></div></div>
+    <form method="post" action="/reglages" class="seg" id="lang-form">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label><input type="radio" name="lang" value="fr" <%= contact.lang === 'fr' ? 'checked' : '' %> data-autosubmit><span>FR</span></label>
+      <label><input type="radio" name="lang" value="en" <%= contact.lang === 'en' ? 'checked' : '' %> data-autosubmit><span>EN</span></label>
+    </form>
+  </div>
+  <p class="tiny mt"><%= t('me.link_hint') %> <a href="/a-propos"><%= t('login.what_is_this') %></a></p>
+  <form method="post" action="/deconnexion" class="mt"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn secondary block" type="submit"><%= t('me.logout') %></button></form>
+  <% if (!isAdmin && contact.status === 'active') { %><button class="btn ghost block mt-s" type="button" data-open="#optout-modal" style="color:var(--danger)"><%= t('me.opt_out') %></button><% } %>
+  <% if (contact.status !== 'active') { %><div class="banner warn mt-s"><%= t('me.opted_out') %></div><% } %>
+</div>
+<div class="modal" id="optout-modal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <h2><%= t('me.opt_out_title') %></h2>
+    <p class="muted"><%= t('me.opt_out_body') %></p>
+    <form method="post" action="/reglages/retrait" class="actions">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
+      <button class="btn danger" type="submit"><%= t('me.opt_out_confirm') %></button>
+    </form>
+  </div>
+</div>

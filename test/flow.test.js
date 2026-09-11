@@ -84,7 +84,7 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(loc, '/admin');
   let r = await admin.get('/admin');
   assert.equal(r.status, 200);
-  assert.match(r.text, /Administration/);
+  assert.match(r.text, /Tableau de bord/);
   const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
 
   // Create two contacts
@@ -108,8 +108,8 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(r.status, 303);
   const offerId = /\/admin\/offres\/(\d+)\/confirmer/.exec(r.location)[1];
   r = await admin.get(r.location);
-  assert.match(r.text, /Surplus alimentaire disponible aujourd(&#39;|')hui/);
-  assert.match(r.text, /Food surplus available today/);
+  assert.match(r.text, /Surplus alimentaire aujourd(&#39;|')hui/);
+  assert.match(r.text, /Food surplus today/);
   assert.match(r.text, /Marie Tremblay/);
 
   // Publish to both contacts
@@ -219,7 +219,7 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.match(r.text, /Pains/); assert.match(r.text, /Plateaux de sushis/);
 
   // Marie opts out → cannot log in anymore
-  r = await marie.post('/moi/retrait', { form: { _csrf: mcsrf } });
+  r = await marie.post('/reglages/retrait', { form: { _csrf: mcsrf } });
   assert.equal(r.status, 200);
   r = await marie.get('/offres');
   assert.equal(r.status, 303);

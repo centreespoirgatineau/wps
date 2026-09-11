@@ -112,19 +112,20 @@ export function contactRoutes(app, db) {
     ctx.json({ ok: true, message: messageJson(msg, c.id) });
   });
 
-  // Profile
-  app.get('/moi', requireContact, (ctx) => ctx.render('me', { title: ctx.t('me.title') }));
+  // Personal settings
+  app.get('/moi', (ctx) => ctx.redirect('/reglages'));
+  app.get('/reglages', requireContact, (ctx) => ctx.render('me', { title: ctx.t('settings.title') }));
 
-  app.post('/moi', requireContact, async (ctx) => {
+  app.post('/reglages', requireContact, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
     const lang = normalizeLang(body.lang, ctx.state.contact.lang);
     db.run('UPDATE contacts SET lang = ?, updated_at = ? WHERE id = ?', lang, Date.now(), ctx.state.contact.id);
     ctx.flash('ok', ctx.t('me.saved'));
-    ctx.redirect('/moi');
+    ctx.redirect('/reglages');
   });
 
-  app.post('/moi/retrait', requireContact, async (ctx) => {
+  app.post('/reglages/retrait', requireContact, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
     db.run(`UPDATE contacts SET status = 'opted_out', updated_at = ? WHERE id = ?`, Date.now(), ctx.state.contact.id);

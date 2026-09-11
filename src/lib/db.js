@@ -142,9 +142,20 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 `;
 
+// Columns added after v1. Each is applied only if missing (safe on existing databases).
+const MIGRATIONS = [
+  ['contacts', 'no_sms', 'INTEGER NOT NULL DEFAULT 0'],   // test accounts: never texted
+  ['offers', 'sms_fr', "TEXT NOT NULL DEFAULT ''"],        // per-offer SMS template overrides
+  ['offers', 'sms_en', "TEXT NOT NULL DEFAULT ''"],
+];
+
 export function openDb(file) {
   const db = new DatabaseSync(file);
   db.exec(SCHEMA);
+  for (const [table, col, def] of MIGRATIONS) {
+    const has = db.prepare(`SELECT 1 FROM pragma_table_info(?) WHERE name = ?`).get(table, col);
+    if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+  }
   return wrap(db);
 }
 

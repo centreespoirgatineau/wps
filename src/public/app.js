@@ -277,6 +277,31 @@
     });
   }
 
+  // ---- copy to clipboard ----
+  $$('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    const el = $(b.dataset.copy); if (!el) return;
+    try { await navigator.clipboard.writeText(el.textContent.trim()); toast(b.dataset.done || 'OK'); }
+    catch { const r = document.createRange(); r.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+  }));
+
+  // ---- SMS template live preview (confirm page + settings) ----
+  const gsm = (t) => t.replace(/[’‘]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/…/g, '...');
+  $$('[data-sms-template]').forEach((ta) => {
+    const lang = ta.dataset.smsTemplate;
+    const box = ta.closest('[data-sample]');
+    const sample = JSON.parse(box?.dataset.sample || '{}');
+    const vars = { first: lang === 'fr' ? 'Marie' : 'John', org: lang === 'fr' ? 'Église de la Grâce' : 'Hope Church', title: sample.title || '…', n: sample.n ?? 4, url: sample.url || 'https://…' };
+    const prev = $(`[data-sms-preview="${lang}"]`, box), cnt = $(`[data-sms-count="${lang}"]`, box);
+    const render = () => {
+      let out = ta.value; for (const [k, v] of Object.entries(vars)) out = out.split(`{${k}}`).join(v);
+      out = gsm(out);
+      if (prev) prev.textContent = out;
+      if (cnt) { const n = out.length; cnt.textContent = `${n} car. · ${n <= 160 ? '1 SMS' : Math.ceil(n / 153) + ' SMS'}`; }
+    };
+    ta.addEventListener('input', render); render();
+    $(`[data-reset-template="${lang}"]`)?.addEventListener('click', (e) => { ta.value = e.target.dataset.default; render(); });
+  });
+
   // ---- reset pickup to defaults ----
   $('#reset-pickup')?.addEventListener('click', (e) => {
     const d = JSON.parse(e.target.dataset.defaults || '{}');

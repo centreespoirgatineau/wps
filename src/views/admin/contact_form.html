@@ -1,8 +1,23 @@
-<%- include('admin/_tabs') %>
 <div class="page-head"><h1><%= title %></h1></div>
 <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
 
-<form method="post" action="<%= contactId ? '/admin/contacts/' + contactId : '/admin/contacts' %>" class="stack">
+<% if (contactId) { %>
+<div class="card">
+  <div class="tiny"><%= t('contacts.personal_link') %></div>
+  <code id="personal-link"><%= link %></code>
+  <div class="row wrap-row mt-s" style="gap:8px">
+    <button type="button" class="btn sm secondary" data-copy="#personal-link" data-done="<%= t('contacts.copied') %>"><%= t('contacts.copy_link') %></button>
+    <% if (!form.no_sms) { %>
+    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="link"><button class="btn sm secondary" type="submit"><%= t('contacts.send_link') %></button></form>
+    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="test"><button class="btn sm ghost" type="submit"><%= t('contacts.send_test') %></button></form>
+    <% } %>
+    <form method="post" action="/admin/contacts/<%= contactId %>/lien" data-confirm="<%= t('contacts.regenerate_confirm') %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn sm ghost" type="submit"><%= t('contacts.regenerate') %></button></form>
+  </div>
+  <% if (form.no_sms) { %><p class="tiny mt-s"><%= t('contacts.no_sms_hint') %></p><% } %>
+</div>
+<% } %>
+
+<form method="post" action="<%= contactId ? '/admin/contacts/' + contactId : '/admin/contacts' %>" class="stack <%= contactId ? 'mt' : '' %>">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <div class="card">
     <div class="grid-2">
@@ -17,48 +32,41 @@
       <label class="field"><span><%= t('contacts.role') %></span>
         <select name="role" <%= contactId && contact.id === contactId ? 'disabled' : '' %>><option value="user" <%= form.role !== 'admin' ? 'selected' : '' %>><%= t('contacts.role.user') %></option><option value="admin" <%= form.role === 'admin' ? 'selected' : '' %>><%= t('contacts.role.admin') %></option></select></label>
     </div>
+    <% if (contactId) { %>
     <label class="field"><span><%= t('contacts.status') %></span>
       <select name="status"><option value="active" <%= (form.status || 'active') === 'active' ? 'selected' : '' %>><%= t('contacts.status.active') %></option><option value="opted_out" <%= form.status === 'opted_out' ? 'selected' : '' %>><%= t('contacts.status.opted_out') %></option></select></label>
-    <label class="field"><span><%= t('contacts.notes') %></span><textarea name="notes" maxlength="2000"><%= form.notes || '' %></textarea></label>
-    <button class="btn primary block" type="submit"><%= t('btn.save') %></button>
+    <% } %>
+    <label class="field"><span><%= t('contacts.notes') %> <small>(<%= t('optional') %>)</small></span><textarea name="notes" maxlength="2000"><%= form.notes || '' %></textarea></label>
+    <label class="check line"><input type="checkbox" name="no_sms" value="1" <%= form.no_sms ? 'checked' : '' %>><span><%= t('contacts.no_sms') %><br><span class="tiny"><%= t('contacts.no_sms_hint') %></span></span></label>
+    <button class="btn primary block mt-s" type="submit"><%= t('btn.save') %></button>
   </div>
 </form>
 
-<% if (contactId) { %>
-<div class="section-title"><%= t('contacts.personal_link') %></div>
-<div class="card">
-  <code><%= link %></code>
-  <div class="row wrap-row mt" style="gap:8px">
-    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="link"><button class="btn sm secondary" type="submit"><%= t('contacts.send_link') %></button></form>
-    <form method="post" action="/admin/contacts/<%= contactId %>/sms"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="kind" value="test"><button class="btn sm secondary" type="submit"><%= t('contacts.send_test') %></button></form>
-    <form method="post" action="/admin/contacts/<%= contactId %>/lien" data-confirm="<%= t('contacts.regenerate_confirm') %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn sm ghost" type="submit"><%= t('contacts.regenerate') %></button></form>
-  </div>
-</div>
-
-<% if (penalties && penalties.length) { %>
+<% if (contactId && penalties && penalties.length) { %>
 <div class="section-title"><%= t('offer.admin.penalties') %></div>
 <div class="card"><ul class="list">
   <% for (const p of penalties) { %>
-  <li><div class="grow"><span class="badge <%= p.type === 'no_show' ? 'danger' : 'accent' %>"><%= t('offer.admin.penalty.' + p.type) %></span> <span class="tiny"><%= p.status %> · <%= fmtShort(p.created_at) %></span></div>
+  <li><div class="grow"><span class="badge <%= p.type === 'no_show' ? 'danger' : 'accent' %>"><%= t('offer.admin.penalty.' + p.type) %></span> <span class="tiny"><%= fmtShort(p.created_at) %></span></div>
     <form method="post" action="/admin/penalites/<%= p.id %>/lever"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="/admin/contacts/<%= contactId %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.clear_penalty') %></button></form></li>
   <% } %>
 </ul></div>
 <% } %>
 
-<% if (history && history.length) { %>
-<div class="section-title"><%= t('contacts.reservations') %></div>
-<div class="card"><ul class="list">
-  <% for (const h of history) { %>
-  <li><div class="grow"><a href="/admin/offres/<%= h.offer_id %>"><%= h.title %></a> · <%= t('offer.lot', { n: h.number }) %><div class="meta"><%= fmtShort(h.reserved_at) %></div></div>
-    <span class="badge <%= h.status === 'picked_up' ? 'ok' : h.status === 'no_show' ? 'danger' : '' %>"><%= t(h.status === 'picked_up' ? 'offer.picked_up' : h.status === 'no_show' ? 'offer.no_show' : 'offer.reserved') %></span></li>
-  <% } %>
-</ul></div>
+<% if (contactId && history && history.length) { %>
+<details class="fold mt">
+  <summary><span class="summary-text"><%= t('contacts.reservations') %> (<%= history.length %>)</span></summary>
+  <div class="fold-body"><ul class="list">
+    <% for (const h of history) { %>
+    <li><div class="grow"><a href="/admin/offres/<%= h.offer_id %>"><%= h.title %></a> · <%= t('offer.lot', { n: h.number }) %><div class="meta"><%= fmtShort(h.reserved_at) %></div></div>
+      <% if (h.status === 'no_show') { %><span class="badge danger"><%= t('offer.no_show') %></span><% } %></li>
+    <% } %>
+  </ul></div>
+</details>
 <% } %>
 
-<% if (contact.id !== contactId) { %>
+<% if (contactId && contact.id !== contactId) { %>
 <form method="post" action="/admin/contacts/<%= contactId %>/supprimer" class="mt-l center" data-confirm="<%= t('btn.delete') %> ?">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <button class="btn ghost" type="submit" style="color:var(--danger)"><%= t('btn.delete') %></button>
 </form>
-<% } %>
 <% } %>

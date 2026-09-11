@@ -18,6 +18,8 @@ warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
 die()  { printf '  \033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" -eq 0 ] || die "Run as root: sudo bash install.sh"
+# When run as `curl … | bash`, stdin is the script itself: take answers from the terminal.
+[ -t 0 ] || exec < /dev/tty
 
 bold "1/6  Checking Docker"
 if ! command -v docker >/dev/null 2>&1; then
@@ -66,7 +68,8 @@ else
 fi
 
 bold "5/6  First administrator"
-if [ "$(docker compose exec -T wps node --no-warnings=ExperimentalWarning -e 'const {DatabaseSync}=require("node:sqlite");const d=new DatabaseSync("/data/wps.sqlite");console.log(d.prepare("SELECT COUNT(*) n FROM contacts WHERE role=\"admin\"").get().n)')" = "0" ]; then
+admins="$(docker compose exec -T wps node --no-warnings=ExperimentalWarning -e "const {DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('/data/wps.sqlite');console.log(d.prepare(\"SELECT COUNT(*) n FROM contacts WHERE role='admin'\").get().n)" 2>/dev/null || echo 0)"
+if [ "$admins" = "0" ]; then
   read -r -p "  Your mobile number (e.g. (819) 555-1234): " phone
   read -r -p "  First name [David]: " fn; fn="${fn:-David}"
   read -r -p "  Last name [Hatin]: " ln; ln="${ln:-Hatin}"

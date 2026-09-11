@@ -22,21 +22,37 @@ function safeNext(next) {
   return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : '/admin';
 }
 
+/** Default wording of the offer SMS for a language (locale file). */
+export function defaultSmsTemplate(lang) {
+  return translator(lang)('sms.offer');
+}
+
+/** Effective template: this offer's override → site default (settings) → locale. */
+export function smsTemplate(db, lang, offer) {
+  const key = lang === 'en' ? 'sms_en' : 'sms_fr';
+  return (offer && offer[key]) || db.setting(key) || defaultSmsTemplate(lang);
+}
+
+export function fillSms(template, vars) {
+  let out = template;
+  for (const [k, v] of Object.entries(vars)) out = out.split(`{${k}}`).join(v ?? '');
+  return gsmSafe(out);
+}
+
 /** Build the SMS body for a contact/offer, in the contact's language. */
-export function offerSmsBody(contact, offer) {
-  const t = translator(contact.lang);
-  return gsmSafe(t('sms.offer', {
+export function offerSmsBody(db, contact, offer) {
+  return fillSms(smsTemplate(db, contact.lang, offer), {
     first: contact.first_name, org: contact.organization || '-', title: offer.title,
     n: offer.lot_count, url: personalLink(contact, offer.id),
-  }));
+  });
 }
 
 /** Send the offer to the chosen contacts, one by one, in the background. */
 async function broadcastOffer(db, offer, contactIds) {
   for (const id of contactIds) {
-    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND status = 'active'`, id);
+    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND status = 'active' AND no_sms = 0`, id);
     if (!c) continue;
-    await sendSms(db, { to: c.phone, body: offerSmsBody(c, offer), kind: 'offer', contactId: c.id, offerId: offer.id });
+    await sendSms(db, { to: c.phone, body: offerSmsBody(db, c, offer), kind: 'offer', contactId: c.id, offerId: offer.id });
     sse.publish(offer.id, 'refresh', { reason: 'sms' });
   }
 }
@@ -165,11 +181,9 @@ export function adminRoutes(app, db) {
     const offer = loadOffer(db, ctx.params.id);
     if (offer.status !== 'draft') return ctx.redirect(`/admin/offres/${offer.id}`);
     const contacts = db.all(`SELECT * FROM contacts WHERE status = 'active' ORDER BY organization, first_name`);
-    const previews = {
-      fr: offerSmsBody({ first_name: 'Prénom', organization: 'Organisme', lang: 'fr', token: 'xxxxxxxxxxxx' }, offer),
-      en: offerSmsBody({ first_name: 'FirstName', organization: 'Organization', lang: 'en', token: 'xxxxxxxxxxxx' }, offer),
-    };
-    ctx.render('admin/offer_confirm', { title: ctx.t('offer.confirm.title'), offer, contacts, previews, smsOk: smsConfigured() });
+    const templates = { fr: smsTemplate(db, 'fr', offer), en: smsTemplate(db, 'en', offer) };
+    const sample = { title: offer.title, n: offer.lot_count, url: `${config.appUrl}/o/${offer.id}/xxxxxxxxxxxx` };
+    ctx.render('admin/offer_confirm', { title: ctx.t('offer.confirm.title'), offer, contacts, templates, sample, smsOk: smsConfigured() });
   });
 
   app.post('/admin/offres/:id/publier', requireAdmin, async (ctx) => {
@@ -178,6 +192,10 @@ export function adminRoutes(app, db) {
     if (offer.status !== 'draft') return ctx.redirect(`/admin/offres/${offer.id}`);
     const ids = (Array.isArray(body.contacts) ? body.contacts : body.contacts ? [body.contacts] : []).map(Number).filter(Boolean);
     if (!ids.length) { ctx.flash('error', ctx.t('offer.confirm.no_recipients')); return ctx.redirect(`/admin/offres/${offer.id}/confirmer`); }
+    // Per-offer wording (kept only when it differs from the site default).
+    const smsFr = str(body.sms_fr, 600), smsEn = str(body.sms_en, 600);
+    db.run('UPDATE offers SET sms_fr = ?, sms_en = ? WHERE id = ?',
+      smsFr && smsFr !== smsTemplate(db, 'fr') ? smsFr : '', smsEn && smsEn !== smsTemplate(db, 'en') ? smsEn : '', offer.id);
     const published = rules.publishOffer(db, offer.id);
     // Fire and forget; delivery is visible on the offer page.
     broadcastOffer(db, published, ids).catch((e) => console.error('[broadcast]', e));
@@ -235,7 +253,7 @@ export function adminRoutes(app, db) {
     const c = db.get(`SELECT * FROM contacts WHERE id = ? AND status = 'active'`, Number(ctx.params.contactId));
     if (!c) throw new HttpError(404);
     if (!rateLimit(db, `resend:${offer.id}:${c.id}`, 3, 10 * MIN)) throw new HttpError(429);
-    await sendSms(db, { to: c.phone, body: offerSmsBody(c, offer), kind: 'offer', contactId: c.id, offerId: offer.id });
+    await sendSms(db, { to: c.phone, body: offerSmsBody(db, c, offer), kind: 'offer', contactId: c.id, offerId: offer.id });
     ctx.flash('ok', ctx.t('contacts.sms_sent'));
     ctx.redirect(`/admin/offres/${offer.id}`);
   });
@@ -272,6 +290,7 @@ export function adminRoutes(app, db) {
     role: body.role === 'admin' ? 'admin' : 'user',
     status: ['active', 'opted_out'].includes(body.status) ? body.status : 'active',
     notes: str(body.notes, 2000),
+    no_sms: body.no_sms ? 1 : 0,
   });
 
   app.post('/admin/contacts', requireAdmin, async (ctx) => {
@@ -283,8 +302,8 @@ export function adminRoutes(app, db) {
     if (!phone) return view(ctx.t('contacts.invalid_phone'));
     if (db.get('SELECT id FROM contacts WHERE phone = ?', phone)) return view(ctx.t('contacts.phone_in_use'));
     const now = Date.now();
-    const { lastInsertRowid } = db.run(`INSERT INTO contacts(first_name, last_name, organization, phone, lang, role, status, token, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      form.first_name, form.last_name, form.organization, phone, form.lang, form.role, form.status, newToken(12), form.notes, now, now);
+    const { lastInsertRowid } = db.run(`INSERT INTO contacts(first_name, last_name, organization, phone, lang, role, status, token, notes, no_sms, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      form.first_name, form.last_name, form.organization, phone, form.lang, form.role, form.status, newToken(12), form.notes, form.no_sms, now, now);
     ctx.flash('ok', ctx.t('contacts.saved'));
     ctx.redirect(`/admin/contacts/${lastInsertRowid}`);
   });
@@ -311,8 +330,8 @@ export function adminRoutes(app, db) {
     // Never let the last admin demote themself by accident.
     let role = form.role;
     if (c.id === ctx.state.contact.id) role = 'admin';
-    db.run(`UPDATE contacts SET first_name=?, last_name=?, organization=?, phone=?, lang=?, role=?, status=?, notes=?, updated_at=? WHERE id=?`,
-      form.first_name, form.last_name, form.organization, phone, form.lang, role, form.status, form.notes, Date.now(), c.id);
+    db.run(`UPDATE contacts SET first_name=?, last_name=?, organization=?, phone=?, lang=?, role=?, status=?, notes=?, no_sms=?, updated_at=? WHERE id=?`,
+      form.first_name, form.last_name, form.organization, phone, form.lang, role, form.status, form.notes, form.no_sms, Date.now(), c.id);
     ctx.flash('ok', ctx.t('contacts.saved'));
     ctx.redirect(`/admin/contacts/${c.id}`);
   });
@@ -393,12 +412,18 @@ export function adminRoutes(app, db) {
 
   // ---- settings ----
   app.get('/admin/parametres', requireAdmin, (ctx) => {
-    ctx.render('admin/settings', { title: ctx.t('settings.title'), s: { app_name: db.setting('app_name', config.appName), ...defaultPickup(db) }, smsOk: smsConfigured() });
+    ctx.render('admin/settings', {
+      title: ctx.t('settings.title'), smsOk: smsConfigured(),
+      s: { ...defaultPickup(db), sms_fr: smsTemplate(db, 'fr'), sms_en: smsTemplate(db, 'en') },
+      defaults: { sms_fr: defaultSmsTemplate('fr'), sms_en: defaultSmsTemplate('en') },
+    });
   });
 
   app.post('/admin/parametres', requireAdmin, async (ctx) => {
     const body = await ctx.body(); checkCsrf(ctx, body);
-    db.setSetting('app_name', str(body.app_name, 40) || config.appName);
+    const smsFr = str(body.sms_fr, 600), smsEn = str(body.sms_en, 600);
+    db.setSetting('sms_fr', smsFr && smsFr !== defaultSmsTemplate('fr') ? smsFr : '');
+    db.setSetting('sms_en', smsEn && smsEn !== defaultSmsTemplate('en') ? smsEn : '');
     db.setSetting('pickup_name', str(body.pickup_name, 120));
     db.setSetting('pickup_address', str(body.pickup_address, 300));
     db.setSetting('pickup_details', str(body.pickup_details, 1000));

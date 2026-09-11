@@ -1,11 +1,10 @@
-<%- include('admin/_tabs', { pendingCount: pending }) %>
 <div class="page-head">
-  <h1><%= t('admin.title') %></h1>
+  <h1><%= t('admin.dashboard') %></h1>
   <div class="actions"><a class="btn primary" href="/admin/offres/nouvelle">+ <%= t('admin.new_offer') %></a></div>
 </div>
 <% if (!smsOk) { %><div class="banner warn mb"><%= t('sms.not_configured') %></div><% } %>
 <div class="stats">
-  <a class="card flat stat" href="/admin/offres"><b><%= offers.filter(o => o.active).length %></b><span><%= t('offers.active') %></span></a>
+  <a class="card flat stat" href="/admin/offres"><b><%= offers.filter(o => o.active).length %></b><span><%= t('dash.active_short') %></span></a>
   <a class="card flat stat" href="/admin/contacts"><b><%= activeContacts %></b><span><%= t('admin.contacts') %></span></a>
   <a class="card flat stat" href="/admin/demandes" style="<%= pending ? 'border-color:var(--accent)' : '' %>"><b><%= pending %></b><span><%= t('admin.requests') %></span></a>
 </div>

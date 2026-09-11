@@ -7,7 +7,7 @@
       <% if (offer.active) { %><%= t('offer.published', { date: fmtDate(offer.published_at, true) }) %><% } else { %><%= t('offer.ended', { date: fmtDate(offer.ended_at || offer.expires_at || offer.created_at, true) }) %><% } %>
       <% if (isAdmin) { %> · <a href="/admin/offres/<%= offer.id %>"><%= t('nav.admin') %></a><% } %>
     </div>
-    <div class="tiny mt-s"><span class="badge"><%= t('offer.you') %> <%= contact.first_name %> · <%= fmtPhone(contact.phone) %></span></div>
+    <div class="tiny"><%= t('offer.you') %> <%= contact.first_name %> · <%= fmtPhone(contact.phone) %></div>
   </div>
   <%- include('_status_badge', { status: offer.effective }) %>
 </div>

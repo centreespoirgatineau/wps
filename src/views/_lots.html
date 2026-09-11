@@ -18,13 +18,11 @@
   <div class="n"><%= l.number %></div>
   <div class="grow">
     <% if (free) { %>
-      <div><strong><%= t('offer.lot', { n: l.number }) %></strong> <span class="badge accent"><%= t('offer.available') %></span></div>
+      <div><strong><%= t('offer.lot', { n: l.number }) %></strong></div>
       <div class="tiny"><%= offer.lot_description %></div>
     <% } else { %>
       <div class="who">
-        <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong>
-          <% if (l.status === 'picked_up') { %><span class="badge ok"><%= t('offer.picked_up') %></span><% } else if (l.status === 'no_show') { %><span class="badge danger"><%= t('offer.no_show') %></span><% } else if (!mine) { %><span class="badge"><%= t('offer.reserved') %></span><% } %>
-        </div>
+        <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong></div>
         <% if (!mine) { %><div class="org"><%= l.organization %></div>
           <div class="contact-links">
             <a href="tel:<%= l.phone %>"><%= fmtPhone(l.phone) %></a>

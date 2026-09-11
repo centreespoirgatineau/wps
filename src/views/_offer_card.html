@@ -11,7 +11,7 @@
     <span>
       <% if (o.active) { %>
         <% if (o.counts.available === 0) { %><%= t('offers.all_taken') %><% } else { %><%= t(o.counts.available === 1 ? 'offers.lots_free_1' : 'offers.lots_free', { n: o.counts.available, total: o.counts.total }) %><% } %>
-      <% } else { %>
+      <% } else if (typeof adminView !== 'undefined' && adminView) { %>
         <%= t('dash.reserved_of', { reserved: o.counts.reserved, total: o.counts.total }) %>
       <% } %>
     </span>

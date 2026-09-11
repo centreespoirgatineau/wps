@@ -75,6 +75,7 @@ app.use((ctx) => {
       path: ctx.path,
       langSwitchUrl: u.pathname + u.search,
       flash: ctx.state.flash || null,
+      pendingCount: isAdmin(ctx) ? db.get(`SELECT COUNT(*) n FROM join_requests WHERE status = 'pending'`).n : 0,
       fmtPhone: formatPhone,
       fmtDate: (ms, withTime) => formatDate(ms, config.timezone, lang, withTime),
       fmtShort: (ms) => formatDateTimeShort(ms, config.timezone, lang),

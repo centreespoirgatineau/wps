@@ -1,50 +1,49 @@
-<div class="stats mb">
-  <div class="card flat stat"><b><%= offer.counts.reserved %>/<%= offer.counts.total %></b><span><%= t('offer.reserved') %></span></div>
-  <div class="card flat stat"><b><%= offer.counts.picked_up %></b><span><%= t('offer.picked_up') %></span></div>
-  <div class="card flat stat"><b><%= offer.counts.no_show %></b><span><%= t('offer.no_show') %></span></div>
-</div>
-
-<div class="section-title"><%= t('offer.lots') %></div>
+<% const reserved = offer.lots.filter(l => l.status !== 'available'); %>
+<div class="section-title"><%= t('offer.lots') %> · <%= offer.counts.total - offer.counts.available %>/<%= offer.counts.total %></div>
 <% for (const l of offer.lots) { const free = l.status === 'available'; %>
 <div class="lot <%= free ? 'free' : 'taken' %>">
-  <div class="n"><%= l.number %></div>
+  <div class="n <%= free ? '' : 'plain' %>"><%= l.number %></div>
   <div class="grow">
     <% if (free) { %>
-      <strong><%= t('offer.lot', { n: l.number }) %></strong> <span class="badge accent"><%= t('offer.available') %></span>
+      <strong><%= t('offer.lot', { n: l.number }) %></strong>
     <% } else { %>
-      <div class="who"><strong><%= l.first_name %> <%= l.last_name %></strong>
-        <% if (l.status === 'picked_up') { %><span class="badge ok"><%= t('offer.picked_up') %></span><% } else if (l.status === 'no_show') { %><span class="badge danger"><%= t('offer.no_show') %></span><% } else { %><span class="badge"><%= t('offer.reserved') %></span><% } %>
+      <div class="who"><strong><%= l.first_name %> <%= l.last_name %></strong><% if (l.status === 'no_show') { %> <span class="badge danger"><%= t('offer.no_show') %></span><% } %>
         <div class="org"><%= l.organization %> · <a href="tel:<%= l.phone %>"><%= fmtPhone(l.phone) %></a></div>
         <div class="tiny"><%= l.reserved_at ? fmtShort(l.reserved_at) : '' %></div>
       </div>
-      <form method="post" action="/admin/offres/<%= offer.id %>/lots/<%= l.id %>" data-lot-action class="row wrap-row mt-s" style="gap:6px">
-        <input type="hidden" name="_csrf" value="<%= csrf %>">
-        <% if (l.status === 'reserved') { %>
-          <button class="btn sm ok" name="action" value="picked_up" type="submit">✓ <%= t('offer.admin.mark_picked_up') %></button>
-          <button class="btn sm danger" name="action" value="no_show" type="submit"><%= t('offer.admin.mark_no_show') %></button>
-          <% if (offer.active) { %><button class="btn sm ghost" name="action" value="free" type="submit"><%= t('offer.admin.free') %></button><% } %>
-        <% } else { %>
-          <button class="btn sm ghost" name="action" value="reserved" type="submit"><%= t('btn.undo') %></button>
-        <% } %>
-      </form>
     <% } %>
   </div>
+  <% if (!free) { %>
+  <form method="post" action="/admin/offres/<%= offer.id %>/lots/<%= l.id %>" data-lot-action>
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <% if (l.status === 'no_show') { %>
+      <button class="btn sm ghost" name="action" value="reserved" type="submit"><%= t('offer.admin.no_show_undo') %></button>
+    <% } else if (offer.active) { %>
+      <button class="btn sm ghost" name="action" value="free" type="submit" title="<%= t('offer.admin.free_confirm') %>"><%= t('offer.admin.free') %></button>
+    <% } else { %>
+      <button class="btn sm ghost" name="action" value="no_show" type="submit" style="color:var(--danger)"><%= t('offer.admin.mark_no_show') %></button>
+    <% } %>
+  </form>
+  <% } %>
 </div>
 <% } %>
-<p class="tiny mt-s"><%= t('offer.admin.no_show_hint') %></p>
+<% if (!offer.active && reserved.length) { %><p class="tiny mt-s"><%= t('offer.admin.no_show_hint') %></p><% } %>
 
-<div class="section-title"><%= t('offer.admin.deliveries') %> (<%= sms.length %>)</div>
-<div class="card">
-  <% if (!sms.length) { %><div class="empty"><%= t('sms.none') %></div><% } %>
-  <ul class="list">
-    <% for (const s of sms) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' ? 'warn' : ''; %>
-    <li>
-      <div class="grow"><strong><%= s.first_name || '' %> <%= s.last_name || '' %></strong><div class="meta"><%= s.organization || fmtPhone(s.to_phone) %> · <%= fmtShort(s.created_at) %><% if (s.error) { %> · <span style="color:var(--danger)"><%= s.error %></span><% } %></div></div>
-      <span class="badge <%= cls %>"><%= t('sms.status.' + st) %></span>
-      <% if (offer.active && s.contact_id && (st === 'failed' || st === 'undelivered')) { %>
-        <form method="post" action="/admin/offres/<%= offer.id %>/renvoyer/<%= s.contact_id %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.resend') %></button></form>
+<% const failed = sms.filter(s => s.status === 'failed' || s.status === 'undelivered'); const sent = sms.length - failed.length; %>
+<details class="fold mt">
+  <summary><span class="summary-text"><%= t('offer.admin.deliveries') %><small><%= t('offer.admin.sms_summary', { sent }) %><% if (failed.length) { %> · <span style="color:var(--danger)"><%= t('offer.admin.sms_failed', { n: failed.length }) %></span><% } %></small></span></summary>
+  <div class="fold-body">
+    <% if (!sms.length) { %><div class="tiny"><%= t('sms.none') %></div><% } %>
+    <ul class="list">
+      <% for (const s of sms) { const st = s.status; const cls = st === 'delivered' ? 'ok' : st === 'failed' || st === 'undelivered' ? 'danger' : st === 'dry_run' ? 'warn' : ''; %>
+      <li>
+        <div class="grow"><strong><%= s.first_name || '' %> <%= s.last_name || '' %></strong><div class="meta"><%= s.organization || fmtPhone(s.to_phone) %> · <%= fmtShort(s.created_at) %><% if (s.error) { %> · <span style="color:var(--danger)"><%= s.error %></span><% } %></div></div>
+        <span class="badge <%= cls %>"><%= t('sms.status.' + st) %></span>
+        <% if (offer.active && s.contact_id && (st === 'failed' || st === 'undelivered')) { %>
+          <form method="post" action="/admin/offres/<%= offer.id %>/renvoyer/<%= s.contact_id %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.resend') %></button></form>
+        <% } %>
+      </li>
       <% } %>
-    </li>
-    <% } %>
-  </ul>
-</div>
+    </ul>
+  </div>
+</details>

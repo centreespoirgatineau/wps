@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#FAF9F5">
-<title><%= title ? title + ' · ' : '' %><%= appName %></title>
+<title><%= title || t('offers.title') %></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
@@ -15,20 +15,28 @@
 </head>
 <body>
 <header class="top">
-  <div class="wrap">
-    <a class="brand" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>"><%= appName %></a>
+  <div class="wrap bar">
+    <a class="home" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>" aria-label="Accueil"><%- include('_mark', { small: true }) %></a>
     <nav class="nav">
-      <% if (contact) { %>
-        <a href="/offres" class="<%= path.startsWith('/offres') ? 'on' : '' %>"><%= t('nav.offers') %></a>
-        <a href="/moi" class="<%= path === '/moi' ? 'on' : '' %>"><%= t('nav.me') %></a>
-        <% if (isAdmin) { %><a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>"><%= t('nav.admin') %></a><% } %>
-      <% } else { %>
-        <a href="/a-propos" class="<%= path === '/a-propos' ? 'on' : '' %>"><%= t('nav.about') %></a>
-        <% if (path !== '/' && path !== '/connexion') { %><a href="/connexion"><%= t('nav.login') %></a><% } %>
+      <% if (!contact) { %>
+        <a class="lang" href="<%= langSwitchUrl %>" rel="nofollow"><%= t('lang.other') %></a>
+      <% } else if (!isAdmin) { %>
+        <a href="/reglages" class="icon-btn <%= path === '/reglages' ? 'on' : '' %>" aria-label="<%= t('settings.title') %>" title="<%= t('settings.title') %>">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </a>
       <% } %>
-      <a class="lang" href="<%= langSwitchUrl %>" rel="nofollow"><%= t('lang.other') %></a>
     </nav>
   </div>
+  <% if (contact && isAdmin) { %>
+  <nav class="tabs wrap">
+    <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>"><%= t('admin.dashboard') %></a>
+    <a href="/admin/offres" class="<%= path.startsWith('/admin/offres') || path.startsWith('/offres') ? 'on' : '' %>"><%= t('admin.offers') %></a>
+    <a href="/admin/contacts" class="<%= path.startsWith('/admin/contacts') ? 'on' : '' %>"><%= t('admin.contacts') %></a>
+    <a href="/admin/demandes" class="<%= path.startsWith('/admin/demandes') ? 'on' : '' %>"><%= t('admin.requests') %><% if (pendingCount) { %> <span class="pill"><%= pendingCount %></span><% } %></a>
+    <a href="/admin/sms" class="<%= path.startsWith('/admin/sms') ? 'on' : '' %>"><%= t('admin.sms') %></a>
+    <a href="/admin/parametres" class="<%= path.startsWith('/admin/parametres') ? 'on' : '' %>"><%= t('admin.settings') %></a>
+  </nav>
+  <% } %>
 </header>
 <main class="wrap">
   <% if (flash) { %><div class="banner <%= flash.type === 'error' ? 'error' : 'ok' %> mb"><%= flash.text %></div><% } %>

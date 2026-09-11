@@ -1,4 +1,3 @@
-<%- include('admin/_tabs', { pendingCount: pending.length }) %>
 <div class="page-head"><h1><%= t('requests.title') %></h1></div>
 <% if (!pending.length) { %><div class="card flat empty"><%= t('requests.none') %></div><% } %>
 <% for (const r of pending) { %>

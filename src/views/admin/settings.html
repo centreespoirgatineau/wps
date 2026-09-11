@@ -1,25 +1,41 @@
-<%- include('admin/_tabs') %>
 <div class="page-head"><h1><%= t('settings.title') %></h1></div>
-<form method="post" action="/admin/parametres" class="stack">
+
+<div class="section-title"><%= t('settings.personal') %></div>
+<%- include('_account') %>
+
+<form method="post" action="/admin/parametres" class="stack mt-l">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="section-title"><%= t('settings.default_pickup') %></div>
   <div class="card">
-    <label class="field"><span><%= t('settings.app_name') %></span><input type="text" name="app_name" value="<%= s.app_name %>" maxlength="40"></label>
-  </div>
-  <div class="card">
-    <h3 class="mb"><%= t('settings.default_pickup') %></h3>
     <label class="field"><span><%= t('offer.form.pickup_name') %></span><input type="text" name="pickup_name" value="<%= s.pickup_name %>"></label>
     <label class="field"><span><%= t('offer.form.pickup_address') %></span><input type="text" name="pickup_address" value="<%= s.pickup_address %>"></label>
     <label class="field"><span><%= t('offer.form.pickup_details') %></span><textarea name="pickup_details"><%= s.pickup_details %></textarea></label>
     <%- include('admin/_photo_field', { fieldName: 'pickup_photo', files: s.pickup_photo ? [s.pickup_photo] : [], multiple: false, max: 1, label: t('offer.form.pickup_photo') }) %>
   </div>
+
+  <div class="section-title"><%= t('settings.sms_templates') %></div>
+  <div class="card" data-sample="<%= JSON.stringify({ title: 'Légumes frais', n: 4, url: config.appUrl + '/o/12/xxxxxxxxxxxx' }) %>" id="sms-settings">
+    <p class="tiny"><%= t('settings.sms_hint') %></p>
+    <label class="field"><span><%= t('settings.sms_fr') %></span>
+      <textarea class="mono" name="sms_fr" data-sms-template="fr" maxlength="600"><%= s.sms_fr %></textarea>
+      <div class="sms-preview mt-s" data-sms-preview="fr"></div><div class="counter" data-sms-count="fr"></div>
+      <button type="button" class="link-btn tiny" data-reset-template="fr" data-default="<%= defaults.sms_fr %>"><%= t('settings.reset_default') %></button></label>
+    <label class="field"><span><%= t('settings.sms_en') %></span>
+      <textarea class="mono" name="sms_en" data-sms-template="en" maxlength="600"><%= s.sms_en %></textarea>
+      <div class="sms-preview mt-s" data-sms-preview="en"></div><div class="counter" data-sms-count="en"></div>
+      <button type="button" class="link-btn tiny" data-reset-template="en" data-default="<%= defaults.sms_en %>"><%= t('settings.reset_default') %></button></label>
+  </div>
   <button class="btn primary block" type="submit"><%= t('btn.save') %></button>
 </form>
-<div class="section-title"><%= t('settings.info') %></div>
-<div class="card flat tiny">
-  <dl class="kv">
-    <dt>URL</dt><dd><code><%= config.appUrl %></code></dd>
-    <dt>SMS</dt><dd><%= smsOk ? 'Twilio ✓' : t('sms.status.dry_run') %></dd>
-    <dt>Fuseau</dt><dd><%= config.timezone %></dd>
-    <dt>Webhooks</dt><dd><code><%= config.appUrl %>/twilio/status</code><br><code><%= config.appUrl %>/twilio/inbound</code></dd>
-  </dl>
-</div>
+
+<details class="fold mt-l">
+  <summary><span class="summary-text"><%= t('settings.info') %></span></summary>
+  <div class="fold-body tiny">
+    <dl class="kv">
+      <dt>URL</dt><dd><code><%= config.appUrl %></code></dd>
+      <dt>SMS</dt><dd><%= smsOk ? 'Twilio ✓' : t('sms.status.dry_run') %></dd>
+      <dt>Fuseau</dt><dd><%= config.timezone %></dd>
+      <dt>Webhooks</dt><dd><code><%= config.appUrl %>/twilio/status</code><br><code><%= config.appUrl %>/twilio/inbound</code></dd>
+    </dl>
+  </div>
+</details>

@@ -1,0 +1,18 @@
+# The override used on David's VPS (Traefik in container root-traefik-1, network root_default,
+# certificate resolver "mytlschallenge"). Copy to /opt/wps/docker-compose.override.yml.
+services:
+  wps:
+    networks:
+      - default
+      - root_default
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=root_default
+      - traefik.http.routers.wps.rule=Host(`wps.davidhatin.com`)
+      - traefik.http.routers.wps.entrypoints=websecure
+      - traefik.http.routers.wps.tls.certresolver=mytlschallenge
+      - traefik.http.services.wps.loadbalancer.server.port=8080
+      - traefik.http.services.wps.loadbalancer.responseforwarding.flushinterval=-1
+networks:
+  root_default:
+    external: true

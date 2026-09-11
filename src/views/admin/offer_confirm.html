@@ -1,4 +1,3 @@
-<%- include('admin/_tabs') %>
 <div class="page-head">
   <div class="grow"><h1><%= t('offer.confirm.title') %></h1><div class="tiny mt-s"><%= t('offer.confirm.summary', { lots: offer.lot_count, max: offer.max_per_contact }) %></div></div>
   <%- include('_status_badge', { status: 'draft' }) %>
@@ -11,12 +10,9 @@
   </div>
   <% } %>
   <h2><%= offer.title %></h2>
-  <dl class="kv mt-s">
-    <dt><%= t('offer.lot_content') %></dt><dd><%= offer.lot_description %></dd>
-    <dt><%= t('offer.lots') %></dt><dd><%= offer.lot_count %></dd>
-    <dt><%= t('offer.pickup') %></dt><dd><%= offer.pickup_name %><br><span class="muted"><%= offer.pickup_address %></span>
-      <br><% if (offer.pickup_from && offer.pickup_to) { %><%= t('offer.pickup_window', { from: hmToH(offer.pickup_from), to: hmToH(offer.pickup_to) }) %><% } else if (offer.pickup_from) { %><%= t('offer.pickup_from', { from: hmToH(offer.pickup_from) }) %><% } else if (offer.pickup_to) { %><%= t('offer.pickup_to', { to: hmToH(offer.pickup_to) }) %><% } else { %><%= t('offer.pickup_today') %><% } %></dd>
-  </dl>
+  <div class="muted"><%= offer.lot_description %> · <%= offer.lot_count %> <%= t('offer.lots').toLowerCase() %></div>
+  <div class="tiny mt-s"><%= offer.pickup_name %> · <%= offer.pickup_address %>
+    · <% if (offer.pickup_from && offer.pickup_to) { %><%= t('offer.pickup_window', { from: hmToH(offer.pickup_from), to: hmToH(offer.pickup_to) }) %><% } else if (offer.pickup_from) { %><%= t('offer.pickup_from', { from: hmToH(offer.pickup_from) }) %><% } else if (offer.pickup_to) { %><%= t('offer.pickup_to', { to: hmToH(offer.pickup_to) }) %><% } else { %><%= t('offer.pickup_today') %><% } %></div>
   <% if (offer.description) { %><p class="mt-s muted" style="white-space:pre-line"><%= offer.description %></p><% } %>
   <div class="row mt">
     <a class="btn secondary sm" href="/admin/offres/<%= offer.id %>/modifier"><%= t('offer.confirm.edit') %></a>
@@ -24,24 +20,31 @@
   </div>
 </div>
 
-<div class="section-title"><%= t('offer.confirm.preview') %></div>
-<div class="card">
-  <div class="sms-preview"><%= previews.fr %></div>
-  <div class="sms-preview mt-s"><%= previews.en %></div>
-  <% if (!smsOk) { %><div class="banner warn mt-s"><%= t('sms.not_configured') %></div><% } %>
-</div>
-
-<form method="post" action="/admin/offres/<%= offer.id %>/publier" id="publish-form">
+<form method="post" action="/admin/offres/<%= offer.id %>/publier" id="publish-form" data-sample="<%= JSON.stringify(sample) %>">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
-  <div class="section-title"><%= t('offer.confirm.recipients') %> (<%= contacts.length %>)</div>
+
+  <div class="section-title"><%= t('offer.confirm.preview') %></div>
+  <div class="card">
+    <p class="tiny"><%= t('offer.confirm.preview_hint') %> <%= t('settings.sms_hint') %></p>
+    <label class="field"><span>FR</span>
+      <textarea class="mono" name="sms_fr" data-sms-template="fr" maxlength="600"><%= templates.fr %></textarea>
+      <div class="sms-preview mt-s" data-sms-preview="fr"></div><div class="counter" data-sms-count="fr"></div></label>
+    <label class="field"><span>EN</span>
+      <textarea class="mono" name="sms_en" data-sms-template="en" maxlength="600"><%= templates.en %></textarea>
+      <div class="sms-preview mt-s" data-sms-preview="en"></div><div class="counter" data-sms-count="en"></div></label>
+    <% if (!smsOk) { %><div class="banner warn"><%= t('sms.not_configured') %></div><% } %>
+  </div>
+
+  <div class="section-title"><%= t('offer.confirm.recipients') %></div>
   <div class="card" id="recipients">
     <div class="row mb"><button type="button" class="btn sm secondary" id="sel-all"><%= t('offer.confirm.all') %></button><button type="button" class="btn sm ghost" id="sel-none"><%= t('offer.confirm.none') %></button></div>
     <% for (const c of contacts) { %>
-      <label class="check line"><input type="checkbox" name="contacts" value="<%= c.id %>" checked>
-        <span class="grow"><strong><%= c.first_name %> <%= c.last_name %></strong> <span class="badge"><%= c.lang.toUpperCase() %></span><br><span class="tiny"><%= c.organization %> · <%= fmtPhone(c.phone) %></span></span></label>
+      <label class="check line"><input type="checkbox" name="contacts" value="<%= c.id %>" <%= c.no_sms ? '' : 'checked' %>>
+        <span class="grow"><strong><%= c.first_name %> <%= c.last_name %></strong> <span class="badge"><%= c.lang.toUpperCase() %></span><% if (c.no_sms) { %> <span class="badge warn"><%= t('contacts.test_badge') %></span><% } %><br><span class="tiny"><%= c.organization %> · <%= fmtPhone(c.phone) %></span></span></label>
     <% } %>
     <% if (!contacts.length) { %><div class="empty"><%= t('contacts.none') %></div><% } %>
   </div>
+
   <div class="banner warn mt"><%= t('offer.confirm.warning') %></div>
   <button class="btn primary block mt" type="submit" id="send-btn" data-tpl="<%= t('offer.confirm.send', { n: '{n}' }) %>" data-confirm="<%= t('offer.confirm.warning') %>"><%= t('offer.confirm.send', { n: contacts.length }) %></button>
 </form>

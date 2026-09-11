@@ -1,4 +1,3 @@
-<%- include('admin/_tabs') %>
 <div class="page-head"><h1><%= title %></h1></div>
 <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
 
@@ -17,28 +16,29 @@
       <label class="field"><span><%= t('offer.form.max_per_contact') %></span>
         <input type="number" name="max_per_contact" inputmode="numeric" min="1" max="500" value="<%= form.max_per_contact || 1 %>" required></label>
     </div>
-    <label class="field"><span><%= t('offer.form.description') %> <small>(<%= t('optional') %>)</small></span>
+    <label class="field" style="margin-bottom:0"><span><%= t('offer.form.description') %> <small>(<%= t('optional') %>)</small></span>
       <textarea name="description" placeholder="<%= t('offer.form.description_placeholder') %>" maxlength="2000"><%= form.description %></textarea></label>
   </div>
 
-  <div class="card">
-    <div class="row between mb">
-      <h3><%= t('offer.form.pickup') %></h3>
+  <% const custom = form.pickup_name !== defaults.pickup_name || form.pickup_address !== defaults.pickup_address || form.pickup_details !== defaults.pickup_details || form.pickup_from || form.pickup_to || (form.pickup_photo && form.pickup_photo !== defaults.pickup_photo); %>
+  <details class="fold" <%= custom ? 'open' : '' %>>
+    <summary><span class="summary-text"><%= t('offer.form.pickup') %><small><%= form.pickup_name %> · <%= form.pickup_address %><% if (form.pickup_from || form.pickup_to) { %> · <%= form.pickup_from ? hmToH(form.pickup_from) : '…' %>–<%= form.pickup_to ? hmToH(form.pickup_to) : '…' %><% } else { %> · <%= t('offer.pickup_today') %><% } %></small></span></summary>
+    <div class="fold-body">
+      <div class="field"><span><%= t('offer.form.pickup_window') %> <small>(<%= t('optional') %>)</small></span>
+        <div class="grid-2">
+          <label class="field"><span class="tiny"><%= t('offer.form.pickup_from') %></span><input type="time" name="pickup_from" value="<%= form.pickup_from %>"></label>
+          <label class="field"><span class="tiny"><%= t('offer.form.pickup_to') %></span><input type="time" name="pickup_to" value="<%= form.pickup_to %>"></label>
+        </div>
+        <div class="hint"><%= t('offer.form.window_hint') %></div>
+      </div>
+      <label class="field"><span><%= t('offer.form.pickup_name') %></span><input type="text" name="pickup_name" value="<%= form.pickup_name %>" maxlength="120"></label>
+      <label class="field"><span><%= t('offer.form.pickup_address') %></span><input type="text" name="pickup_address" value="<%= form.pickup_address %>" maxlength="300"></label>
+      <label class="field"><span><%= t('offer.form.pickup_details') %> <small>(<%= t('optional') %>)</small></span><textarea name="pickup_details" maxlength="1000"><%= form.pickup_details %></textarea></label>
+      <%- include('admin/_photo_field', { fieldName: 'pickup_photo', files: form.pickup_photo ? [form.pickup_photo] : [], multiple: false, max: 1, label: t('offer.form.pickup_photo') }) %>
       <button type="button" class="link-btn tiny" id="reset-pickup" data-defaults="<%= JSON.stringify(defaults) %>"><%= t('offer.form.reset_pickup') %></button>
     </div>
-    <label class="field"><span><%= t('offer.form.pickup_name') %></span><input type="text" name="pickup_name" value="<%= form.pickup_name %>" maxlength="120"></label>
-    <label class="field"><span><%= t('offer.form.pickup_address') %></span><input type="text" name="pickup_address" value="<%= form.pickup_address %>" maxlength="300"></label>
-    <label class="field"><span><%= t('offer.form.pickup_details') %> <small>(<%= t('optional') %>)</small></span><textarea name="pickup_details" maxlength="1000"><%= form.pickup_details %></textarea></label>
-    <%- include('admin/_photo_field', { fieldName: 'pickup_photo', files: form.pickup_photo ? [form.pickup_photo] : [], multiple: false, max: 1, label: t('offer.form.pickup_photo') }) %>
-    <div class="field"><span><%= t('offer.form.pickup_window') %> <small>(<%= t('optional') %>)</small></span>
-      <div class="grid-2">
-        <label class="field"><span class="tiny"><%= t('offer.form.pickup_from') %></span><input type="time" name="pickup_from" value="<%= form.pickup_from %>"></label>
-        <label class="field"><span class="tiny"><%= t('offer.form.pickup_to') %></span><input type="time" name="pickup_to" value="<%= form.pickup_to %>"></label>
-      </div>
-      <div class="hint"><%= t('offer.form.window_hint') %></div>
-    </div>
-  </div>
+  </details>
 
   <button class="btn primary block" type="submit"><%= t('btn.continue') %> →</button>
-  <% if (offerId) { %><a class="btn ghost block" href="/admin/offres/<%= offerId %>/confirmer"><%= t('btn.cancel') %></a><% } else { %><a class="btn ghost block" href="/admin"><%= t('btn.cancel') %></a><% } %>
+  <a class="btn ghost block" href="<%= offerId ? '/admin/offres/' + offerId + '/confirmer' : '/admin' %>"><%= t('btn.cancel') %></a>
 </form>
