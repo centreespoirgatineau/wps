@@ -26,12 +26,18 @@ const deckCsp = (() => {
     + `script-src 'sha256-${hash}'; frame-src 'self'; base-uri 'none'; form-action 'none'`;
 })();
 
-// The deck carries its link-preview tags with an __ORIGIN__ placeholder rather
-// than a domain, so changing the address in Réglages is enough. Substituting on
-// a 200 KB string is worth doing once per address, not once per request.
+// The deck writes the address as __ORIGIN__ (a full URL, for the link-preview
+// tags and the join button) and __HOST__ (just the domain, for the address a
+// church reads off a slide), so changing it in Réglages is enough. Substituting
+// on a 150 KB string is worth doing once per address, not once per request.
+// Neither placeholder appears inside the deck's inline script, so the hash the
+// page's own policy allows is unaffected.
 let deckCache = { origin: null, html: '' };
 function deckFor(origin) {
-  if (deckCache.origin !== origin) deckCache = { origin, html: deckHtml.replaceAll('__ORIGIN__', origin) };
+  if (deckCache.origin !== origin) {
+    const host = origin.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    deckCache = { origin, html: deckHtml.replaceAll('__ORIGIN__', origin).replaceAll('__HOST__', host) };
+  }
   return deckCache.html;
 }
 

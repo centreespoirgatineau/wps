@@ -25,12 +25,11 @@ slides.push(`
 <section class="s title">
   <div class="mid">
     <img class="logo" src="data:image/svg+xml;base64,${mark}" alt="">
-    <h1>Rien ne devrait se perdre.</h1>
-    <p class="lede">Les surplus alimentaires du Centre Espoir de Gatineau,
-      redistribués le jour même par les églises
-      <strong>— comme outil pour annoncer l’Évangile de Jésus-Christ.</strong></p>
+    <h1>Un outil pour annoncer l’Évangile</h1>
+    <p class="lede">Le Centre Espoir de Gatineau souhaite redistribuer ses surplus
+      alimentaires par l’entremise des églises locales, afin de créer des occasions
+      de partager l’Évangile de Jésus-Christ.</p>
   </div>
-  <p class="title-foot">Centre Espoir de Gatineau<span class="sep">·</span>jc.centreespoir.ca</p>
 </section>`);
 
 // 2 ---------------------------------------------------------------- problem
@@ -39,9 +38,10 @@ slides.push(`
   <div class="split">
     <div class="col">
       <p class="eyebrow">Le problème</p>
-      <h2 class="tight">Comme nous sommes une banque alimentaire, nous recevons parfois des surplus qui doivent être redistribués le jour même.</h2>
+      <h2>Tout doit partir aujourd’hui.</h2>
     </div>
     <div class="col">
+      <p class="big">Comme nous sommes une banque alimentaire, nous recevons parfois des surplus qui doivent être redistribués le jour même.</p>
       <p class="big">Le temps de joindre nos contacts un à un, il est souvent déjà trop tard.</p>
       <p class="big accent-text">Pour nous, ce n’est pas seulement de la nourriture qui finit à la poubelle, c’est une porte qui se ferme.</p>
     </div>
@@ -61,7 +61,7 @@ slides.push(`
         <p class="pull-label">Règle n° 1 de la plateforme</p>
         <p class="pull-text">Ces lots de nourriture doivent servir d’outil pour prêcher l’Évangile de Jésus-Christ.</p>
       </div>
-      <p class="note">Cette règle n’est pas une formalité : c’est la raison d’être de la plateforme, et chaque contact l’accepte avant de réserver.</p>
+      <p class="note">Cette règle n’est pas une formalité&nbsp;: c’est la raison d’être de la plateforme, et chaque contact l’accepte avant de réserver.</p>
     </div>
   </div>
 </section>`);
@@ -97,7 +97,7 @@ slides.push(`
     <div class="col shot-col">
       <div class="sms">
         <p class="sms-head">Centre Espoir</p>
-        <p class="bubble">Bonjour Daniel (Église Nouvelle Vie de Gatineau). Surplus alimentaire aujourd’hui au Centre Espoir : Plateaux de sushis et salades, 8 lot(s). Réserver&nbsp;: <span class="link">jc.centreespoir.ca/o/1/…</span></p>
+        <p class="bubble">Bonjour Daniel (Église Nouvelle Vie de Gatineau). Surplus alimentaire aujourd’hui au Centre Espoir&nbsp;: Plateaux de sushis et salades, 8 lot(s).<br>Réserver&nbsp;: <span class="link">__HOST__/o/1/…</span></p>
         <p class="sms-time">aujourd’hui, 10H16</p>
       </div>
     </div>
@@ -131,6 +131,7 @@ slides.push(`
       <ul class="ticks">
         <li>Un lot réservé disparaît aussitôt pour les autres.</li>
         <li>Vous voyez qui a pris quoi, en direct.</li>
+        <li>Une réservation vous engage à venir le chercher.</li>
       </ul>
     </div>
     <div class="col shot-col">${phone('offer', 600)}</div>
@@ -145,8 +146,8 @@ slides.push(`
       <p class="eyebrow">Étape 4</p>
       <h2>Vous vous organisez entre vous.</h2>
       <ul class="ticks">
-        <li>« Je peux prendre ton lot en passant. »</li>
-        <li>« Quelqu’un va vers Aylmer ? »</li>
+        <li>«&nbsp;Je peux prendre ton lot en passant.&nbsp;»</li>
+        <li>«&nbsp;Quelqu’un va vers Aylmer&nbsp;?&nbsp;»</li>
         <li>Chaque église a sa couleur, d’un coup d’œil.</li>
       </ul>
     </div>
@@ -205,8 +206,9 @@ slides.push(`
 slides.push(`
 <section class="s gospel">
   <div class="mid">
-    <h2 class="center">Un outil pour annoncer l’Évangile</h2>
-    <p class="big center">Le Centre Espoir de Gatineau souhaite redistribuer ses surplus alimentaires par l’entremise des églises locales, afin de créer des occasions de partager l’Évangile de Jésus-Christ.</p>
+    <p class="quote-mark">“</p>
+    <blockquote>Je suis le pain de vie. Celui qui vient à moi n’aura jamais faim.</blockquote>
+    <p class="attrib">Jésus — Jean 6.35</p>
   </div>
 </section>`);
 
@@ -215,16 +217,14 @@ slides.push(`
 <section class="s join">
   <div class="mid">
     <p class="eyebrow center">Rejoindre la liste</p>
-    <h2 class="center">Vous voulez en être ?</h2>
+    <h2 class="center">Vous voulez en être&nbsp;?</h2>
     <p class="big center">Faites votre demande en ligne, ou parlez-en directement à David.</p>
-    <p class="center"><a class="cta" href="https://jc.centreespoir.ca/demande">jc.centreespoir.ca/demande</a></p>
+    <p class="center"><a class="cta" href="__ORIGIN__/demande">__HOST__/demande</a></p>
     <p class="contact center"><strong>David Hatin</strong> · Directeur général<br>Centre Espoir de Gatineau<br>
       <a class="tel" href="tel:+18192085721">819-208-5721</a></p>
     <p class="note center">Vous recevrez un texto dès que votre demande sera approuvée.</p>
   </div>
 </section>`);
-
-const dots = slides.map((_, i) => `<button class="dot" data-go="${i}" aria-label="Diapositive ${i + 1}"></button>`).join('');
 
 const html = `<!doctype html>
 <html lang="fr">
@@ -235,14 +235,14 @@ const html = `<!doctype html>
 <!-- Link preview. __ORIGIN__ is filled in by the /presentation route, so the
      address stays a setting rather than something baked into this file. -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="Les surplus alimentaires, redistribués le jour même">
-<meta property="og:description" content="Comment une église rejoint son quartier avec les surplus alimentaires du Centre Espoir de Gatineau — et annonce l’Évangile de Jésus-Christ.">
+<meta property="og:title" content="Un outil pour annoncer l’Évangile de Jésus-Christ">
+<meta property="og:description" content="Comment une église annonce l’Évangile de Jésus-Christ en redistribuant les surplus alimentaires du Centre Espoir de Gatineau.">
 <meta property="og:url" content="__ORIGIN__/presentation">
 <meta property="og:image" content="__ORIGIN__/static/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<title>Surplus alimentaires — Centre Espoir de Gatineau</title>
+<title>Un outil pour annoncer l’Évangile — Centre Espoir de Gatineau</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
@@ -269,7 +269,7 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 .s{position:relative;min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;
   background:var(--bg);display:flex;flex-direction:column;justify-content:center;
   padding:calc(var(--pad) + env(safe-area-inset-top)) calc(var(--pad) + env(safe-area-inset-right))
-          calc(var(--pad) + env(safe-area-inset-bottom) + 40px) calc(var(--pad) + env(safe-area-inset-left))}
+          calc(var(--pad) + env(safe-area-inset-bottom)) calc(var(--pad) + env(safe-area-inset-left))}
 .mid{width:100%;max-width:1400px;margin:0 auto}
 
 /* Everything arrives a moment after its slide does, in reading order. */
@@ -280,7 +280,7 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 
 /* Type: one fluid scale, bounded by both the width and the height of the screen
    so it works on a projector, a laptop and a phone lying on its side. */
-h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
+h1,h2,h3,blockquote{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
 h1{font-size:clamp(34px, min(6.2vw, 12vh), 116px);line-height:1.05}
 h2{font-size:clamp(25px, min(3.9vw, 7.4vh), 72px);line-height:1.12}
 h2.tight{font-size:clamp(22px, min(3.4vw, 6.4vh), 64px)}
@@ -301,26 +301,22 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 
 .split{display:grid;grid-template-columns:1fr auto;gap:clamp(18px,3.8vw,72px);align-items:center;width:100%;max-width:1660px;margin:0 auto}
 .col{min-width:0}
+/* Side by side, the right-hand column is sized by whatever is in it. Anything
+   there without a width of its own — the rule box, the text message — would
+   otherwise take the whole slide and leave the words beside it one per line.
+   The phones size themselves against the slide, already well under this. */
+@media (min-aspect-ratio: 5/4){ .split>.col:last-child{max-width:44vw} }
 .shot-col{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
 
 /* title */
 .title .logo{width:clamp(52px, min(6.6vw, 12vh), 128px);height:auto;margin-bottom:var(--gap)}
-.lede{font-size:clamp(15px, min(1.56vw, 3vh), 30px);line-height:1.6;color:var(--ink-2);margin-top:var(--gap);max-width:34ch}
-.lede strong{color:var(--accent-ink);font-weight:600;display:block;margin-top:.35em}
-.title-foot{position:absolute;left:calc(var(--pad) + env(safe-area-inset-left));
-  bottom:calc(var(--pad) + env(safe-area-inset-bottom) + 6px);
-  font-size:clamp(11px, min(1.1vw, 2vh), 21px);color:var(--ink-3)}
-.title-foot .sep{margin:0 .6em;color:var(--ink-3);opacity:.5}
+.lede{font-size:clamp(15px, min(1.56vw, 3vh), 30px);line-height:1.6;color:var(--ink-2);margin-top:var(--gap);max-width:42ch}
 
 /* purpose */
 .pull{background:var(--accent-soft);border-radius:clamp(14px,1.4vw,26px);padding:clamp(18px,2.6vw,52px)}
 .pull-label{font-size:clamp(10px, min(1vw, 1.9vh), 19px);letter-spacing:.14em;text-transform:uppercase;
   color:var(--accent-ink);font-weight:600;margin-bottom:.9em}
 .pull-text{font-family:var(--serif);font-size:clamp(17px, min(2vw, 3.8vh), 38px);line-height:1.38}
-/* Side by side, the right-hand column is sized by what is in it. The rule box
-   has no natural width, so without this cap it took the whole slide and left the
-   heading beside it one word per line. */
-@media (min-aspect-ratio: 5/4){ .pull{max-width:40vw} }
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.5vw,28px);margin-top:calc(var(--gap) * 1.5)}
@@ -361,9 +357,11 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 
 /* gospel */
 .gospel{background:var(--accent-soft);text-align:center}
-/* The one paragraph on the slide carries it, so it gets a wider measure and a
-   little more size than a paragraph sitting beside something else. */
-.gospel .big{color:var(--ink);max-width:44ch;font-size:clamp(16px, min(1.85vw, 3.5vh), 35px)}
+.quote-mark{font-family:var(--serif);font-size:clamp(50px,min(7.8vw,14vh),150px);line-height:.6;
+  color:var(--accent);opacity:.5;margin-bottom:.35em}
+blockquote{font-size:clamp(24px, min(3.5vw, 6.6vh), 66px);line-height:1.3;max-width:20ch;margin:0 auto}
+.attrib{margin-top:calc(var(--gap) * 1.4);font-size:clamp(11px,min(1.15vw,2.2vh),22px);
+  color:var(--accent-ink);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
 
 /* join */
 .cta{display:inline-block;margin:calc(var(--gap) * 1.1) 0;padding:clamp(12px,1.3vw,24px) clamp(18px,2vw,40px);
@@ -403,15 +401,8 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
    through to the deck, or gesturing over it would do nothing. */
 .screen iframe{position:absolute;left:0;width:390px;height:2300px;border:0;display:block;pointer-events:none}
 
-/* progress dots — the affordance, and a control */
-#dots{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 8px);
-  display:flex;justify-content:center;gap:7px;z-index:20;padding:8px}
-.dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;cursor:pointer;
-  background:rgba(20,20,19,.16);transition:background .2s, transform .2s}
-.dot.on{background:var(--accent);transform:scale(1.5)}
-
 /* A quiet invitation to scroll, on the first slide only. */
-#cue{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 64px);z-index:30;
+#cue{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 26px);z-index:30;
   display:flex;flex-direction:column;align-items:center;gap:6px;
   pointer-events:none;opacity:0;transition:opacity .6s ease}
 #cue.show{opacity:1}
@@ -446,14 +437,11 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 @media (max-height: 460px){
   :root{--gap:9px;--pad:clamp(14px,3vw,40px)}
   .ticks li{margin-bottom:.4em}
-  .s{padding-bottom:calc(var(--pad) + env(safe-area-inset-bottom) + 22px)}
-  #dots{bottom:calc(env(safe-area-inset-bottom) + 4px)}
 }
 </style>
 </head>
 <body>
 <div id="deck">${slides.join('\n')}</div>
-<div id="dots">${dots}</div>
 <div id="cue">
   <span>Faites défiler</span>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -463,7 +451,6 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 const PAGES = ${JSON.stringify(pages)};
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.s')];
-const dotEls = [...document.querySelectorAll('.dot')];
 const cue = document.getElementById('cue');
 let current = 0;
 
@@ -482,7 +469,7 @@ for (const p of document.querySelectorAll('.phone')) {
 
 // Everything that should arrive, in reading order, with a small stagger.
 const ANIM = '.eyebrow,h1,h2,h3,.logo,.lede,.big,.note,.pull,.ticks li,'
-  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,.title-foot';
+  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,blockquote,.quote-mark,.attrib';
 for (const s of slides) {
   [...s.querySelectorAll(ANIM)].forEach((el, i) => {
     el.classList.add('anim');
@@ -547,7 +534,6 @@ const io = new IntersectionObserver((entries) => {
       const i = slides.indexOf(e.target);
       if (i !== current) {
         current = i;
-        dotEls.forEach((d, k) => d.classList.toggle('on', k === i));
         history.replaceState(null, '', '#' + (i + 1));
       }
       sizeShots();
@@ -572,7 +558,6 @@ addEventListener('keydown', (e) => {
     if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
   }
 });
-for (const d of dotEls) d.addEventListener('click', () => goTo(+d.dataset.go));
 deck.addEventListener('scroll', hideCue, { passive: true, once: true });
 
 addEventListener('resize', sizeShots);

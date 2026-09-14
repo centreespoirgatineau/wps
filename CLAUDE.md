@@ -59,11 +59,16 @@ Other hard constraints:
   screen (`min-height:100dvh`) inside one scroll container with
   `scroll-snap-type:y mandatory`, so a thumb-flick, a mouse wheel and the arrow
   keys all move one slide. The type is fluid (`clamp()` bounded by both vw and
-  vh). Two things are easy to get wrong again: the phone mock-up iframes need
-  `pointer-events:none` or a scroll starting on one dies, and the phone sizing
-  must measure **one screen** (`deck.clientHeight`), never the slide — a slide
-  that has grown past the fold would otherwise report the room it took and the
-  phone would grow to match. Covered by a test.
+  vh). Scrolling is the only navigation: there are no progress dots and nothing
+  is pinned to the bottom of the screen. Three things are easy to get wrong
+  again: the phone mock-up iframes need `pointer-events:none` or a scroll
+  starting on one dies; the phone sizing must measure **one screen**
+  (`deck.clientHeight`), never the slide — a slide that has grown past the fold
+  would otherwise report the room it took and the phone would grow to match; and
+  in the two-column layout the right-hand column is sized by its content, so
+  anything put there without a width of its own takes the whole slide and leaves
+  the heading beside it one word per line (hence the `max-width:44vw` cap). The
+  first two are covered by a test.
 - **`/presentation` is the one page with its own CSP.** The slideshow is a single
   self-contained file with an inline `<script>`, which the site-wide policy
   forbids; the route allows that exact script by SHA-256 hash rather than by
@@ -78,9 +83,13 @@ Other hard constraints:
   because no messenger renders an SVG in a preview card. It is generated from
   the mark and a few lines of copy by `presentation/build/make-og.mjs` and
   committed; rerun it when the mark or the wording changes. The pages reference
-  it with an absolute URL built from `publicUrl()`, and the slideshow carries an
-  `__ORIGIN__` placeholder the `/presentation` route fills in — so changing the
-  address in Réglages is still enough.
+  it with an absolute URL built from `publicUrl()`, and the slideshow carries
+  `__ORIGIN__` (a full URL) and `__HOST__` (just the domain, for the address a
+  church reads off a slide) placeholders that the `/presentation` route fills in
+  — so changing the address in Réglages is still enough. Covered by a test.
+  The card is drawn by **Chrome**, headless: Edge's `--headless=new` stopped
+  writing the file at some point in 2026 and now exits 0 having done nothing, so
+  `make-og.mjs` tries each browser it finds and checks the PNG actually exists.
 
 ## 3. Layout of the code
 

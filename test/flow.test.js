@@ -467,7 +467,7 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   const visitor = client();
   const r = await visitor.get('/presentation');
   assert.equal(r.status, 200, 'no sign-in needed');
-  assert.match(r.text, /Rien ne devrait/);
+  assert.match(r.text, /Un outil pour annoncer/);
   assert.match(r.text, /Évangile de Jésus-Christ/);
   // The deck carries one inline script; the page's own policy must allow
   // exactly it, by hash, or the slideshow will not advance.
@@ -489,6 +489,10 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   // The mark is the vector, inlined — the retired PNGs must not come back.
   assert.doesNotMatch(r.text, /image\/png/);
   assert.match(r.text, /data:image\/svg\+xml/);
+  // The address is a setting: the deck writes it as a placeholder and the route
+  // fills it in, so none may survive to the page.
+  assert.doesNotMatch(r.text, /__ORIGIN__|__HOST__/);
+  assert.match(r.text, /http:\/\/127\.0\.0\.1:\d+\/demande/);
 });
 
 test('the public address can be changed from Réglages, and links follow it', async () => {

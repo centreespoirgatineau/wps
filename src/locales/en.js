@@ -26,8 +26,9 @@ export default {
   'error.csrf': 'This page expired. Reload and try again.',
   'error.too_many': 'Too many attempts. Wait a few minutes.',
   'noscript': 'This page needs JavaScript to work.',
-  'meta.og_title': 'Surplus food, redistributed the same day',
-  'meta.og_desc': 'A network of churches and ministries in the Outaouais who take the surplus food from Centre Espoir de Gatineau to feed their neighbourhood and share the gospel of Jesus Christ.',
+  'meta.og_title': 'A tool for sharing the gospel of Jesus Christ',
+  'meta.og_desc': 'Surplus food from Centre Espoir de Gatineau, redistributed the same day by the churches of the Outaouais.',
+  'meta.title_suffix': 'Surplus food, Centre Espoir de Gatineau',
 
   // ---- login ----
   'login.title': 'Sign in',

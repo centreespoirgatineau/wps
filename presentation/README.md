@@ -13,7 +13,6 @@ connexion. C'est le lien à donner aux églises.
 
 **Sur un téléphone ou une tablette**
 - Faites simplement défiler vers le bas : chaque diapositive s'arrête d'elle-même.
-- Les points au bas de l'écran indiquent où vous êtes ; touchez-en un pour y aller.
 - Tenez l'appareil à la verticale : la mise en page est faite pour ça.
 
 **Sur un ordinateur**
@@ -82,3 +81,6 @@ node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png
 
 Le texte de la carte se trouve en haut de `build/make-og.mjs`. À refaire si le
 logo ou ce texte change, puis à pousser sur GitHub comme le reste.
+
+> La carte est dessinée par Chrome, en arrière-plan. Edge ne fait plus l'affaire :
+> depuis une de ses mises à jour, il se termine sans rien écrire.
