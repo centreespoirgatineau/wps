@@ -5,6 +5,8 @@ WORKDIR /app
 COPY package.json ./
 COPY src ./src
 COPY scripts ./scripts
+# The slideshow served at /presentation (its build tooling is dockerignored).
+COPY presentation/presentation-surplus.html ./presentation/
 RUN mkdir -p /data && chown -R node:node /data /app
 USER node
 EXPOSE 8080

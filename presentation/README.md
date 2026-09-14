@@ -1,15 +1,21 @@
 # La présentation aux églises
 
-`presentation-surplus.html` — un diaporama de 12 diapositives, en 1920 × 1080,
+`presentation-surplus.html` — un diaporama de 13 diapositives, en 1920 × 1080,
 pour présenter la plateforme à d'autres églises.
 
 ## L'utiliser
 
-Ouvrez le fichier avec un double-clic : il s'ouvre dans votre navigateur.
+**En ligne :** https://wps.davidhatin.com/presentation — accessible à tous, sans
+connexion. C'est le lien à donner aux églises.
+
+**Hors ligne :** ouvrez `presentation-surplus.html` avec un double-clic.
 
 - **F** — plein écran (et **Échap** pour en sortir)
 - **→** ou **espace** ou un clic — diapositive suivante
 - **←** ou un clic dans le quart gauche de l'écran — diapositive précédente
+
+Sur un téléphone tenu à la verticale, la présentation invite d'abord à tourner
+l'appareil : elle est faite pour l'écran à l'horizontale.
 
 Tout est dans le fichier : aucune connexion Internet n'est nécessaire, sauf pour
 charger la police d'écriture (sans Internet, le texte s'affiche dans une police
@@ -17,7 +23,7 @@ très proche). Vous pouvez le copier sur une clé USB ou l'envoyer par courriel.
 
 ## Ce qu'il y a dedans
 
-Les téléphones montrés dans les diapositives 5 à 9 et 12 ne sont pas des images :
+Les téléphones montrés dans les diapositives 6 à 10 et 13 ne sont pas des images :
 ce sont les **vraies pages de la plateforme**, intégrées telles quelles, ce qui
 les garde parfaitement nettes sur un projecteur.
 
@@ -46,6 +52,10 @@ node presentation/build/build-deck.mjs presentation/build/work/pages.json \
      presentation/build/mark-small.png presentation/presentation-surplus.html
 ```
 
+La version en ligne est lue **au démarrage** de l'application : après avoir
+refait le diaporama, il faut pousser le changement sur GitHub pour que le
+serveur redémarre et serve la nouvelle version.
+
 Le texte des diapositives se trouve dans `build/build-deck.mjs`, en haut du
 fichier, une diapositive à la fois. Les églises fictives et le contenu des offres
 se trouvent dans `build/seed-demo.mjs`.
@@ -53,4 +63,4 @@ se trouvent dans `build/seed-demo.mjs`.
 `presentation/build/work/` est un dossier de travail : il n'est pas conservé dans
 Git et peut être effacé sans risque.
 
-> Ce dossier est exclu de l'image Docker : il ne part jamais sur le serveur.
+> Seul `presentation-surplus.html` part sur le serveur ; `build/` en est exclu.

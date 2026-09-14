@@ -1,6 +1,7 @@
 // End-to-end HTTP flow against a real server process (SMS in dry-run).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,7 +29,8 @@ function client() {
       if (attrs.some((a) => /max-age=0/i.test(a))) jar.delete(k.trim()); else jar.set(k.trim(), v);
     }
     const text = await res.text();
-    return { status: res.status, location: res.headers.get('location'), text, json: () => JSON.parse(text) };
+    return { status: res.status, location: res.headers.get('location'), text, json: () => JSON.parse(text),
+      headers: { csp: res.headers.get('content-security-policy') } };
   }
   const c = { jar, get: (u, o) => req('GET', u, o), post: (u, o) => req('POST', u, o) };
   c.csrf = async (u = '/moi') => { const r = await c.get(u); return /name="csrf" content="([^"]+)"/.exec(r.text)?.[1]; };
@@ -459,4 +461,21 @@ test('an admin can erase an offer and everything attached to it', async () => {
   // And its deliveries are out of the text log.
   r = await admin.get('/admin/sms');
   assert.doesNotMatch(r.text, /Pommes/);
+});
+
+test('the slideshow is served at /presentation, to anyone, with a policy that runs it', async () => {
+  const visitor = client();
+  const r = await visitor.get('/presentation');
+  assert.equal(r.status, 200, 'no sign-in needed');
+  assert.match(r.text, /Rien ne devrait/);
+  assert.match(r.text, /Évangile de Jésus-Christ/);
+  // The deck carries one inline script; the page's own policy must allow
+  // exactly it, by hash, or the slideshow will not advance.
+  const script = /<script>([\s\S]*?)<\/script>/.exec(r.text)[1];
+  const hash = createHash('sha256').update(script, 'utf8').digest('base64');
+  const csp = r.headers?.csp ?? null;
+  assert.ok(csp === null || csp.includes(`'sha256-${hash}'`));
+  // The phones inside it are the real pages, inlined — not links to a server.
+  assert.doesNotMatch(r.text, /src="\/static\//);
+  assert.match(r.text, /Tournez votre téléphone/);
 });

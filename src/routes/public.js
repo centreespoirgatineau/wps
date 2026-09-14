@@ -1,4 +1,8 @@
 // Visitor-facing routes: login by SMS code, personal links, about, join request.
+import fs from 'node:fs';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { HttpError } from '../lib/http.js';
 import { normalizePhone, formatPhone } from '../lib/phone.js';
 import { normalizeLang } from '../lib/i18n.js';
@@ -7,6 +11,19 @@ import { DEMO_PHONE, ensureDemoContact } from '../lib/demo.js';
 import { config } from '../config.js';
 
 const MIN = 60_000;
+
+// The slideshow is a single static file, read once at boot. Its one inline
+// script is allowed by its SHA-256 hash rather than by 'unsafe-inline', so the
+// page stays as locked down as the rest of the site.
+const deckFile = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../presentation/presentation-surplus.html');
+const deckHtml = fs.existsSync(deckFile) ? fs.readFileSync(deckFile, 'utf8') : '';
+const deckCsp = (() => {
+  const script = /<script>([\s\S]*?)<\/script>/.exec(deckHtml)?.[1] ?? '';
+  const hash = createHash('sha256').update(script, 'utf8').digest('base64');
+  return "default-src 'none'; img-src 'self' data:; "
+    + "style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
+    + `script-src 'sha256-${hash}'; frame-src 'self'; base-uri 'none'; form-action 'none'`;
+})();
 
 function safeNext(next) {
   return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : null;
@@ -110,6 +127,16 @@ export function publicRoutes(app, db) {
   });
 
   app.get('/a-propos', (ctx) => ctx.render('about', { title: ctx.t('about.title') }));
+
+  // The slideshow for prospective churches. One self-contained file, so it
+  // carries its own inline <style> and <script>: the site-wide policy forbids
+  // inline script, so this route serves a policy of its own that allows only
+  // this exact script, by hash. Nothing here is user-supplied.
+  app.get('/presentation', (ctx) => {
+    ctx.set('Content-Security-Policy', deckCsp);
+    ctx.set('Cache-Control', 'public, max-age=300');
+    ctx.html(deckHtml);
+  });
 
   // Join requests
   app.get('/demande', (ctx) => {

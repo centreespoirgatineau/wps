@@ -55,6 +55,11 @@ Other hard constraints:
   `src/server.js`, over the CSS, the JS and both PNGs); HTML is
   `Cache-Control: no-store`. This exists because a stale cached stylesheet once
   broke the live layout. Keep it.
+- **`/presentation` is the one page with its own CSP.** The slideshow is a single
+  self-contained file with an inline `<script>`, which the site-wide policy
+  forbids; the route allows that exact script by SHA-256 hash rather than by
+  `'unsafe-inline'`. The file is read once at boot, so a rebuilt deck only goes
+  live on the next deploy. Covered by a test.
 - **The mark is a raster, not a vector.** David's logo (a cornucopia of loaves,
   fish and fruit) arrived as an SVG wrapping two PNGs, so `src/public/mark.png`
   and `icon.png` are generated from `assets/logo-source.svg` by
@@ -75,7 +80,7 @@ src/lib/auth.js        sessions, SMS login codes, CSRF, rate limits, personal li
 src/lib/sms.js         Twilio REST, webhook signature check, GSM-7 flattening
 src/lib/sse.js         one live channel per offer
 src/lib/scheduler.js   30 s tick: expire offers at end of day, tidy auth tables
-src/routes/public.js   login, personal links, about, join requests
+src/routes/public.js   login, personal links, about, join requests, /presentation
 src/routes/contact.js  offers, reservations, chat, personal settings, private media
 src/routes/admin.js    offers, lots, contacts, requests, SMS log, settings
 src/routes/twilio.js   delivery-status and inbound (STOP/START) webhooks
@@ -84,6 +89,7 @@ src/public/            app.css, app.js, mark.png, icon.png  (no build step)
 src/locales/fr.js en.js  every user-visible string; FR is the reference
 scripts/make-admin.js  create/promote an administrator from the CLI
 scripts/build-mark.mjs rebuild mark.png + icon.png from assets/logo-source.svg
+presentation/          the slideshow for churches, served at /presentation (see its README)
 assets/logo-source.svg the master logo (kept out of the Docker image)
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
@@ -185,7 +191,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (21 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (22 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -196,7 +202,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 21 tests: rules engine + end-to-end HTTP
+npm test                     # 22 tests: rules engine + end-to-end HTTP
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

@@ -7,4 +7,4 @@ deploy/
 .git
 assets/
 scripts/build-mark.mjs
-presentation/
+presentation/build/
