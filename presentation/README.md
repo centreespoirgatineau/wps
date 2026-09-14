@@ -30,6 +30,10 @@ Les téléphones montrés dans les diapositives 6 à 9 ne sont pas des images :
 ce sont les **vraies pages de la plateforme**, intégrées telles quelles, ce qui
 les garde parfaitement nettes sur un projecteur.
 
+Les dates qu'on y lit sont celles du jour où les captures ont été faites. Rien ne
+casse en vieillissant, mais avant une grande présentation, refaire le diaporama
+(voir plus bas) remet l'offre du jour à aujourd'hui.
+
 Les églises, les personnes et les offres qu'on y voit sont **inventées pour la
 démonstration** — d'où la mention « Exemple — données de démonstration » sous les
 téléphones. Aucune donnée réelle, aucun vrai contact, aucun vrai numéro de
