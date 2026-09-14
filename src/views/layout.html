@@ -11,6 +11,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/app.css?v=<%= v %>">
 <link rel="icon" href="/static/mark.svg?v=<%= v %>" type="image/svg+xml">
+<%# Link preview: the address is shared by text and by e-mail, and every
+    messenger wants a raster image — hence og.png, built by
+    presentation/build/make-og.mjs. The URL must be absolute. %>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="<%= appName %>">
+<meta property="og:locale" content="<%= lang === 'en' ? 'en_CA' : 'fr_CA' %>">
+<meta property="og:title" content="<%= t('meta.og_title') %>">
+<meta property="og:description" content="<%= t('meta.og_desc') %>">
+<meta property="og:url" content="<%= publicUrl %><%= path %>">
+<meta property="og:image" content="<%= publicUrl %>/static/og.png?v=<%= v %>">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="<%= t('meta.og_desc') %>">
 <meta name="csrf" content="<%= csrf %>">
 </head>
 <body>

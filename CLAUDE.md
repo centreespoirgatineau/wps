@@ -70,10 +70,17 @@ Other hard constraints:
   `'unsafe-inline'`. The file is read once at boot, so a rebuilt deck only goes
   live on the next deploy. Covered by a test.
 - **The mark is one square vector**, `src/public/mark.svg` (a lighthouse in
-  white on a terracotta disc, 9 KB, already in the app's accent colour). The
+  white on a terracotta disc, 3.5 KB, already in the app's accent colour). The
   same file is the in-page mark and the browser-tab icon, and it is inlined as a
-  data URI into the slideshow. There are no PNG copies and no build step — an
-  earlier cornucopia logo needed both, and that tooling is gone.
+  data URI into the slideshow. No PNG copies, no build step — an earlier
+  cornucopia logo needed both, and that tooling is gone.
+- **The link preview is the one raster image**, `src/public/og.png` (1200x630),
+  because no messenger renders an SVG in a preview card. It is generated from
+  the mark and a few lines of copy by `presentation/build/make-og.mjs` and
+  committed; rerun it when the mark or the wording changes. The pages reference
+  it with an absolute URL built from `publicUrl()`, and the slideshow carries an
+  `__ORIGIN__` placeholder the `/presentation` route fills in — so changing the
+  address in Réglages is still enough.
 
 ## 3. Layout of the code
 

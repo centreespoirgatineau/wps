@@ -68,3 +68,17 @@ se trouvent dans `build/seed-demo.mjs`.
 Git et peut être effacé sans risque.
 
 > Seul `presentation-surplus.html` part sur le serveur ; `build/` en est exclu.
+
+## L'image d'aperçu des liens
+
+Quand l'adresse du site est envoyée par texto, par courriel ou sur WhatsApp,
+c'est `src/public/og.png` qui s'affiche dans la vignette. Aucune messagerie
+n'accepte une image vectorielle à cet endroit, d'où cette seule image matricielle
+du projet. Elle se refait en une commande :
+
+```bash
+node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png
+```
+
+Le texte de la carte se trouve en haut de `build/make-og.mjs`. À refaire si le
+logo ou ce texte change, puis à pousser sur GitHub comme le reste.

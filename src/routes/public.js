@@ -9,6 +9,7 @@ import { normalizeLang } from '../lib/i18n.js';
 import { createSession, destroySession, issueLoginCode, verifyLoginCode, rateLimit, checkCsrf } from '../lib/auth.js';
 import { DEMO_PHONE, ensureDemoContact } from '../lib/demo.js';
 import { config } from '../config.js';
+import { publicUrl } from '../lib/site.js';
 
 const MIN = 60_000;
 
@@ -24,6 +25,15 @@ const deckCsp = (() => {
     + "style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
     + `script-src 'sha256-${hash}'; frame-src 'self'; base-uri 'none'; form-action 'none'`;
 })();
+
+// The deck carries its link-preview tags with an __ORIGIN__ placeholder rather
+// than a domain, so changing the address in Réglages is enough. Substituting on
+// a 200 KB string is worth doing once per address, not once per request.
+let deckCache = { origin: null, html: '' };
+function deckFor(origin) {
+  if (deckCache.origin !== origin) deckCache = { origin, html: deckHtml.replaceAll('__ORIGIN__', origin) };
+  return deckCache.html;
+}
 
 function safeNext(next) {
   return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : null;
@@ -135,7 +145,7 @@ export function publicRoutes(app, db) {
   app.get('/presentation', (ctx) => {
     ctx.set('Content-Security-Policy', deckCsp);
     ctx.set('Cache-Control', 'public, max-age=300');
-    ctx.html(deckHtml);
+    ctx.html(deckFor(publicUrl()));
   });
 
   // Join requests

@@ -28,8 +28,12 @@ export default {
   'noscript': 'Cette page a besoin de JavaScript pour fonctionner.',
 
   // ---- login ----
+  'meta.og_title': 'Les surplus alimentaires, redistribués le jour même',
+  'meta.og_desc': 'Un réseau d’églises et de ministères de l’Outaouais qui récupèrent les surplus du Centre Espoir de Gatineau pour nourrir leur quartier et annoncer l’Évangile de Jésus-Christ.',
+
   'login.title': 'Connexion',
-  'login.intro': 'Entrez votre numéro de cellulaire. Un code vous sera envoyé par texto.',
+  'login.intro': 'Entrez votre numéro de cellulaire.',
+  'login.intro_code': 'Un code vous sera envoyé par texto.',
   'login.phone': 'Numéro de cellulaire',
   'login.phone_placeholder': '(XXX) XXX-XXXX',
   'login.code_title': 'Votre code',

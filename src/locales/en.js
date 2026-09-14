@@ -28,8 +28,12 @@ export default {
   'noscript': 'This page needs JavaScript to work.',
 
   // ---- login ----
+  'meta.og_title': 'Surplus food, redistributed the same day',
+  'meta.og_desc': 'A network of churches and ministries in the Outaouais who take the surplus food from Centre Espoir de Gatineau to feed their neighbourhood and share the gospel of Jesus Christ.',
+
   'login.title': 'Sign in',
-  'login.intro': 'Enter your mobile number. A code will be texted to you.',
+  'login.intro': 'Enter your mobile number.',
+  'login.intro_code': 'A code will be texted to you.',
   'login.phone': 'Mobile number',
   'login.phone_placeholder': '(XXX) XXX-XXXX',
   'login.code_title': 'Your code',

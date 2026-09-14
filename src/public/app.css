@@ -80,8 +80,8 @@ main.centered .hero { padding-top: 0; }
 .grow { flex: 1; min-width: 0; }
 .right { text-align: right; }
 .center { text-align: center; }
-/* Login footer: the "what is this" and language links, wrapping on a narrow phone. */
-.login-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 18px; }
+/* Login footer: the "what is this" link, and the language under it. */
+.login-foot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .mt { margin-top: 16px; } .mt-s { margin-top: 8px; } .mt-l { margin-top: 28px; }
 .mb { margin-bottom: 16px; }
 

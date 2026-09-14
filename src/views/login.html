@@ -1,7 +1,7 @@
 <div class="hero">
   <%- include('_mark') %>
   <h1><%= step === 'code' ? t('login.code_title') : t('login.title') %></h1>
-  <% if (step !== 'code') { %><p><%= t('login.intro') %></p><% } %>
+  <% if (step !== 'code') { %><p><%= t('login.intro') %><br><%= t('login.intro_code') %></p><% } %>
 </div>
 
 <div class="card mt">
