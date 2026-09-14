@@ -125,8 +125,6 @@ export default {
   'offer.no_show': 'Not picked up',
   'offer.call': 'Call',
   'offer.text': 'Text',
-  'offer.cancel_reservation': 'Cancel my reservation',
-  'offer.cancel_confirm': 'Free this lot for someone else?',
   'offer.cooldown': 'You reserved on the last offer. To give everyone a chance, you can reserve in <strong>{time}</strong>.',
   'offer.cooldown_over': 'You can reserve now.',
   'offer.noshow_block': 'Your last lot was not picked up. You cannot reserve on this offer. You will be able to reserve again on the next one.',

@@ -27,10 +27,10 @@ slides.push(`
     <img class="logo" src="data:image/svg+xml;base64,${mark}" alt="">
     <h1>Rien ne devrait se perdre.</h1>
     <p class="lede">Les surplus alimentaires du Centre Espoir de Gatineau,
-      redistribués le jour même par les églises —
-      <strong>comme outil pour annoncer l’Évangile de Jésus-Christ.</strong></p>
+      redistribués le jour même par les églises
+      <strong>— comme outil pour annoncer l’Évangile de Jésus-Christ.</strong></p>
   </div>
-  <p class="title-foot">Centre Espoir de Gatineau<span class="dot">·</span>jc.centreespoir.ca</p>
+  <p class="title-foot">Centre Espoir de Gatineau<span class="sep">·</span>jc.centreespoir.ca</p>
 </section>`);
 
 // 2 ---------------------------------------------------------------- problem
@@ -39,13 +39,11 @@ slides.push(`
   <div class="split">
     <div class="col">
       <p class="eyebrow">Le problème</p>
-      <p class="bignum">1 500 $</p>
-      <h2 class="tight">de sushis jetés, le 10 septembre.</h2>
+      <h2 class="tight">Comme nous sommes une banque alimentaire, nous recevons parfois des surplus qui doivent être redistribués le jour même.</h2>
     </div>
     <div class="col">
-      <p class="big">Un surplus arrive sans prévenir. Il doit repartir <strong>avant la fin de la journée</strong>.</p>
-      <p class="big">Le temps d’appeler les contacts un par un, il est déjà trop tard.</p>
-      <p class="big accent-text">Ce n’est pas seulement de la nourriture qui part à la poubelle. C’est une porte qui se referme.</p>
+      <p class="big">Le temps de joindre nos contacts un à un, il est souvent déjà trop tard.</p>
+      <p class="big accent-text">Pour nous, ce n’est pas seulement de la nourriture qui finit à la poubelle, c’est une porte qui se ferme.</p>
     </div>
   </div>
 </section>`);
@@ -55,10 +53,8 @@ slides.push(`
 <section class="s">
   <div class="split">
     <div class="col">
-      <p class="eyebrow">Pourquoi</p>
       <h2>Ce n’est pas qu’une question de nourriture.</h2>
-      <p class="big">Chaque lot qui sort d’ici entre dans une communauté, porté par une église.</p>
-      <p class="big">Un repas partagé, une famille visitée, une conversation qui s’ouvre : <strong>voilà ce que ces surplus rendent possible.</strong></p>
+      <p class="big">Un repas partagé, une famille visitée, une conversation qui s’ouvre, <strong>voilà ce que ces surplus rendent possible.</strong></p>
     </div>
     <div class="col">
       <div class="pull">
@@ -75,9 +71,9 @@ slides.push(`
 <section class="s">
   <div class="mid">
     <p class="eyebrow center">Comment ça marche</p>
-    <h2 class="center">Un texto. Un lien. Une heure plus tard, tout est parti.</h2>
+    <h2 class="center">Un texto. Un lien. La même journée, tout est parti.</h2>
     <div class="steps">
-      <div class="step"><span class="n">1</span><h3>Le Centre Espoir publie</h3><p>Ce que contient un lot, combien de lots, où et jusqu’à quelle heure.</p></div>
+      <div class="step"><span class="n">1</span><h3>Le Centre Espoir publie</h3><p>Ce que contient un lot, combien de lots, où aller le récupérer, et jusqu’à quelle heure.</p></div>
       <div class="step"><span class="n">2</span><h3>Les églises reçoivent un texto</h3><p>Toutes au même moment, avec un lien qui ouvre l’offre.</p></div>
       <div class="step"><span class="n">3</span><h3>Chacune réserve sa part</h3><p>Premier arrivé, premier servi. Vous venez chercher, et c’est tout.</p></div>
     </div>
@@ -135,7 +131,6 @@ slides.push(`
       <ul class="ticks">
         <li>Un lot réservé disparaît aussitôt pour les autres.</li>
         <li>Vous voyez qui a pris quoi, en direct.</li>
-        <li>Vous changez d’avis ? Vous libérez le lot.</li>
       </ul>
     </div>
     <div class="col shot-col">${phone('offer', 600)}</div>
@@ -283,8 +278,6 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
   transition:opacity .62s cubic-bezier(.22,.72,.28,1), transform .62s cubic-bezier(.22,.72,.28,1);
   transition-delay:calc(var(--i, 0) * 65ms)}
 .s.in .anim{opacity:1;transform:none}
-.s.in .bignum{animation:rise .9s cubic-bezier(.22,.72,.28,1) both}
-@keyframes rise{from{letter-spacing:.04em}to{letter-spacing:-.03em}}
 
 /* Type: one fluid scale, bounded by both the width and the height of the screen
    so it works on a projector, a laptop and a phone lying on its side. */
@@ -299,6 +292,9 @@ p{margin:0}
   color:var(--accent-ink);font-weight:600;margin-bottom:var(--gap)}
 .big{font-size:clamp(15px, min(1.62vw, 3.1vh), 31px);line-height:1.55;color:var(--ink-2);max-width:38ch}
 .big+.big{margin-top:.7em}
+/* Several slides set a paragraph straight after a heading; without this it sat
+   flush against the last line of the heading. */
+h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 .big strong{color:var(--ink);font-weight:600}
 .accent-text{color:var(--accent-ink)}
 .note{font-size:clamp(12px, min(1.2vw, 2.3vh), 23px);line-height:1.6;color:var(--ink-3);max-width:48ch;margin-top:var(--gap)}
@@ -315,17 +311,17 @@ p{margin:0}
 .title-foot{position:absolute;left:calc(var(--pad) + env(safe-area-inset-left));
   bottom:calc(var(--pad) + env(safe-area-inset-bottom) + 6px);
   font-size:clamp(11px, min(1.1vw, 2vh), 21px);color:var(--ink-3)}
-.title-foot .dot{margin:0 .6em;color:var(--line)}
-
-/* problem */
-.bignum{font-family:var(--serif);font-size:clamp(52px, min(9.8vw, 18vh), 184px);line-height:1;
-  color:var(--accent);letter-spacing:-.03em;margin-bottom:.06em}
+.title-foot .sep{margin:0 .6em;color:var(--ink-3);opacity:.5}
 
 /* purpose */
 .pull{background:var(--accent-soft);border-radius:clamp(14px,1.4vw,26px);padding:clamp(18px,2.6vw,52px)}
 .pull-label{font-size:clamp(10px, min(1vw, 1.9vh), 19px);letter-spacing:.14em;text-transform:uppercase;
   color:var(--accent-ink);font-weight:600;margin-bottom:.9em}
 .pull-text{font-family:var(--serif);font-size:clamp(17px, min(2vw, 3.8vh), 38px);line-height:1.38}
+/* Side by side, the right-hand column is sized by what is in it. The rule box
+   has no natural width, so without this cap it took the whole slide and left the
+   heading beside it one word per line. */
+@media (min-aspect-ratio: 5/4){ .pull{max-width:40vw} }
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.5vw,28px);margin-top:calc(var(--gap) * 1.5)}
@@ -345,7 +341,7 @@ p{margin:0}
 .ticks li::before{content:"";position:absolute;left:0;top:.55em;
   width:clamp(6px,.68vw,13px);height:clamp(6px,.68vw,13px);border-radius:50%;background:var(--accent)}
 .rules{margin:calc(var(--gap) * 1.3) auto 0;padding:0;list-style:none;counter-reset:r;
-  display:grid;gap:clamp(12px,1.6vw,30px);max-width:1100px}
+  display:grid;gap:clamp(18px,1.8vw,34px);max-width:1100px}
 .rules li{counter-increment:r;position:relative;padding-left:clamp(34px,3.4vw,66px);
   font-size:clamp(13px, min(1.26vw, 2.4vh), 24px);line-height:1.55;color:var(--ink-2)}
 .rules li strong{color:var(--ink);display:block;font-size:clamp(15px, min(1.42vw, 2.7vh), 27px);line-height:1.3;margin-bottom:.2em}
@@ -399,10 +395,12 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
   text-transform:uppercase;text-align:center;order:2}
 /* Scaled by --k, and given the resulting size in layout too, so the grid
    column is as wide as the phone actually looks. */
-.phone-box{order:1;transform-origin:top left;overflow:hidden}
+/* No overflow:hidden here: the box is exactly the size of the scaled phone,
+   so anything it clipped would come out with a hard, square edge. */
+.phone-box{order:1;transform-origin:top left}
 .phone-box>.phone{transform:scale(var(--k,1));transform-origin:top left}
 .phone{width:414px;height:calc(var(--screen-h, 820px) + 24px);border-radius:52px;background:#171614;padding:12px;
-  box-shadow:0 40px 90px -40px rgba(20,20,19,.55),0 0 0 1px rgba(20,20,19,.08)}
+  box-shadow:0 0 0 1px rgba(20,20,19,.08)}
 .screen{position:relative;width:100%;height:100%;border-radius:41px;overflow:hidden;background:var(--bg)}
 /* The phone is a picture, not a control: let taps and swipes pass straight
    through to the deck, or gesturing over it would do nothing. */
@@ -427,7 +425,6 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
   #deck{scroll-behavior:auto}
   #cue svg{animation:none}
   .anim{transition:none;opacity:1;transform:none}
-  .s.in .bignum{animation:none}
 }
 
 /* Stacked layout: portrait phones and tablets. Words first, phone underneath. */
@@ -487,7 +484,7 @@ for (const p of document.querySelectorAll('.phone')) {
 }
 
 // Everything that should arrive, in reading order, with a small stagger.
-const ANIM = '.eyebrow,h1,h2,h3,.bignum,.logo,.lede,.big,.note,.pull,.ticks li,'
+const ANIM = '.eyebrow,h1,h2,h3,.logo,.lede,.big,.note,.pull,.ticks li,'
   + '.rules li,.step,.not,.shot,.sms,.cta,.contact,blockquote,.quote-mark,.attrib,.title-foot';
 for (const s of slides) {
   [...s.querySelectorAll(ANIM)].forEach((el, i) => {

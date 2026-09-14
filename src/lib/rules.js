@@ -111,18 +111,9 @@ export function reserveLot(db, contact, lotId, now = Date.now()) {
   });
 }
 
-export function cancelReservation(db, contact, lotId, now = Date.now()) {
-  return db.tx(() => {
-    const lot = db.get('SELECT * FROM lots WHERE id = ?', lotId);
-    if (!lot || lot.reserved_by !== contact.id || lot.status !== 'reserved') throw new RuleError('not_yours');
-    const offer = getOffer(db, lot.offer_id);
-    if (!isActive(offer, now)) throw new RuleError('inactive');
-    db.run(`UPDATE lots SET status = 'available', reserved_by = NULL, reserved_at = NULL WHERE id = ?`, lotId);
-    // The cooldown earned by reserving stays: it was the act of reserving that
-    // took the lot away from others for a while.
-    return { ...lot, status: 'available', reserved_by: null };
-  });
-}
+// A contact cannot undo their own reservation: reserving is a commitment, and a
+// lot that comes back late is a lot nobody else planned for. Only an admin can
+// free one again (adminSetLot 'free'), which is the escape hatch for a misclick.
 
 /**
  * Admin actions on a lot: 'picked_up' | 'no_show' | 'reserved' (undo) | 'free'.

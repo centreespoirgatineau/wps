@@ -243,9 +243,9 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(r.status, 303, r.text.slice(0, 300));
   r = await marie.post(`/offres/${offer2}/lots/${l3}/reserver`, { json: {}, headers: { 'X-CSRF': mcsrf } });
   assert.equal(r.json().ok, true, r.text);
-  // Marie cancels her own reservation
+  // There is no way back: a contact cannot cancel their own reservation.
   r = await marie.post(`/offres/${offer2}/lots/${l3}/annuler`, { json: {}, headers: { 'X-CSRF': mcsrf } });
-  assert.equal(r.json().ok, true);
+  assert.equal(r.status, 404);
 
   // Offers list shows both
   r = await marie.get('/offres');

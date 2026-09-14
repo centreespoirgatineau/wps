@@ -65,25 +65,17 @@
     let lastMsg = Number(root.dataset.lastMsg || 0);
     const lotsBox = $('#lots');
     const rulesModal = $('#rules-modal');
-    const confirmModal = $('#confirm-modal');
     let pendingLot = null;
     const T = window.__i18n || {};
 
-    // Reserve flow: button → rules modal → POST
+    // Reserve flow: button → rules modal → POST. There is no matching cancel:
+    // a reservation is a commitment, and only an admin can free a lot again.
     lotsBox.addEventListener('click', (e) => {
       const r = e.target.closest('[data-reserve]');
-      if (r && !r.disabled) {
-        pendingLot = r.dataset.reserve;
-        $('#rules-ok').checked = false; $('#rules-confirm').disabled = true;
-        openModal(rulesModal); return;
-      }
-      const c = e.target.closest('[data-cancel]');
-      if (c) {
-        pendingLot = c.dataset.cancel;
-        $('#confirm-title').textContent = c.title;
-        $('#confirm-body').textContent = root.dataset.cancelText || '';
-        openModal(confirmModal);
-      }
+      if (!r || r.disabled) return;
+      pendingLot = r.dataset.reserve;
+      $('#rules-ok').checked = false; $('#rules-confirm').disabled = true;
+      openModal(rulesModal);
     });
     $('#rules-ok')?.addEventListener('change', (e) => { $('#rules-confirm').disabled = !e.target.checked; });
     $('#rules-confirm')?.addEventListener('click', async (e) => {
@@ -93,13 +85,6 @@
       e.target.classList.remove('busy');
       closeModal(rulesModal);
       toast(r.message || (r.ok ? 'OK' : r.error || 'Erreur'), !r.ok);
-      refreshLots();
-    });
-    $('#confirm-yes')?.addEventListener('click', async () => {
-      if (!pendingLot) return;
-      const r = await post(`/offres/${offerId}/lots/${pendingLot}/annuler`);
-      closeModal(confirmModal);
-      if (!r.ok) toast(r.message || r.error || 'Erreur', true);
       refreshLots();
     });
 

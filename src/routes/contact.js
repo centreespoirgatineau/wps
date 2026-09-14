@@ -81,19 +81,6 @@ export function contactRoutes(app, db) {
     }
   });
 
-  app.post('/offres/:id/lots/:lotId/annuler', requireContact, refuseDemo, async (ctx) => {
-    const body = await ctx.body();
-    checkCsrf(ctx, body);
-    try {
-      rules.cancelReservation(db, ctx.state.contact, Number(ctx.params.lotId));
-      sse.publish(ctx.params.id, 'refresh', { reason: 'cancelled' });
-      ctx.json({ ok: true });
-    } catch (e) {
-      if (!(e instanceof rules.RuleError)) throw e;
-      ctx.json({ ok: false, reason: e.reason, message: reasonText(ctx, e) }, 409);
-    }
-  });
-
   // Chat
   app.get('/offres/:id/messages', requireContact, (ctx) => {
     const after = Number(ctx.query.after || 0);

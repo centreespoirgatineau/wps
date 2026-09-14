@@ -41,8 +41,6 @@
     <button class="btn primary sm" type="button" data-reserve="<%= l.id %>"><%= t('offer.reserve') %></button>
   <% } else if (free && offer.active && check.reason === 'cooldown') { %>
     <button class="btn primary sm" type="button" data-reserve="<%= l.id %>" disabled data-wait><%= t('offer.reserve') %></button>
-  <% } else if (mine && l.status === 'reserved' && offer.active) { %>
-    <button class="btn ghost sm" type="button" data-cancel="<%= l.id %>" title="<%= t('offer.cancel_reservation') %>">✕</button>
   <% } %>
 </div>
 <% } %>

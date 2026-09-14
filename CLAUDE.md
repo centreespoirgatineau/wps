@@ -125,8 +125,11 @@ semantics without asking him.
 
 Notes that have already caught me out:
 
-- A contact cancelling their own reservation **keeps** the cooldown — it was earned
-  by the act of taking the lot away from others.
+- **A reservation cannot be undone by the contact who made it.** There is no
+  cancel button, no route, and no rules function — reserving is a commitment, and
+  a lot handed back late is a lot nobody else planned for. The escape hatch for a
+  misclick is an admin freeing the lot (admin → the lot → *Libérer*), which also
+  clears any pending no-show on it. The cooldown earned by reserving still stays.
 - Cooldowns do not stack: one pending cooldown per contact, however many lots.
 - `effectiveStatus()` computes expiry lazily, so an offer is correctly "expired"
   even if the 30 s scheduler has not run yet. Always go through it.

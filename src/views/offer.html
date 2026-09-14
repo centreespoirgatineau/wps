@@ -1,4 +1,4 @@
-<div id="offer" data-cancel-text="<%= t('offer.cancel_confirm') %>" data-offer="<%= offer.id %>" data-active="<%= offer.active ? 1 : 0 %>" data-me="<%= myId %>" data-last-msg="<%= messages.length ? messages[messages.length - 1].id : 0 %>">
+<div id="offer" data-offer="<%= offer.id %>" data-active="<%= offer.active ? 1 : 0 %>" data-me="<%= myId %>" data-last-msg="<%= messages.length ? messages[messages.length - 1].id : 0 %>">
 
 <div class="page-head">
   <div class="grow">
@@ -82,18 +82,6 @@
     <div class="actions">
       <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
       <button class="btn primary" type="button" id="rules-confirm" disabled><%= t('offer.rules_confirm') %></button>
-    </div>
-  </div>
-</div>
-
-<!-- Confirm modal (cancel reservation) -->
-<div class="modal" id="confirm-modal" aria-hidden="true">
-  <div class="sheet" role="dialog" aria-modal="true">
-    <h2 id="confirm-title"></h2>
-    <p class="muted" id="confirm-body"></p>
-    <div class="actions">
-      <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
-      <button class="btn danger" type="button" id="confirm-yes"><%= t('btn.confirm') %></button>
     </div>
   </div>
 </div>

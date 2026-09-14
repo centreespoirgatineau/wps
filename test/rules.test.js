@@ -132,18 +132,20 @@ test('no-show blocks the whole next offer, undo removes it, and it clears when t
   assert.equal(rules.canReserve(db, alice, offer3, t1 + 201 * MIN).ok, true);
 });
 
-test('cancelling a reservation frees the lot but keeps the cooldown', () => {
-  const { db, alice, bob } = fresh();
+test('a reservation cannot be undone by the contact who made it', () => {
+  const { db, alice } = fresh();
   const id = draft(db, { lots: 1 });
   const t0 = Date.now();
   rules.publishOffer(db, id, t0);
   const lot = db.get('SELECT * FROM lots WHERE offer_id = ?', id);
   rules.reserveLot(db, alice, lot.id, t0);
-  assert.throws(() => rules.cancelReservation(db, bob, lot.id, t0), (e) => e.reason === 'not_yours');
-  rules.cancelReservation(db, alice, lot.id, t0 + 1000);
+  // The rules engine offers no way back: freeing a lot is an admin action.
+  assert.equal(typeof rules.cancelReservation, 'undefined');
+  rules.adminSetLot(db, lot.id, 'free', t0 + 1000);
   assert.equal(db.get('SELECT status FROM lots WHERE id = ?', lot.id).status, 'available');
+  // The cooldown earned by reserving stays: it was the act of reserving that
+  // took the lot away from others for a while.
   assert.equal(db.get(`SELECT COUNT(*) n FROM penalties WHERE contact_id = ? AND status = 'pending'`, alice.id).n, 1);
-  rules.reserveLot(db, bob, lot.id, t0 + 2000);
 });
 
 test('offers expire automatically at end of day and reservations stop', () => {

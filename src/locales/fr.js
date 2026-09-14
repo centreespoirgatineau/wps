@@ -125,8 +125,6 @@ export default {
   'offer.no_show': 'Non récupéré',
   'offer.call': 'Appeler',
   'offer.text': 'Texto',
-  'offer.cancel_reservation': 'Annuler ma réservation',
-  'offer.cancel_confirm': 'Libérer ce lot pour quelqu’un d’autre ?',
   'offer.cooldown': 'Vous avez réservé lors de la dernière offre. Pour laisser une chance à tous, vous pourrez réserver dans <strong>{time}</strong>.',
   'offer.cooldown_over': 'Vous pouvez maintenant réserver.',
   'offer.noshow_block': 'Votre dernier lot n’a pas été récupéré. Vous ne pouvez pas réserver sur cette offre. Vous pourrez de nouveau réserver à l’offre suivante.',
