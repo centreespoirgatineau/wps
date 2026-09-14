@@ -52,7 +52,7 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 
 /* Type: one fluid scale, bounded by both the width and the height of the screen
    so it works on a projector, a laptop and a phone lying on its side. */
-h1,h2,h3,blockquote{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
+h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
 h1{font-size:clamp(34px, min(6.2vw, 12vh), 116px);line-height:1.05}
 h2{font-size:clamp(25px, min(3.9vw, 7.4vh), 72px);line-height:1.12}
 h2.tight{font-size:clamp(22px, min(3.4vw, 6.4vh), 64px)}
@@ -133,11 +133,9 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 
 /* gospel */
 .gospel{background:var(--accent-soft);text-align:center}
-.quote-mark{font-family:var(--serif);font-size:clamp(50px,min(7.8vw,14vh),150px);line-height:.6;
-  color:var(--accent);opacity:.5;margin-bottom:.35em}
-blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-width:22ch;margin:0 auto}
-.attrib{margin-top:calc(var(--gap) * 1.4);font-size:clamp(11px,min(1.15vw,2.2vh),22px);
-  color:var(--accent-ink);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+/* The one paragraph on the slide carries it, so it gets a wider measure and a
+   little more size than a paragraph sitting beside something else. */
+.gospel .big{color:var(--ink);max-width:44ch;font-size:clamp(16px, min(1.85vw, 3.5vh), 35px)}
 
 /* join */
 .cta{display:inline-block;margin:calc(var(--gap) * 1.1) 0;padding:clamp(12px,1.3vw,24px) clamp(18px,2vw,40px);
@@ -147,7 +145,7 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
 .contact strong{color:var(--ink)}
 .contact .tel{color:var(--accent-ink);font-weight:600;text-decoration:none;
   font-size:clamp(17px, min(1.72vw, 3.2vh), 33px)}
-.join .big{margin-inline:auto}
+.big.center{margin-inline:auto}
 
 /* text-message mock */
 .sms{width:min(444px, 100%);border-radius:clamp(16px,1.8vw,34px);background:var(--surface);
@@ -404,9 +402,8 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
 
 <section class="s gospel">
   <div class="mid">
-    <p class="quote-mark">“</p>
-    <blockquote>Ces surplus ne sont pas seulement de la nourriture sauvée. Ce sont des occasions de partager l’Évangile de Jésus-Christ.</blockquote>
-    <p class="attrib">La raison d’être de la plateforme</p>
+    <h2 class="center">Un outil pour annoncer l’Évangile</h2>
+    <p class="big center">Le Centre Espoir de Gatineau souhaite redistribuer ses surplus alimentaires par l’entremise des églises locales, afin de créer des occasions de partager l’Évangile de Jésus-Christ.</p>
   </div>
 </section>
 
@@ -450,7 +447,7 @@ for (const p of document.querySelectorAll('.phone')) {
 
 // Everything that should arrive, in reading order, with a small stagger.
 const ANIM = '.eyebrow,h1,h2,h3,.logo,.lede,.big,.note,.pull,.ticks li,'
-  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,blockquote,.quote-mark,.attrib,.title-foot';
+  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,.title-foot';
 for (const s of slides) {
   [...s.querySelectorAll(ANIM)].forEach((el, i) => {
     el.classList.add('anim');
