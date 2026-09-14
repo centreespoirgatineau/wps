@@ -26,8 +26,7 @@ loadPublicUrl(db);   // the address links are built from; may be overridden in R
 const assetVersion = createHash('sha1')
   .update(fs.readFileSync(path.join(here, 'public/app.css')))
   .update(fs.readFileSync(path.join(here, 'public/app.js')))
-  .update(fs.readFileSync(path.join(here, 'public/mark.png')))
-  .update(fs.readFileSync(path.join(here, 'public/icon.png')))
+  .update(fs.readFileSync(path.join(here, 'public/mark.svg')))
   .digest('hex').slice(0, 10);
 
 // Default settings on first run.

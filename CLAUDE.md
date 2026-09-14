@@ -52,27 +52,28 @@ Other hard constraints:
   them everywhere, and a contact still sees their own on `/reglages`. Contacts
   coordinate through the per-offer chat instead.
 - **Static assets are content-hashed** (`app.css?v=<hash>` computed at boot in
-  `src/server.js`, over the CSS, the JS and both PNGs); HTML is
+  `src/server.js`, over the CSS, the JS and the mark); HTML is
   `Cache-Control: no-store`. This exists because a stale cached stylesheet once
   broke the live layout. Keep it.
-- **The slideshow is responsive, not a fixed canvas.** It was 1920x1080 scaled to
-  fit, which letterboxed phones and shrank the text; every slide now fills the
-  screen and the type is fluid (`clamp()` bounded by both vw and vh). Two things
-  there are easy to get wrong again: navigation must go through **pointer
-  events** (a `click` listener on `window` never fires for taps on iOS), and the
-  phone mock-up iframes need `pointer-events:none` or a swipe over them dies.
-  Both are covered by a test.
+- **The slideshow scrolls; it is not a fixed canvas.** Every slide fills the
+  screen (`min-height:100dvh`) inside one scroll container with
+  `scroll-snap-type:y mandatory`, so a thumb-flick, a mouse wheel and the arrow
+  keys all move one slide. The type is fluid (`clamp()` bounded by both vw and
+  vh). Two things are easy to get wrong again: the phone mock-up iframes need
+  `pointer-events:none` or a scroll starting on one dies, and the phone sizing
+  must measure **one screen** (`deck.clientHeight`), never the slide — a slide
+  that has grown past the fold would otherwise report the room it took and the
+  phone would grow to match. Covered by a test.
 - **`/presentation` is the one page with its own CSP.** The slideshow is a single
   self-contained file with an inline `<script>`, which the site-wide policy
   forbids; the route allows that exact script by SHA-256 hash rather than by
   `'unsafe-inline'`. The file is read once at boot, so a rebuilt deck only goes
   live on the next deploy. Covered by a test.
-- **The mark is a raster, not a vector.** David's logo (a cornucopia of loaves,
-  fish and fruit) arrived as an SVG wrapping two PNGs, so `src/public/mark.png`
-  and `icon.png` are generated from `assets/logo-source.svg` by
-  `node scripts/build-mark.mjs` and committed. It is wider than it is tall
-  (1.195:1), so `.mark` is sized by **height** with `width: auto` — never give it
-  a square box. If a true vector version ever turns up, prefer it.
+- **The mark is one square vector**, `src/public/mark.svg` (a lighthouse in
+  white on a terracotta disc, 9 KB, already in the app's accent colour). The
+  same file is the in-page mark and the browser-tab icon, and it is inlined as a
+  data URI into the slideshow. There are no PNG copies and no build step — an
+  earlier cornucopia logo needed both, and that tooling is gone.
 
 ## 3. Layout of the code
 
@@ -92,12 +93,10 @@ src/routes/contact.js  offers, reservations, chat, personal settings, private me
 src/routes/admin.js    offers, lots, contacts, requests, SMS log, settings
 src/routes/twilio.js   delivery-status and inbound (STOP/START) webhooks
 src/views/             templates; `_name.html` are partials, `admin/` is admin-only
-src/public/            app.css, app.js, mark.png, icon.png  (no build step)
+src/public/            app.css, app.js, mark.svg  (no build step)
 src/locales/fr.js en.js  every user-visible string; FR is the reference
 scripts/make-admin.js  create/promote an administrator from the CLI
-scripts/build-mark.mjs rebuild mark.png + icon.png from assets/logo-source.svg
 presentation/          the slideshow for churches, served at /presentation (see its README)
-assets/logo-source.svg the master logo (kept out of the Docker image)
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
 ```

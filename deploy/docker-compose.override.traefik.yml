@@ -1,11 +1,7 @@
 # The override used on David's VPS (Traefik in container root-traefik-1, network root_default,
 # certificate resolver "mytlschallenge"). Copy to /opt/wps/docker-compose.override.yml.
 #
-# The site answers on jc.centreespoir.ca. The old address is kept alive only to
-# redirect: contacts still have wps.davidhatin.com links in their old text
-# messages, and those links are how they sign in. Once everyone has received a
-# text at the new address, delete the two lines marked OLD ADDRESS below and the
-# `wps` A record in the davidhatin.com DNS.
+# The site answers on jc.centreespoir.ca.
 services:
   wps:
     networks:
@@ -19,14 +15,6 @@ services:
       - traefik.http.routers.wps.tls.certresolver=mytlschallenge
       - traefik.http.services.wps.loadbalancer.server.port=8080
       - traefik.http.services.wps.loadbalancer.responseforwarding.flushinterval=-1
-      # OLD ADDRESS — send anything still arriving there to the new one, path intact.
-      - traefik.http.routers.wpsold.rule=Host(`wps.davidhatin.com`)
-      - traefik.http.routers.wpsold.entrypoints=websecure
-      - traefik.http.routers.wpsold.tls.certresolver=mytlschallenge
-      - traefik.http.routers.wpsold.middlewares=wpsredirect
-      - traefik.http.middlewares.wpsredirect.redirectregex.regex=^https://wps\.davidhatin\.com/(.*)
-      - traefik.http.middlewares.wpsredirect.redirectregex.replacement=https://jc.centreespoir.ca/$${1}
-      - traefik.http.middlewares.wpsredirect.redirectregex.permanent=true
 networks:
   root_default:
     external: true

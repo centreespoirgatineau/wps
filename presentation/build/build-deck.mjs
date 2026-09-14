@@ -1,6 +1,6 @@
 // Assemble the slideshow: one self-contained, responsive HTML file.
 //
-//   node presentation/build/build-deck.mjs <pages.json> <mark.png> <out.html>
+//   node presentation/build/build-deck.mjs <pages.json> <mark.svg> <out.html>
 //
 // There is no fixed canvas: every slide fills whatever screen it is on, and the
 // type scales with it. Wide screens get two columns, tall ones stack. The slide
@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 
 const pages = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-const mark = fs.readFileSync(process.argv[3]).toString('base64');
+const mark = fs.readFileSync(process.argv[3]).toString('base64');   // the site mark, inlined
 const OUT = process.argv[4];
 
 /** A phone showing part of a captured page. `top` scrolls the page inside it. */
@@ -24,7 +24,7 @@ const slides = [];
 slides.push(`
 <section class="s title">
   <div class="mid">
-    <img class="logo" src="data:image/png;base64,${mark}" alt="">
+    <img class="logo" src="data:image/svg+xml;base64,${mark}" alt="">
     <h1>Rien ne devrait se perdre.</h1>
     <p class="lede">Les surplus alimentaires du Centre Espoir de Gatineau,
       redistribués le jour même par les églises —
@@ -252,19 +252,29 @@ const html = `<!doctype html>
   --gap: clamp(14px, 2.2vh, 34px);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg)}
+html,body{margin:0;height:100%;background:var(--bg)}
 body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
-  -webkit-tap-highlight-color:transparent;touch-action:pan-y pinch-zoom}
+  -webkit-tap-highlight-color:transparent}
 
-/* Every slide simply fills the screen — no fixed canvas, so no bars anywhere. */
-#deck{position:fixed;inset:0}
-.s{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;justify-content:center;
+/* One tall page that stops neatly on each slide. Scrolling is the navigation:
+   a flick of the thumb on a phone, the wheel on a laptop, arrows on a clicker. */
+#deck{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;
+  scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+#deck::-webkit-scrollbar{width:0;height:0}
+.s{position:relative;min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;
+  background:var(--bg);display:flex;flex-direction:column;justify-content:center;
   padding:calc(var(--pad) + env(safe-area-inset-top)) calc(var(--pad) + env(safe-area-inset-right))
-          calc(var(--pad) + env(safe-area-inset-bottom) + 34px) calc(var(--pad) + env(safe-area-inset-left));
-  opacity:0;visibility:hidden;transform:translateX(var(--from,0));
-  transition:opacity .3s ease, transform .3s ease, visibility 0s linear .3s}
-.s.on{opacity:1;visibility:visible;transform:none;transition:opacity .3s ease, transform .3s ease, visibility 0s}
+          calc(var(--pad) + env(safe-area-inset-bottom) + 40px) calc(var(--pad) + env(safe-area-inset-left))}
 .mid{width:100%;max-width:1400px;margin:0 auto}
+
+/* Everything arrives a moment after its slide does, in reading order. */
+.anim{opacity:0;transform:translateY(20px);
+  transition:opacity .62s cubic-bezier(.22,.72,.28,1), transform .62s cubic-bezier(.22,.72,.28,1);
+  transition-delay:calc(var(--i, 0) * 65ms)}
+.s.in .anim{opacity:1;transform:none}
+.s.in .bignum{animation:rise .9s cubic-bezier(.22,.72,.28,1) both}
+@keyframes rise{from{letter-spacing:.04em}to{letter-spacing:-.03em}}
 
 /* Type: one fluid scale, bounded by both the width and the height of the screen
    so it works on a projector, a laptop and a phone lying on its side. */
@@ -395,15 +405,20 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
   background:rgba(20,20,19,.16);transition:background .2s, transform .2s}
 .dot.on{background:var(--accent);transform:scale(1.5)}
 
-/* first-run cue: shown once, then never again */
-#cue{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0;transition:opacity .5s ease}
+/* A quiet invitation to scroll, on the first slide only. */
+#cue{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 64px);z-index:30;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;opacity:0;transition:opacity .6s ease}
 #cue.show{opacity:1}
-#cue .pill{display:flex;align-items:center;gap:12px;background:rgba(20,20,19,.86);color:#fff;
-  padding:13px 20px;border-radius:999px;font-size:clamp(13px,1.6vw,16px);box-shadow:0 20px 50px -20px rgba(0,0,0,.5)}
-#cue svg{width:24px;height:24px;flex:none;animation:swipe 1.9s ease-in-out infinite}
-@keyframes swipe{0%,100%{transform:translateX(7px)}50%{transform:translateX(-7px)}}
-@media (prefers-reduced-motion:reduce){#cue svg{animation:none}.s{transition:opacity .2s ease}}
+#cue span{font-size:clamp(11px,1.1vw,14px);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+#cue svg{width:22px;height:22px;color:var(--accent);animation:nudge 2.1s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(-3px);opacity:.55}50%{transform:translateY(4px);opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  #deck{scroll-behavior:auto}
+  #cue svg{animation:none}
+  .anim{transition:none;opacity:1;transform:none}
+  .s.in .bignum{animation:none}
+}
 
 /* Stacked layout: portrait phones and tablets. Words first, phone underneath. */
 @media (max-aspect-ratio: 5/4){
@@ -419,7 +434,7 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
   .title .lede{max-width:none}
   /* Words take what they need; the phone gets exactly the rest, so nothing
      ever runs off the top or the bottom of the screen. */
-  .shot-slide .split{grid-template-rows:auto minmax(0,1fr);height:100%;align-content:stretch}
+  .shot-slide .split{grid-template-rows:auto minmax(0,1fr);flex:1;min-height:0;align-content:stretch}
   .shot-slide .col{align-self:start}
   .shot-slide .shot-col{height:100%;min-height:0;align-self:stretch}
 }
@@ -435,20 +450,18 @@ blockquote{font-size:clamp(22px, min(3.3vw, 6.2vh), 62px);line-height:1.32;max-w
 <body>
 <div id="deck">${slides.join('\n')}</div>
 <div id="dots">${dots}</div>
-<div id="cue"><div class="pill">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M9 11V6a1.8 1.8 0 0 1 3.6 0v5"/><path d="M12.6 11V9.2a1.8 1.8 0 0 1 3.6 0V11"/>
-    <path d="M16.2 11v-.6a1.8 1.8 0 0 1 3.6 0V15a6 6 0 0 1-6 6h-1.6a5 5 0 0 1-3.8-1.8L5 15.4a1.8 1.8 0 0 1 2.7-2.3L9 14.4"/>
-  </svg>
-  <span id="cue-text"></span>
-</div></div>
+<div id="cue">
+  <span>Faites défiler</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+</div>
 
 <script>
 const PAGES = ${JSON.stringify(pages)};
+const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.s')];
 const dotEls = [...document.querySelectorAll('.dot')];
 const cue = document.getElementById('cue');
-let i = -1, interacted = false;
+let current = 0;
 
 // Each phone gets its page injected here, so the file stays standalone.
 for (const f of document.querySelectorAll('iframe[data-page]')) {
@@ -463,20 +476,15 @@ for (const p of document.querySelectorAll('.phone')) {
   box.appendChild(p);
 }
 
-function show(n, dir = 0) {
-  n = Math.max(0, Math.min(slides.length - 1, n));
-  if (n === i) return;
-  slides.forEach((s, k) => {
-    if (k === n) s.style.setProperty('--from', dir > 0 ? '3%' : dir < 0 ? '-3%' : '0');
-    s.classList.toggle('on', k === n);
+// Everything that should arrive, in reading order, with a small stagger.
+const ANIM = '.eyebrow,h1,h2,h3,.bignum,.logo,.lede,.big,.note,.pull,.ticks li,'
+  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,blockquote,.quote-mark,.attrib,.title-foot';
+for (const s of slides) {
+  [...s.querySelectorAll(ANIM)].forEach((el, i) => {
+    el.classList.add('anim');
+    el.style.setProperty('--i', Math.min(i, 9));
   });
-  dotEls.forEach((d, k) => d.classList.toggle('on', k === n));
-  i = n;
-  history.replaceState(null, '', '#' + (i + 1));
-  sizeShots();
 }
-const next = () => show(i + 1, 1);
-const prev = () => show(i - 1, -1);
 
 /* The phone mock-ups are a fixed 390px-wide page; scale them to whatever space
    the slide actually has, so nothing is ever cut off or comically small. */
@@ -488,7 +496,11 @@ function sizeShots() {
     if (!slide || !split) continue;
     const cs = getComputedStyle(slide);
     const innerW = slide.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const innerH = slide.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    // Measure one screen, not the slide: a slide that has already grown past the
+    // fold would otherwise report the room it took, and the phone would grow to
+    // match it — pushing itself off the bottom.
+    const innerH = Math.min(slide.clientHeight, deck.clientHeight)
+      - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     const capH = shot.querySelector('figcaption').offsetHeight + 10;
     const gap = parseFloat(getComputedStyle(split).rowGap || 0) || 0;
     const textCol = split.querySelector('.col:not(.shot-col)');
@@ -521,62 +533,59 @@ function sizeShots() {
   }
 }
 
-function hideCue() { cue.classList.remove('show'); interacted = true; }
+function hideCue() { cue.classList.remove('show'); }
 
-// ---- input: swipe, tap, keys, dots ---------------------------------------
-// Note: a plain 'click' listener on window is NOT reliable for taps on iOS, so
-// everything goes through pointer events.
-const deck = document.getElementById('deck');
-let x0 = null, y0 = null, moved = false;
-deck.addEventListener('pointerdown', (e) => { x0 = e.clientX; y0 = e.clientY; moved = false; }, { passive: true });
-deck.addEventListener('pointermove', (e) => {
-  if (x0 === null) return;
-  if (Math.abs(e.clientX - x0) > 12 || Math.abs(e.clientY - y0) > 12) moved = true;
-}, { passive: true });
-deck.addEventListener('pointerup', (e) => {
-  if (x0 === null) return;
-  const dx = e.clientX - x0, dy = e.clientY - y0;
-  x0 = null;
+// Which slide is on screen drives the reveal, the dots and the address bar.
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) e.target.classList.add('in');
+    if (e.isIntersecting && e.intersectionRatio >= 0.5) {
+      const i = slides.indexOf(e.target);
+      if (i !== current) {
+        current = i;
+        dotEls.forEach((d, k) => d.classList.toggle('on', k === i));
+        history.replaceState(null, '', '#' + (i + 1));
+      }
+      sizeShots();
+      if (i > 0) hideCue();
+    }
+  }
+}, { root: deck, threshold: [0.2, 0.5] });
+for (const s of slides) io.observe(s);
+
+function goTo(i) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  slides[i].scrollIntoView({ block: 'start' });
   hideCue();
-  if (e.target.closest('a')) return;              // let real links work
-  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); return; }
-  if (moved) return;                              // a drag that went nowhere
-  (e.clientX < innerWidth * 0.3 ? prev : next)();
-});
-deck.addEventListener('pointercancel', () => { x0 = null; });
+}
 
 addEventListener('keydown', (e) => {
-  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
-  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
-  else if (e.key === 'Home') show(0, -1);
-  else if (e.key === 'End') show(slides.length - 1, 1);
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+  else if (['ArrowUp', 'ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); goTo(current - 1); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
   else if (e.key === 'f' || e.key === 'F') {
     if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
-  } else return;
-  hideCue();
+  }
 });
-for (const d of dotEls) {
-  d.addEventListener('pointerup', (e) => { e.stopPropagation(); hideCue(); show(+d.dataset.go); });
-}
+for (const d of dotEls) d.addEventListener('click', () => goTo(+d.dataset.go));
+deck.addEventListener('scroll', hideCue, { passive: true, once: true });
 
 addEventListener('resize', sizeShots);
 addEventListener('orientationchange', () => setTimeout(sizeShots, 300));
-
-show(Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
-sizeShots();
-// Re-measure once the embedded pages and the web font have settled.
 addEventListener('load', sizeShots);
-setTimeout(sizeShots, 500);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeShots);
+setTimeout(sizeShots, 500);
 
-// Show the cue only if nobody has moved within a couple of seconds.
-setTimeout(() => {
-  if (interacted || i !== 0) return;
-  document.getElementById('cue-text').textContent =
-    matchMedia('(pointer:coarse)').matches ? 'Glissez ou touchez pour avancer' : 'Flèches ← → pour naviguer';
-  cue.classList.add('show');
-  setTimeout(() => cue.classList.remove('show'), 4200);
-}, 1600);
+// Open on the slide named in the address, without a scroll animation.
+const start = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+deck.style.scrollBehavior = 'auto';
+slides[start].scrollIntoView({ block: 'start' });
+slides[start].classList.add('in');
+requestAnimationFrame(() => { deck.style.scrollBehavior = ''; sizeShots(); });
+
+// Invite the first scroll, then never again.
+setTimeout(() => { if (current === 0) cue.classList.add('show'); }, 1400);
 </script>
 </body>
 </html>`;

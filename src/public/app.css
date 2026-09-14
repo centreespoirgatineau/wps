@@ -54,11 +54,11 @@ ul.clean { list-style: none; margin: 0; padding: 0; }
 }
 .top .bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 60px; padding-bottom: 0; }
 .top.plain { border-bottom: 0; background: transparent; backdrop-filter: none; position: static; }
-.home .mark.small { height: 34px; width: auto; flex: none; }
+.home .mark.small { width: 34px; height: 34px; flex: none; }
 .home { display: inline-flex; align-items: center; flex: none; }
-/* The mark is a wider-than-tall illustration: size it by height, width follows. */
-.mark { height: 96px; width: auto; display: block; }
-.mark.small { height: 32px; width: auto; }
+/* The mark is square: one size drives both sides. */
+.mark { width: 96px; height: 96px; display: block; }
+.mark.small { width: 32px; height: 32px; }
 .nav { display: flex; gap: 4px; align-items: center; }
 .nav .lang { font-size: .75rem; font-weight: 600; letter-spacing: .04em; border: 1px solid var(--line-2); padding: 4px 9px; border-radius: 999px; color: var(--ink-2); }
 .nav .lang:hover { text-decoration: none; color: var(--ink); }

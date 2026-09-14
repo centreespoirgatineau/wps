@@ -9,7 +9,7 @@ const OUT = process.argv[2];
 const SRC = new URL('../../src/', import.meta.url).pathname.replace(/^\//, '');
 
 const css = fs.readFileSync(path.join(SRC, 'public/app.css'), 'utf8');
-const markSmall = fs.readFileSync(process.argv[3]).toString('base64');
+const mark = fs.readFileSync(process.argv[3]).toString('base64');
 
 // One session as Daniel Mercier (Église Nouvelle Vie de Gatineau).
 let cookie = '';
@@ -25,7 +25,7 @@ async function page(url, { signedIn = true } = {}) {
     .replace(/<link rel="stylesheet" href="\/static\/app\.css[^>]*>/, `<style>${css}</style>`)
     .replace(/<link rel="icon"[^>]*>/, '')
     .replace(/<script src="\/static\/app\.js[^>]*><\/script>/, '')
-    .replace(/src="\/static\/mark\.png[^"]*"/g, `src="data:image/png;base64,${markSmall}"`)
+    .replace(/src="\/static\/mark\.svg[^"]*"/g, `src="data:image/svg+xml;base64,${mark}"`)
     // The pages are decoration here: nothing should be clickable or scrollable.
     .replace('</head>', '<style>html{overflow:hidden}a{pointer-events:none}</style></head>');
   return html;

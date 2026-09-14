@@ -477,12 +477,18 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   assert.ok(csp === null || csp.includes(`'sha256-${hash}'`));
   // The phones inside it are the real pages, inlined — not links to a server.
   assert.doesNotMatch(r.text, /src="\/static\//);
-  // It must fit any screen: no fixed canvas, and gestures on every pointer.
+  // It must fit any screen: no fixed canvas, and it stacks on a tall one.
   assert.doesNotMatch(r.text, /width:1920px/);
-  assert.match(r.text, /pointerup/);
   assert.match(r.text, /max-aspect-ratio/);
-  // Taps and swipes have to reach the deck through the phone pictures.
+  // Scrolling is the navigation: the deck snaps one slide at a time.
+  assert.match(r.text, /scroll-snap-type:y mandatory/);
+  assert.match(r.text, /scroll-snap-align:start/);
+  assert.match(r.text, /IntersectionObserver/);
+  // A scroll that starts on a phone picture must reach the page, not the frame.
   assert.match(r.text, /iframe\{[^}]*pointer-events:none/);
+  // The mark is the vector, inlined — the retired PNGs must not come back.
+  assert.doesNotMatch(r.text, /image\/png/);
+  assert.match(r.text, /data:image\/svg\+xml/);
 });
 
 test('the public address can be changed from Réglages, and links follow it', async () => {

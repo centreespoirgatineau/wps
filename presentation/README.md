@@ -12,12 +12,12 @@ connexion. C'est le lien à donner aux églises.
 **Hors ligne :** ouvrez `presentation-surplus.html` avec un double-clic.
 
 **Sur un téléphone ou une tablette**
-- Glissez vers la gauche ou la droite, comme dans une galerie de photos.
-- Ou touchez : à droite pour avancer, dans le tiers gauche pour reculer.
+- Faites simplement défiler vers le bas : chaque diapositive s'arrête d'elle-même.
 - Les points au bas de l'écran indiquent où vous êtes ; touchez-en un pour y aller.
+- Tenez l'appareil à la verticale : la mise en page est faite pour ça.
 
 **Sur un ordinateur**
-- **→** ou **espace** ou un clic pour avancer, **←** pour reculer.
+- La molette, ou **↓** **→** **espace** pour avancer, **↑** **←** pour reculer.
 - **F** pour le plein écran (**Échap** pour en sortir).
 - **Début** et **Fin** pour la première et la dernière diapositive.
 
@@ -49,11 +49,11 @@ node presentation/build/seed-demo.mjs presentation/build/work/data
 DATA_DIR=presentation/build/work/data PORT=8100 SMS_DRY_RUN=1 npm start
 
 # 3. Dans un autre terminal : capturer les pages
-node presentation/build/capture.mjs presentation/build/work/pages.json presentation/build/mark-small.png
+node presentation/build/capture.mjs presentation/build/work/pages.json src/public/mark.svg
 
 # 4. Assembler le diaporama
 node presentation/build/build-deck.mjs presentation/build/work/pages.json \
-     presentation/build/mark-small.png presentation/presentation-surplus.html
+     src/public/mark.svg presentation/presentation-surplus.html
 ```
 
 La version en ligne est lue **au démarrage** de l'application : après avoir
