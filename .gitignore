@@ -4,3 +4,4 @@ data/
 .env.dev
 *.log
 .DS_Store
+presentation/build/work/
