@@ -10,6 +10,7 @@
 //    targeting it is cleared — everyone starts equal again.
 import { config } from '../config.js';
 import { endOfDay } from './time.js';
+import { isDemo } from './demo.js';
 
 export class RuleError extends Error {
   constructor(reason, extra = {}) { super(reason); this.reason = reason; Object.assign(this, extra); }
@@ -72,6 +73,10 @@ export function penaltiesFor(db, contactId, offerId) {
  * Returns { ok: true } or { ok: false, reason, until? }.
  */
 export function canReserve(db, contact, offer, now = Date.now()) {
+  // The demonstration account looks and never takes. Refusing here — rather
+  // than only hiding the button — also covers reserveLot() and any hand-made
+  // request, the way sendSms() owns the "never texted" rule.
+  if (isDemo(contact)) return { ok: false, reason: 'demo' };
   if (!isActive(offer, now)) return { ok: false, reason: 'inactive' };
   if (contact.status !== 'active') return { ok: false, reason: 'contact_inactive' };
   const pens = penaltiesFor(db, contact.id, offer.id);

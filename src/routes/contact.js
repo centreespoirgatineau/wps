@@ -2,6 +2,7 @@
 import path from 'node:path';
 import { HttpError, sendFile } from '../lib/http.js';
 import { requireContact, checkCsrf, destroySession, rateLimit } from '../lib/auth.js';
+import { isDemo } from '../lib/demo.js';
 import { normalizeLang } from '../lib/i18n.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
@@ -32,6 +33,14 @@ export function listOffers(db) {
   return { active: offers.filter((o) => o.active), past: offers.filter((o) => !o.active) };
 }
 
+/**
+ * The demonstration account may read everything and write nothing. Used as a
+ * route guard: the router stops the chain as soon as a handler has answered.
+ */
+function refuseDemo(ctx) {
+  if (isDemo(ctx.state.contact)) ctx.json({ ok: false, reason: 'demo', message: ctx.t('demo.read_only') }, 403);
+}
+
 export function contactRoutes(app, db) {
   app.get('/offres', requireContact, (ctx) => {
     ctx.render('offers', { title: ctx.t('offers.title'), ...listOffers(db) });
@@ -57,7 +66,7 @@ export function contactRoutes(app, db) {
     sse.subscribe(ctx.params.id, ctx);
   });
 
-  app.post('/offres/:id/lots/:lotId/reserver', requireContact, async (ctx) => {
+  app.post('/offres/:id/lots/:lotId/reserver', requireContact, refuseDemo, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
     if (!rateLimit(db, `reserve:${ctx.state.contact.id}`, 30, 60_000)) throw new HttpError(429);
@@ -72,7 +81,7 @@ export function contactRoutes(app, db) {
     }
   });
 
-  app.post('/offres/:id/lots/:lotId/annuler', requireContact, async (ctx) => {
+  app.post('/offres/:id/lots/:lotId/annuler', requireContact, refuseDemo, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
     try {
@@ -95,7 +104,7 @@ export function contactRoutes(app, db) {
     ctx.json({ messages: rows.map((m) => messageJson(m, ctx.state.contact.id)) });
   });
 
-  app.post('/offres/:id/messages', requireContact, async (ctx) => {
+  app.post('/offres/:id/messages', requireContact, refuseDemo, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
     const offer = loadOffer(db, ctx.params.id);
@@ -128,6 +137,12 @@ export function contactRoutes(app, db) {
   app.post('/reglages/retrait', requireContact, async (ctx) => {
     const body = await ctx.body();
     checkCsrf(ctx, body);
+    // The demonstration account cannot retire itself — that would close the
+    // door for everyone. Only an admin can, by changing its status.
+    if (isDemo(ctx.state.contact)) {
+      ctx.flash('error', ctx.t('demo.read_only'));
+      return ctx.redirect('/reglages');
+    }
     db.run(`UPDATE contacts SET status = 'opted_out', updated_at = ? WHERE id = ?`, Date.now(), ctx.state.contact.id);
     // Free their reservations on active offers so others can take them.
     const lots = db.all(`SELECT l.id, l.offer_id FROM lots l JOIN offers o ON o.id = l.offer_id WHERE l.reserved_by = ? AND l.status = 'reserved' AND o.status = 'active'`, ctx.state.contact.id);
@@ -159,6 +174,7 @@ export function reasonText(ctx, e) {
     case 'no_show': return ctx.t('offer.noshow_block');
     case 'cooldown': return ctx.t('offer.cooldown', { time: msToClock(e.until - Date.now()) }).replace(/<[^>]+>/g, '');
     case 'max': return ctx.t('offer.max_reached', { n: e.max });
+    case 'demo': return ctx.t('demo.read_only');
     default: return ctx.t('offer.reserve_refused');
   }
 }

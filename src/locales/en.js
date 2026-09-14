@@ -46,6 +46,13 @@ export default {
   'login.what_is_this': 'What is this platform?',
   'login.test_account': 'This test account signs in only through its personal link (Admin → Contacts → Copy link).',
   'login.opted_out': 'You left the list. To come back, submit a new request.',
+  'login.demo_closed': 'The demonstration account is closed.',
+
+  // Demonstration account: (555) 555-5555 signs in with no code and can only look.
+  'demo.banner': 'Demonstration account — this is what a contact sees. Nothing can be changed.',
+  'demo.read_only': 'The demonstration account can look at everything but change nothing.',
+  'demo.no_reserve': 'Demonstration: reserving is disabled. The lots below are real.',
+  'demo.no_chat': 'Demonstration: you can read the conversation but not write in it.',
 
   // ---- about ----
   'about.title': 'About',

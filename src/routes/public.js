@@ -3,6 +3,7 @@ import { HttpError } from '../lib/http.js';
 import { normalizePhone, formatPhone } from '../lib/phone.js';
 import { normalizeLang } from '../lib/i18n.js';
 import { createSession, destroySession, issueLoginCode, verifyLoginCode, rateLimit, checkCsrf } from '../lib/auth.js';
+import { DEMO_PHONE, ensureDemoContact } from '../lib/demo.js';
 import { config } from '../config.js';
 
 const MIN = 60_000;
@@ -33,6 +34,23 @@ export function publicRoutes(app, db) {
     const phone = normalizePhone(body.phone);
     const view = (extra) => ctx.render('login', { centered: true, title: ctx.t('login.title'), step: 'phone', phone: body.phone || '', next, ...extra });
     if (!phone) return view({ error: ctx.t('login.invalid_phone') });
+    // The demonstration number walks straight in: no code, no text message.
+    // It is read-only once inside (see lib/demo.js). Its own generous bucket,
+    // so showing the interface repeatedly never eats the real login budget —
+    // and being throttled at all keeps it from being a way to pile up sessions.
+    if (phone === DEMO_PHONE) {
+      if (!rateLimit(db, `login:demo:${ctx.ip}`, 30, 15 * MIN)) return view({ error: ctx.t('error.too_many') });
+      const demo = ensureDemoContact(db, ctx.state.lang);
+      if (demo.status !== 'active') {
+        // Closing the door also ends any session already holding it open.
+        db.run('DELETE FROM sessions WHERE contact_id = ?', demo.id);
+        return view({ error: ctx.t('login.demo_closed') });
+      }
+      if (ctx.state.session) db.run('DELETE FROM sessions WHERE id = ?', ctx.state.session.id);
+      createSession(db, demo.id, 'link', ctx);
+      ctx.state.contact = demo;
+      return ctx.redirect(next || '/offres');
+    }
     if (!rateLimit(db, `login:ip:${ctx.ip}`, 20, 15 * MIN) || !rateLimit(db, `login:phone:${phone}`, 5, 15 * MIN)) {
       return view({ error: ctx.t('error.too_many') });
     }

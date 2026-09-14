@@ -8,6 +8,7 @@ import { openDb } from './lib/db.js';
 import { render, renderPartial } from './lib/view.js';
 import { translator, normalizeLang, fromAcceptLanguage } from './lib/i18n.js';
 import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
+import { isDemo } from './lib/demo.js';
 import { startScheduler } from './lib/scheduler.js';
 import { formatPhone } from './lib/phone.js';
 import { formatDate, formatDateTimeShort, hmToH } from './lib/time.js';
@@ -79,6 +80,7 @@ app.use((ctx) => {
       appName: db.setting('app_name', config.appName),
       contact: ctx.state.contact || null,
       isAdmin: isAdmin(ctx),
+      isDemo: isDemo(ctx.state.contact),
       adminFresh: adminFresh(ctx),
       csrf: ctx.state.session?.csrf || '',
       path: ctx.path,

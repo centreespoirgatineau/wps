@@ -295,3 +295,63 @@ test('admin pages need admin role; link sessions need a fresh code for admin', a
   r = await paul.get('/admin');
   assert.equal(r.status, 403);
 });
+
+test('demonstration number: signs in with no code, looks at everything, changes nothing', async () => {
+  // A fresh published offer, so there is certainly an available lot to try.
+  const admin = client();
+  await loginByCode(admin, '(819) 555-0001');
+  let csrf = await admin.csrf('/admin');
+  let r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Yogourts', lot_description: '12 yogourts', lot_count: '2', max_per_contact: '1' } });
+  const offerId = /\/admin\/offres\/(\d+)\/confirmer/.exec(r.location)[1];
+  r = await admin.get(r.location);
+  // The demo account is not offered as a recipient: it can never receive a text.
+  assert.doesNotMatch(r.text, /\(555\) 555-5555/);
+  const ids = [...r.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  await admin.post(`/admin/offres/${offerId}/publier`, { form: new URLSearchParams([['_csrf', csrf], ...ids.map((i) => ['contacts', i])]) });
+
+  // Straight in from the login screen — no code step, no text message.
+  const demo = client();
+  r = await demo.post('/connexion', { form: { phone: '(555) 555-5555' } });
+  assert.equal(r.status, 303);
+  assert.equal(r.location, '/offres');
+  r = await demo.get('/offres');
+  assert.equal(r.status, 200);
+  assert.match(r.text, /démonstration/i);
+
+  // It reads the offer and the conversation, with no control to write with.
+  r = await demo.get(`/offres/${offerId}`);
+  assert.equal(r.status, 200);
+  assert.doesNotMatch(r.text, /id="chat-form"/);
+  assert.doesNotMatch(r.text, /data-reserve=/);
+  const lotId = /data-lot="(\d+)"/.exec(r.text)[1]; // lots are listed, just not reservable
+
+  // Refused by the rules engine, not merely hidden in the page.
+  const dCsrf = await demo.csrf(`/offres/${offerId}`);
+  r = await demo.post(`/offres/${offerId}/lots/${lotId}/reserver`, { json: {}, headers: { 'X-CSRF': dCsrf } });
+  assert.equal(r.status, 403);
+  assert.equal(r.json().reason, 'demo');
+  // The lot really is still free afterwards.
+  r = await admin.get(`/admin/offres/${offerId}`);
+  assert.doesNotMatch(r.text, /Démonstration/);
+
+  // Writing in the chat is refused too.
+  r = await demo.post(`/offres/${offerId}/messages`, { json: { body: 'coucou' }, headers: { 'X-CSRF': dCsrf } });
+  assert.equal(r.status, 403);
+  assert.equal(r.json().reason, 'demo');
+
+  // It cannot retire itself and close the door on everyone.
+  const meCsrf = await demo.csrf('/reglages');
+  r = await demo.post('/reglages/retrait', { form: { _csrf: meCsrf } });
+  assert.equal(r.status, 303);
+  r = await demo.get('/offres');
+  assert.equal(r.status, 200);
+
+  // Never texted, whatever an admin asks for.
+  r = await admin.get('/admin/contacts');
+  const demoId = /\/admin\/contacts\/(\d+)"[^>]*>\s*<strong>Démonstration/.exec(r.text)[1];
+  csrf = await admin.csrf('/admin');
+  await admin.post(`/admin/contacts/${demoId}/sms`, { form: { _csrf: csrf, kind: 'test' } });
+  r = await admin.get('/admin/sms');
+  assert.match(r.text, /Compte de test/);
+  assert.doesNotMatch(r.text, /\(555\) 555-5555[\s\S]{0,400}?(Envoyé|Livré)/);
+});

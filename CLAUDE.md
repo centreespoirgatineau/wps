@@ -109,6 +109,17 @@ Notes that have already caught me out:
   Never texted (enforced in `sendSms` itself, not only at the call sites), cannot
   log in by code, signs in only through its personal link. Unticked by default in
   the recipients list.
+- **Demonstration account (`(555) 555-5555`)** — typing that number on the login
+  screen signs straight in to the contact dashboard: no code, no text message.
+  It exists so the contact side can be shown or checked without a second phone.
+  It is **read-only**: reserving is refused by `rules.canReserve()` itself (so a
+  hand-made request fails too, not just a hidden button), chat and leaving the
+  list are refused in the routes, and it is never a recipient when publishing.
+  The number is also refused inside `sendSms` regardless of its checkbox.
+  All of it lives in `src/lib/demo.js`. Off switch: Admin → Contacts →
+  Démonstration, set the status to anything but active — that also ends any
+  demo session already open. Note it lets anyone who guesses the number read
+  offers, the chat, and the name/organisation/phone of whoever holds a lot.
 
 ## 6. Deployment (already live — do not reinvent)
 
@@ -146,7 +157,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (14 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (15 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -157,7 +168,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 14 tests: rules engine + end-to-end HTTP
+npm test                     # 15 tests: rules engine + end-to-end HTTP
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

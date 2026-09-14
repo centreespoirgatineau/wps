@@ -59,7 +59,9 @@
       </div>
     <% } %>
   </div>
-  <% if (offer.active && contact.status === 'active') { %>
+  <% if (isDemo) { %>
+    <div class="tiny mt-s"><%= t('demo.no_chat') %></div>
+  <% } else if (offer.active && contact.status === 'active') { %>
     <form id="chat-form" class="chat-form">
       <textarea name="body" rows="1" maxlength="1000" placeholder="<%= t('chat.placeholder') %>" required></textarea>
       <button class="btn primary" type="submit" aria-label="<%= t('chat.send') %>">↑</button>

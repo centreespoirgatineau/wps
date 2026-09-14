@@ -39,6 +39,7 @@
 </header>
 <main class="wrap<%= centered ? ' centered' : '' %>">
   <% if (flash) { %><div class="banner <%= flash.type === 'error' ? 'error' : 'ok' %> mb"><%= flash.text %></div><% } %>
+  <% if (isDemo) { %><div class="banner info mb"><%= t('demo.banner') %></div><% } %>
   <%- body %>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

@@ -1,6 +1,7 @@
 // Twilio Programmable Messaging through its REST API (plain fetch, no SDK).
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { config } from '../config.js';
+import { DEMO_PHONE } from './demo.js';
 
 export function smsConfigured() {
   const t = config.twilio;
@@ -13,8 +14,12 @@ export function smsConfigured() {
  */
 export async function sendSms(db, { to, body, kind = 'other', contactId = null, offerId = null }) {
   const now = Date.now();
-  // Test accounts are never texted, whatever the caller.
-  if (contactId && db.get('SELECT no_sms FROM contacts WHERE id = ?', contactId)?.no_sms) {
+  // Test accounts are never texted, whatever the caller. The demonstration
+  // number is refused on the number itself too, so un-ticking its checkbox by
+  // accident still cannot text a phone nobody owns.
+  const skip = to === DEMO_PHONE
+    || Boolean(contactId && db.get('SELECT no_sms FROM contacts WHERE id = ?', contactId)?.no_sms);
+  if (skip) {
     const { lastInsertRowid } = db.run(
       `INSERT INTO sms_log(contact_id, offer_id, to_phone, kind, body, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'skipped', ?, ?)`,
       contactId, offerId, to, kind, body, now, now);

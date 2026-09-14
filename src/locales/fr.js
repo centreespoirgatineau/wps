@@ -46,6 +46,13 @@ export default {
   'login.what_is_this': 'Qu’est-ce que cette plateforme ?',
   'login.test_account': 'Ce compte de test se connecte uniquement par son lien personnel (Admin → Contacts → Copier le lien).',
   'login.opted_out': 'Vous vous êtes retiré de la liste. Pour revenir, faites une nouvelle demande.',
+  'login.demo_closed': 'Le compte de démonstration est fermé.',
+
+  // Demonstration account: (555) 555-5555 signs in with no code and can only look.
+  'demo.banner': 'Compte de démonstration — vous voyez ce que voit un contact. Rien ne peut être modifié.',
+  'demo.read_only': 'Le compte de démonstration peut tout consulter, mais ne peut rien modifier.',
+  'demo.no_reserve': 'Démonstration : la réservation est désactivée. Les lots ci-dessous sont réels.',
+  'demo.no_chat': 'Démonstration : vous pouvez lire la discussion, mais pas y écrire.',
 
   // ---- about ----
   'about.title': 'À propos',

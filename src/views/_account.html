@@ -9,7 +9,7 @@
   </div>
   <p class="tiny mt"><%= t('me.link_hint') %> <a href="/a-propos"><%= t('login.what_is_this') %></a></p>
   <form method="post" action="/deconnexion" class="mt"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn secondary block" type="submit"><%= t('me.logout') %></button></form>
-  <% if (!isAdmin && contact.status === 'active') { %><button class="btn ghost block mt-s" type="button" data-open="#optout-modal" style="color:var(--danger)"><%= t('me.opt_out') %></button><% } %>
+  <% if (!isAdmin && !isDemo && contact.status === 'active') { %><button class="btn ghost block mt-s" type="button" data-open="#optout-modal" style="color:var(--danger)"><%= t('me.opt_out') %></button><% } %>
   <% if (contact.status !== 'active') { %><div class="banner warn mt-s"><%= t('me.opted_out') %></div><% } %>
 </div>
 <div class="modal" id="optout-modal" aria-hidden="true">

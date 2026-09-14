@@ -8,6 +8,8 @@
   <div class="banner ok mb"><%= t('offer.max_reached', { n: check.max }) %></div>
 <% } else if (!check.ok && check.reason === 'contact_inactive') { %>
   <div class="banner warn mb"><%= t('login.opted_out') %></div>
+<% } else if (!check.ok && check.reason === 'demo') { %>
+  <div class="banner info mb"><%= t('demo.no_reserve') %></div>
 <% } %>
 
 <% for (const l of offer.lots) {

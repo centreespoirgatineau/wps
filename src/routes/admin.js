@@ -8,6 +8,7 @@ import { normalizePhone, formatPhone } from '../lib/phone.js';
 import { normalizeLang, translator } from '../lib/i18n.js';
 import { token as newToken } from '../lib/crypto.js';
 import { sendSms, gsmSafe, smsConfigured } from '../lib/sms.js';
+import { DEMO_PHONE } from '../lib/demo.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
@@ -180,7 +181,9 @@ export function adminRoutes(app, db) {
   app.get('/admin/offres/:id/confirmer', requireAdmin, (ctx) => {
     const offer = loadOffer(db, ctx.params.id);
     if (offer.status !== 'draft') return ctx.redirect(`/admin/offres/${offer.id}`);
-    const contacts = db.all(`SELECT * FROM contacts WHERE status = 'active' ORDER BY organization, first_name`);
+    // The demonstration account can never receive anything, so it is left out
+    // of the recipients list rather than sitting there unticked forever.
+    const contacts = db.all(`SELECT * FROM contacts WHERE status = 'active' AND phone != ? ORDER BY organization, first_name`, DEMO_PHONE);
     const templates = { fr: smsTemplate(db, 'fr', offer), en: smsTemplate(db, 'en', offer) };
     const sample = { title: offer.title, n: offer.lot_count, url: `${config.appUrl}/o/${offer.id}/xxxxxxxxxxxx` };
     ctx.render('admin/offer_confirm', { title: ctx.t('offer.confirm.title'), offer, contacts, templates, sample, smsOk: smsConfigured() });
