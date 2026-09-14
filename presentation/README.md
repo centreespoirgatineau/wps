@@ -1,7 +1,8 @@
 # La présentation aux églises
 
-`presentation-surplus.html` — un diaporama de 13 diapositives, en 1920 × 1080,
-pour présenter la plateforme à d'autres églises.
+`presentation-surplus.html` — un diaporama de 13 diapositives pour présenter la
+plateforme à d'autres églises. Il s'adapte à l'écran : téléphone à la verticale
+ou à l'horizontale, tablette, portable, projecteur. Aucune bande noire, jamais.
 
 ## L'utiliser
 
@@ -10,12 +11,15 @@ connexion. C'est le lien à donner aux églises.
 
 **Hors ligne :** ouvrez `presentation-surplus.html` avec un double-clic.
 
-- **F** — plein écran (et **Échap** pour en sortir)
-- **→** ou **espace** ou un clic — diapositive suivante
-- **←** ou un clic dans le quart gauche de l'écran — diapositive précédente
+**Sur un téléphone ou une tablette**
+- Glissez vers la gauche ou la droite, comme dans une galerie de photos.
+- Ou touchez : à droite pour avancer, dans le tiers gauche pour reculer.
+- Les points au bas de l'écran indiquent où vous êtes ; touchez-en un pour y aller.
 
-Sur un téléphone tenu à la verticale, la présentation invite d'abord à tourner
-l'appareil : elle est faite pour l'écran à l'horizontale.
+**Sur un ordinateur**
+- **→** ou **espace** ou un clic pour avancer, **←** pour reculer.
+- **F** pour le plein écran (**Échap** pour en sortir).
+- **Début** et **Fin** pour la première et la dernière diapositive.
 
 Tout est dans le fichier : aucune connexion Internet n'est nécessaire, sauf pour
 charger la police d'écriture (sans Internet, le texte s'affiche dans une police
@@ -23,7 +27,7 @@ très proche). Vous pouvez le copier sur une clé USB ou l'envoyer par courriel.
 
 ## Ce qu'il y a dedans
 
-Les téléphones montrés dans les diapositives 6 à 10 et 13 ne sont pas des images :
+Les téléphones montrés dans les diapositives 6 à 9 ne sont pas des images :
 ce sont les **vraies pages de la plateforme**, intégrées telles quelles, ce qui
 les garde parfaitement nettes sur un projecteur.
 

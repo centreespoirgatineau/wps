@@ -55,6 +55,13 @@ Other hard constraints:
   `src/server.js`, over the CSS, the JS and both PNGs); HTML is
   `Cache-Control: no-store`. This exists because a stale cached stylesheet once
   broke the live layout. Keep it.
+- **The slideshow is responsive, not a fixed canvas.** It was 1920x1080 scaled to
+  fit, which letterboxed phones and shrank the text; every slide now fills the
+  screen and the type is fluid (`clamp()` bounded by both vw and vh). Two things
+  there are easy to get wrong again: navigation must go through **pointer
+  events** (a `click` listener on `window` never fires for taps on iOS), and the
+  phone mock-up iframes need `pointer-events:none` or a swipe over them dies.
+  Both are covered by a test.
 - **`/presentation` is the one page with its own CSP.** The slideshow is a single
   self-contained file with an inline `<script>`, which the site-wide policy
   forbids; the route allows that exact script by SHA-256 hash rather than by

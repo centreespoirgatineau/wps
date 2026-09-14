@@ -477,5 +477,10 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   assert.ok(csp === null || csp.includes(`'sha256-${hash}'`));
   // The phones inside it are the real pages, inlined — not links to a server.
   assert.doesNotMatch(r.text, /src="\/static\//);
-  assert.match(r.text, /Tournez votre téléphone/);
+  // It must fit any screen: no fixed canvas, and gestures on every pointer.
+  assert.doesNotMatch(r.text, /width:1920px/);
+  assert.match(r.text, /pointerup/);
+  assert.match(r.text, /max-aspect-ratio/);
+  // Taps and swipes have to reach the deck through the phone pictures.
+  assert.match(r.text, /iframe\{[^}]*pointer-events:none/);
 });
