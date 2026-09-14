@@ -14,7 +14,7 @@ same organisations taking everything.
 
 The platform exists not only to prevent waste but, in David's words, to use these
 surpluses as a tool to preach the gospel of Jesus Christ. That intent is stated in
-the About page and in rule 2 of the platform rules; keep it intact.
+the About page and in rule 1 of the platform rules; keep it intact.
 
 - **Owner / only admin today:** David Hatin, Directeur général (+1 819 208 5721).
 - **Live:** https://wps.davidhatin.com
@@ -102,6 +102,7 @@ semantics without asking him.
 | Admin marks no-show | Holder earns a *pending* no-show penalty → cannot reserve at all on the next offer |
 | Offer ends (23:59 local, or closed by admin) | Status `expired`/`closed`; every penalty targeting it is *cleared*; chat becomes read-only |
 | Max per contact | Set per offer by the admin (default 1) |
+| 3rd no-show | Absences add up across offers; at `STRIKE_LIMIT` (3) the contact's status becomes `removed` automatically. Undoing that no-show brings them straight back |
 
 Notes that have already caught me out:
 
@@ -112,6 +113,16 @@ Notes that have already caught me out:
   even if the 30 s scheduler has not run yet. Always go through it.
 - Pick-ups are **not** tracked (David's decision): the only post-offer action is
   marking a no-show, and only once the offer has ended.
+- **Absences are counted from the lots themselves** (`status = 'no_show'`), not
+  from a separate counter, so undoing a no-show undoes the strike. An admin is
+  never auto-removed — that could lock the only administrator out. Reinstating a
+  contact stamps `strikes_reset_at`, which stops earlier absences from counting
+  without rewriting what happened.
+- **Deleting an offer erases it for good** (admin → an ended offer → Supprimer):
+  lots, messages and photo rows go by cascade; penalties, the SMS log rows and
+  the photo files on disk are removed explicitly in the route, and every former
+  holder is re-checked against the absence limit. A running offer must be closed
+  first.
 
 ## 5. Roles and what each sees
 
@@ -174,7 +185,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (17 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (21 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -185,7 +196,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 17 tests: rules engine + end-to-end HTTP
+npm test                     # 21 tests: rules engine + end-to-end HTTP
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

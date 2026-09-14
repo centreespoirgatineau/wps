@@ -147,6 +147,8 @@ const MIGRATIONS = [
   ['contacts', 'no_sms', 'INTEGER NOT NULL DEFAULT 0'],   // test accounts: never texted
   ['offers', 'sms_fr', "TEXT NOT NULL DEFAULT ''"],        // per-offer SMS template overrides
   ['offers', 'sms_en', "TEXT NOT NULL DEFAULT ''"],
+  ['contacts', 'auto_removed', 'INTEGER NOT NULL DEFAULT 0'],      // removed by the 3-absence rule, not by hand
+  ['contacts', 'strikes_reset_at', 'INTEGER NOT NULL DEFAULT 0'],  // absences before this moment no longer count
 ];
 
 export function openDb(file) {

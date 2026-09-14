@@ -16,6 +16,23 @@
 
 <div id="admin-lots"><%- include('admin/_offer_lots') %></div>
 
+<% if (!offer.active) { %>
+<div class="mt-l center">
+  <button class="btn ghost sm" type="button" data-open="#delete-offer-modal" style="color:var(--danger)"><%= t('offer.admin.delete') %></button>
+</div>
+<div class="modal" id="delete-offer-modal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <h2><%= t('offer.admin.delete_title') %></h2>
+    <p class="muted"><%= t('offer.admin.delete_body') %></p>
+    <form method="post" action="/admin/offres/<%= offer.id %>/supprimer" class="actions">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
+      <button class="btn danger" type="submit"><%= t('offer.admin.delete') %></button>
+    </form>
+  </div>
+</div>
+<% } %>
+
 <% if (penalties.length) { %>
 <div class="section-title"><%= t('offer.admin.penalties') %></div>
 <div class="card">

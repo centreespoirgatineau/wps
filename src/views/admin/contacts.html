@@ -13,7 +13,8 @@
         <strong><%= c.first_name %> <%= c.last_name %>
           <% if (c.role === 'admin') { %><span class="badge accent"><%= t('contacts.role.admin') %></span><% } %>
           <% if (c.no_sms) { %><span class="badge warn"><%= t('contacts.test_badge') %></span><% } %>
-          <% if (c.status !== 'active') { %><span class="badge warn"><%= t('contacts.status.' + c.status) %></span><% } %>
+          <% if (c.auto_removed) { %><span class="badge danger"><%= t('contacts.auto_removed_badge', { n: c.no_shows }) %></span>
+          <% } else if (c.status !== 'active') { %><span class="badge warn"><%= t('contacts.status.' + c.status) %></span><% } %>
         </strong>
         <div class="meta"><%= c.organization %> · <%= fmtPhone(c.phone) %> · <%= c.lang.toUpperCase() %><% if (c.no_shows) { %> · <span style="color:var(--danger)"><%= t('contacts.no_shows') %> : <%= c.no_shows %></span><% } %></div>
       </a>

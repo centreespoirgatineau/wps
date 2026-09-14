@@ -206,11 +206,32 @@ export function adminRoutes(app, db) {
     ctx.redirect(`/admin/offres/${offer.id}`);
   });
 
+  // Erase an offer and everything attached to it. Lots, messages and photo rows
+  // go by cascade; penalties, the SMS log and the photo files on disk do not,
+  // so they are removed here. An offer still running must be closed first —
+  // deleting it under the contacts holding its lots would be a nasty surprise.
   app.post('/admin/offres/:id/supprimer', requireAdmin, async (ctx) => {
     const body = await ctx.body(); checkCsrf(ctx, body);
     const offer = loadOffer(db, ctx.params.id);
-    if (offer.status !== 'draft') throw new HttpError(409);
-    db.run('DELETE FROM offers WHERE id = ?', offer.id);
+    if (offer.effective === 'active') { ctx.flash('error', ctx.t('offer.admin.delete_active')); return ctx.redirect(`/admin/offres/${offer.id}`); }
+
+    const files = [...offer.photos.map((p) => p.file), offer.pickup_photo].filter(Boolean);
+    // Whoever held a lot here may drop below the absence limit once it is gone.
+    const holders = db.all(`SELECT DISTINCT reserved_by AS id FROM lots WHERE offer_id = ? AND reserved_by IS NOT NULL`, offer.id).map((r) => r.id);
+
+    db.tx(() => {
+      db.run('DELETE FROM penalties WHERE source_offer_id = ? OR target_offer_id = ?', offer.id, offer.id);
+      db.run('DELETE FROM sms_log WHERE offer_id = ?', offer.id);
+      db.run('DELETE FROM offers WHERE id = ?', offer.id);
+      for (const id of holders) rules.applyStrikes(db, id);
+    });
+    for (const f of files) {
+      const name = path.basename(String(f));
+      if (/^[A-Za-z0-9_-]+\.(jpg|webp|png)$/.test(name)) {
+        try { fs.unlinkSync(path.join(config.uploadsDir, name)); } catch {}
+      }
+    }
+    ctx.flash('ok', ctx.t('offer.admin.deleted'));
     ctx.redirect('/admin/offres');
   });
 
@@ -234,10 +255,21 @@ export function adminRoutes(app, db) {
     const offer = loadOffer(db, ctx.params.id);
     const lot = offer.lots.find((l) => l.id === Number(ctx.params.lotId));
     if (!lot) throw new HttpError(404);
-    try { rules.adminSetLot(db, lot.id, String(body.action)); }
+    let result;
+    try { result = rules.adminSetLot(db, lot.id, String(body.action)); }
     catch (e) { if (!(e instanceof rules.RuleError)) throw e; throw new HttpError(409, e.reason); }
     sse.publish(offer.id, 'refresh', { reason: 'admin' });
-    if (ctx.req.headers['x-csrf']) return ctx.json({ ok: true });
+    // Say it out loud when the absence rule removes or brings back a contact:
+    // otherwise a church would quietly vanish from the list.
+    let notice = null;
+    if (result.strikes?.removed || result.strikes?.restored) {
+      const c = db.get('SELECT first_name, last_name FROM contacts WHERE id = ?', lot.reserved_by);
+      const who = `${c?.first_name || ''} ${c?.last_name || ''}`.trim();
+      notice = ctx.t(result.strikes.removed ? 'contacts.auto_removed_notice' : 'contacts.restored_notice',
+        { name: who, n: result.strikes.strikes, max: config.strikeLimit });
+    }
+    if (ctx.req.headers['x-csrf']) return ctx.json({ ok: true, notice });
+    if (notice) ctx.flash('ok', notice);
     ctx.redirect(`/admin/offres/${offer.id}`);
   });
 
@@ -278,7 +310,8 @@ export function adminRoutes(app, db) {
         (SELECT COUNT(*) FROM lots l WHERE l.reserved_by = c.id AND l.status IN ('reserved','picked_up')) AS reservations,
         (SELECT COUNT(*) FROM lots l WHERE l.reserved_by = c.id AND l.status = 'no_show') AS no_shows,
         (SELECT MAX(last_seen_at) FROM sessions s WHERE s.contact_id = c.id) AS last_seen
-      FROM contacts c WHERE c.status != 'removed' ORDER BY c.status = 'active' DESC, c.organization, c.first_name`);
+      FROM contacts c WHERE c.status != 'removed' OR c.auto_removed = 1
+      ORDER BY c.status = 'active' DESC, c.organization, c.first_name`);
     if (q) contacts = contacts.filter((c) => `${c.first_name} ${c.last_name} ${c.organization} ${c.phone}`.toLowerCase().includes(q));
     ctx.render('admin/contacts', { title: ctx.t('contacts.title'), contacts, q });
   });
@@ -312,16 +345,17 @@ export function adminRoutes(app, db) {
   });
 
   app.get('/admin/contacts/:id', requireAdmin, (ctx) => {
-    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND status != 'removed'`, Number(ctx.params.id));
+    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND (status != 'removed' OR auto_removed = 1)`, Number(ctx.params.id));
     if (!c) throw new HttpError(404);
     const history = db.all(`SELECT l.*, o.title, o.published_at FROM lots l JOIN offers o ON o.id = l.offer_id WHERE l.reserved_by = ? ORDER BY l.reserved_at DESC LIMIT 20`, c.id);
     const penalties = db.all(`SELECT * FROM penalties WHERE contact_id = ? AND status IN ('pending','active') ORDER BY id DESC`, c.id);
-    ctx.render('admin/contact_form', { title: ctx.t('contacts.edit'), form: c, contactId: c.id, link: personalLink(c), history, penalties });
+    ctx.render('admin/contact_form', { title: ctx.t('contacts.edit'), form: c, contactId: c.id, link: personalLink(c), history, penalties,
+      strikes: rules.strikeCount(db, c.id), strikeLimit: config.strikeLimit });
   });
 
   app.post('/admin/contacts/:id', requireAdmin, async (ctx) => {
     const body = await ctx.body(); checkCsrf(ctx, body);
-    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND status != 'removed'`, Number(ctx.params.id));
+    const c = db.get(`SELECT * FROM contacts WHERE id = ? AND (status != 'removed' OR auto_removed = 1)`, Number(ctx.params.id));
     if (!c) throw new HttpError(404);
     const form = contactFromBody(body);
     const phone = normalizePhone(form.phone_raw);
@@ -346,6 +380,19 @@ export function adminRoutes(app, db) {
     db.run(`UPDATE contacts SET status = 'removed', updated_at = ? WHERE id = ?`, Date.now(), id);
     db.run('DELETE FROM sessions WHERE contact_id = ?', id);
     ctx.redirect('/admin/contacts');
+  });
+
+  // Put back a contact the absence rule removed, and wipe the slate: their past
+  // absences stay in the history but stop counting, otherwise the next one would
+  // remove them again immediately.
+  app.post('/admin/contacts/:id/reintegrer', requireAdmin, async (ctx) => {
+    const body = await ctx.body(); checkCsrf(ctx, body);
+    const id = Number(ctx.params.id);
+    const c = db.get('SELECT * FROM contacts WHERE id = ? AND auto_removed = 1', id);
+    if (!c) throw new HttpError(404);
+    db.run(`UPDATE contacts SET status = 'active', auto_removed = 0, strikes_reset_at = ?, updated_at = ? WHERE id = ?`, Date.now(), Date.now(), id);
+    ctx.flash('ok', ctx.t('contacts.reinstated'));
+    ctx.redirect(`/admin/contacts/${id}`);
   });
 
   app.post('/admin/contacts/:id/lien', requireAdmin, async (ctx) => {

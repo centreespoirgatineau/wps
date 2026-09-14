@@ -196,8 +196,16 @@ input.big { font-size: 1.25rem; }
 /* Chat */
 .chat { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; padding: 4px 2px; scroll-behavior: smooth; }
 .msg { max-width: 85%; padding: 8px 12px; border-radius: 16px; background: var(--surface-2); font-size: .95rem; word-wrap: break-word; }
-.msg .by { display: block; font-size: .75rem; color: var(--ink-3); }
+.msg .by { display: block; font-size: .75rem; font-weight: 600; color: var(--ink-3); }
 .msg .at { display: block; font-size: .7rem; color: var(--ink-3); opacity: .8; margin-bottom: 3px; }
+/* One tint per participant (contact id modulo 6), so a glance tells you how many
+   people are in the conversation. Own messages override this below. */
+.msg.p0 { background: #EDEAE1; } .msg.p0 .by { color: #6B675C; }
+.msg.p1 { background: #E7F0EA; } .msg.p1 .by { color: #3F7A5B; }
+.msg.p2 { background: #F8F0DC; } .msg.p2 .by { color: #8A6012; }
+.msg.p3 { background: #E6EDF4; } .msg.p3 .by { color: #3F6080; }
+.msg.p4 { background: #F2E8F0; } .msg.p4 .by { color: #7A4A70; }
+.msg.p5 { background: #F7E5E3; } .msg.p5 .by { color: #B3403A; }
 .msg.mine { align-self: flex-end; background: var(--accent-soft); color: var(--ink); border-bottom-right-radius: 4px; }
 .msg.mine .by, .msg.mine .at { color: var(--accent-ink); }
 .msg:not(.mine) { border-bottom-left-radius: 4px; }

@@ -173,3 +173,70 @@ test('lot counts', () => {
   rules.adminSetLot(db, lot.id, 'picked_up', t0);
   assert.deepEqual(rules.lotCounts(db, id), { total: 3, available: 2, reserved: 1, picked_up: 1, no_show: 0 });
 });
+
+test('three absences remove a contact from the list; undoing the third brings them back', () => {
+  const { db, alice } = fresh();
+  assert.equal(config.strikeLimit, 3);
+  const lots = [];
+  // Three offers, Alice reserves one lot on each and never comes for it.
+  for (let i = 0; i < 3; i++) {
+    const id = draft(db, { lots: 2 });
+    rules.publishOffer(db, id, Date.now());
+    const free = db.get(`SELECT * FROM lots WHERE offer_id = ? AND status = 'available'`, id);
+    // Clear the cooldown earned on the previous offer so she can reserve again.
+    db.run(`UPDATE penalties SET status = 'cleared' WHERE contact_id = ?`, alice.id);
+    rules.reserveLot(db, alice, free.id);
+    lots.push(free.id);
+    assert.equal(rules.strikeCount(db, alice.id), i, 'no strike before the absence is marked');
+    rules.adminSetLot(db, free.id, 'no_show');
+    assert.equal(rules.strikeCount(db, alice.id), i + 1);
+    const after = db.get('SELECT status, auto_removed FROM contacts WHERE id = ?', alice.id);
+    if (i < 2) assert.equal(after.status, 'active', `still on the list after ${i + 1}`);
+    else {
+      assert.equal(after.status, 'removed');
+      assert.equal(after.auto_removed, 1);
+    }
+  }
+  // Undoing the third absence puts her back.
+  rules.adminSetLot(db, lots[2], 'reserved');
+  const back = db.get('SELECT status, auto_removed FROM contacts WHERE id = ?', alice.id);
+  assert.equal(rules.strikeCount(db, alice.id), 2);
+  assert.equal(back.status, 'active');
+  assert.equal(back.auto_removed, 0);
+});
+
+test('an administrator is never removed by the absence rule', () => {
+  const { db, bob } = fresh();
+  db.run(`UPDATE contacts SET role = 'admin' WHERE id = ?`, bob.id);
+  const admin = db.get('SELECT * FROM contacts WHERE id = ?', bob.id);
+  for (let i = 0; i < 4; i++) {
+    const id = draft(db, { lots: 2 });
+    rules.publishOffer(db, id, Date.now());
+    const free = db.get(`SELECT * FROM lots WHERE offer_id = ? AND status = 'available'`, id);
+    db.run(`UPDATE penalties SET status = 'cleared' WHERE contact_id = ?`, admin.id);
+    rules.reserveLot(db, admin, free.id);
+    rules.adminSetLot(db, free.id, 'no_show');
+  }
+  assert.equal(rules.strikeCount(db, admin.id), 4);
+  assert.equal(db.get('SELECT status FROM contacts WHERE id = ?', admin.id).status, 'active');
+});
+
+test('reinstating a contact stops their past absences from counting', () => {
+  const { db, carol } = fresh();
+  const marked = [];
+  for (let i = 0; i < 3; i++) {
+    const id = draft(db, { lots: 2 });
+    rules.publishOffer(db, id, Date.now());
+    const free = db.get(`SELECT * FROM lots WHERE offer_id = ? AND status = 'available'`, id);
+    db.run(`UPDATE penalties SET status = 'cleared' WHERE contact_id = ?`, carol.id);
+    rules.reserveLot(db, carol, free.id);
+    rules.adminSetLot(db, free.id, 'no_show');
+    marked.push(free.id);
+  }
+  assert.equal(db.get('SELECT status FROM contacts WHERE id = ?', carol.id).status, 'removed');
+  // What the admin's "reinstate" button does.
+  db.run(`UPDATE contacts SET status = 'active', auto_removed = 0, strikes_reset_at = ? WHERE id = ?`, Date.now() + 1, carol.id);
+  assert.equal(rules.strikeCount(db, carol.id), 0, 'the slate is clean');
+  // The lots still say what happened.
+  assert.equal(db.all(`SELECT id FROM lots WHERE reserved_by = ? AND status = 'no_show'`, carol.id).length, 3);
+});

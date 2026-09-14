@@ -1,6 +1,17 @@
 <div class="page-head"><h1><%= title %></h1></div>
 <% if (error) { %><div class="banner error mb"><%= error %></div><% } %>
 
+<% if (contactId && form.auto_removed) { %>
+<div class="card mb">
+  <div class="banner warn mb"><%= t('contacts.auto_removed_badge', { n: strikes }) %></div>
+  <p class="tiny"><%= t('contacts.reinstate_hint') %></p>
+  <form method="post" action="/admin/contacts/<%= contactId %>/reintegrer" class="mt-s">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <button class="btn secondary block" type="submit"><%= t('contacts.reinstate') %></button>
+  </form>
+</div>
+<% } %>
+
 <% if (contactId) { %>
 <div class="card">
   <div class="tiny"><%= t('contacts.personal_link') %></div>
@@ -41,6 +52,13 @@
     <button class="btn primary block mt-s" type="submit"><%= t('btn.save') %></button>
   </div>
 </form>
+
+<% if (contactId && strikes) { %>
+<div class="section-title"><%= t('contacts.strikes') %></div>
+<div class="card">
+  <p class="tiny" style="color:var(--danger)"><%= t('contacts.strikes_hint', { n: strikes, max: strikeLimit }) %></p>
+</div>
+<% } %>
 
 <% if (contactId && penalties && penalties.length) { %>
 <div class="section-title"><%= t('offer.admin.penalties') %></div>

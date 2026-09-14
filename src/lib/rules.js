@@ -8,6 +8,8 @@
 //    penalty: they cannot reserve at all on the next published offer.
 //  • When an offer ends (23:59 local or closed by an admin), every penalty
 //    targeting it is cleared — everyone starts equal again.
+//  • Absences add up across offers: at STRIKE_LIMIT (3) the contact is removed
+//    from the list automatically. Undoing the absence brings them back.
 import { config } from '../config.js';
 import { endOfDay } from './time.js';
 import { isDemo } from './demo.js';
@@ -130,6 +132,7 @@ export function adminSetLot(db, lotId, action, now = Date.now()) {
     const lot = db.get('SELECT * FROM lots WHERE id = ?', lotId);
     if (!lot) throw new RuleError('not_found');
     const holder = lot.reserved_by;
+    let strikes = null;
     switch (action) {
       case 'picked_up':
         if (!holder) throw new RuleError('no_holder');
@@ -155,8 +158,46 @@ export function adminSetLot(db, lotId, action, now = Date.now()) {
       default:
         throw new RuleError('bad_action');
     }
-    return db.get('SELECT * FROM lots WHERE id = ?', lotId);
+    // Every branch above can change how many absences the holder has.
+    if (holder) strikes = applyStrikes(db, holder, now);
+    return { ...db.get('SELECT * FROM lots WHERE id = ?', lotId), strikes };
   });
+}
+
+/**
+ * How many times this contact reserved a lot and never came for it.
+ * Read straight from the lots, so undoing a no-show undoes the strike too, and
+ * reinstating a contact (which stamps strikes_reset_at) wipes the slate without
+ * rewriting what happened.
+ */
+export function strikeCount(db, contactId) {
+  const c = db.get('SELECT strikes_reset_at FROM contacts WHERE id = ?', contactId);
+  if (!c) return 0;
+  return db.get(
+    `SELECT COUNT(*) AS n FROM lots WHERE reserved_by = ? AND status = 'no_show' AND COALESCE(reserved_at, 0) > ?`,
+    contactId, c.strikes_reset_at || 0).n;
+}
+
+/**
+ * Enforce the absence limit after any change to a lot's status: at the limit the
+ * contact leaves the list, and undoing the absence that tipped them over brings
+ * them back. Administrators are never removed this way — that would lock the
+ * only administrator out of the platform.
+ */
+export function applyStrikes(db, contactId, now = Date.now()) {
+  const c = db.get('SELECT id, role, status, auto_removed FROM contacts WHERE id = ?', contactId);
+  if (!c) return { strikes: 0 };
+  const strikes = strikeCount(db, contactId);
+  if (strikes >= config.strikeLimit && c.status !== 'removed' && c.role !== 'admin') {
+    db.run(`UPDATE contacts SET status = 'removed', auto_removed = 1, updated_at = ? WHERE id = ?`, now, c.id);
+    db.run('DELETE FROM sessions WHERE contact_id = ?', c.id);
+    return { strikes, removed: true };
+  }
+  if (strikes < config.strikeLimit && c.auto_removed && c.status === 'removed') {
+    db.run(`UPDATE contacts SET status = 'active', auto_removed = 0, updated_at = ? WHERE id = ?`, now, c.id);
+    return { strikes, restored: true };
+  }
+  return { strikes };
 }
 
 function removePendingNoShow(db, contactId, offerId) {

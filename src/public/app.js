@@ -151,7 +151,7 @@
       $('#chat-empty')?.remove();
       const mine = m.contactId === me;
       const div = document.createElement('div');
-      div.className = 'msg' + (mine ? ' mine' : ''); div.dataset.id = m.id;
+      div.className = `msg p${m.contactId % 6}${mine ? ' mine' : ''}`; div.dataset.id = m.id;
       const by = document.createElement('span'); by.className = 'by';
       by.textContent = mine ? (T.you || (document.documentElement.lang === 'fr' ? 'Vous' : 'You')) : m.name + (m.org ? ' - ' + m.org : '');
       const at = document.createElement('span'); at.className = 'at';
@@ -283,6 +283,7 @@
       const action = e.submitter?.value || f.action_value?.value;
       const r = await post(f.getAttribute('action'), { action });
       if (!r.ok) toast(r.error || 'Erreur', true);
+      else if (r.notice) toast(r.notice);
       refresh();
     });
   }

@@ -36,6 +36,9 @@ export const config = {
     dryRun: bool(env.SMS_DRY_RUN, false),
   },
   cooldownMinutes: Number(env.COOLDOWN_MINUTES || 15),
+  // Absences (lots reserved but never picked up) before a contact is
+  // removed from the list automatically.
+  strikeLimit: Number(env.STRIKE_LIMIT || 3),
   adminFreshHours: Number(env.ADMIN_FRESH_HOURS || 12),
   sessionDays: Number(env.SESSION_DAYS || 90),
   loginCodeMinutes: 10,

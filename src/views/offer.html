@@ -53,7 +53,7 @@
   <div id="chat" class="chat">
     <% if (!messages.length) { %><div class="tiny center" id="chat-empty"><%= t('chat.empty') %></div><% } %>
     <% for (const m of messages) { %>
-      <div class="msg <%= m.contact_id === myId ? 'mine' : '' %>" data-id="<%= m.id %>">
+      <div class="msg p<%= m.contact_id % 6 %><%= m.contact_id === myId ? ' mine' : '' %>" data-id="<%= m.id %>">
         <span class="by"><%= m.contact_id === myId ? t('chat.you') : (m.first_name + (m.last_name ? ' ' + m.last_name[0] + '.' : '') + (m.organization ? ' - ' + m.organization : '')) %></span>
         <span class="at"><%= fmtWhen(m.created_at) %></span>
         <%= m.body %>

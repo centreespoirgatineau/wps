@@ -81,6 +81,15 @@ async function loginByCode(c, phone) {
   return r2.location;
 }
 
+// The admin signs in by code, and codes are rate-limited per phone (5 / 15 min
+// in production). Tests that only need admin rights share one session rather
+// than spending a login each.
+let sharedAdmin = null;
+async function adminClient() {
+  if (!sharedAdmin) { sharedAdmin = client(); await loginByCode(sharedAdmin, '(819) 555-0001'); }
+  return sharedAdmin;
+}
+
 test('unknown phone is told to request access', async () => {
   const c = client();
   const r = await c.post('/connexion', { form: { phone: '(819) 555-9999' } });
@@ -320,8 +329,7 @@ test('admin pages need admin role; link sessions need a fresh code for admin', a
 
 test('demonstration number: signs in with no code, looks at everything, changes nothing', async () => {
   // A fresh published offer, so there is certainly an available lot to try.
-  const admin = client();
-  await loginByCode(admin, '(819) 555-0001');
+  const admin = await adminClient();
   let csrf = await admin.csrf('/admin');
   let r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Yogourts', lot_description: '12 yogourts', lot_count: '2', max_per_contact: '1' } });
   const offerId = /\/admin\/offres\/(\d+)\/confirmer/.exec(r.location)[1];
@@ -410,4 +418,45 @@ test('the login page has no header, but keeps a way into English', async () => {
   // Other visitor pages keep their header.
   r = await c.get('/a-propos');
   assert.match(r.text, /<header/);
+});
+
+test('an admin can erase an offer and everything attached to it', async () => {
+  const admin = await adminClient();
+  let csrf = await admin.csrf('/admin');
+  let r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Pommes', lot_description: '5 pommes', lot_count: '2', max_per_contact: '1' } });
+  const offerId = /\/admin\/offres\/(\d+)\/confirmer/.exec(r.location)[1];
+  r = await admin.get(r.location);
+  const ids = [...r.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  await admin.post(`/admin/offres/${offerId}/publier`, { form: new URLSearchParams([['_csrf', csrf], ...ids.map((i) => ['contacts', i])]) });
+  await new Promise((res) => setTimeout(res, 200));
+
+  // A reservation and a message, so there is something to clean up.
+  r = await admin.get(`/offres/${offerId}`);
+  const lotId = /data-reserve="(\d+)"/.exec(r.text)[1];
+  const ocsrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+  await admin.post(`/offres/${offerId}/lots/${lotId}/reserver`, { json: {}, headers: { 'X-CSRF': ocsrf } });
+  await admin.post(`/offres/${offerId}/messages`, { json: { body: 'à supprimer' }, headers: { 'X-CSRF': ocsrf } });
+
+  // A running offer must be closed first.
+  csrf = await admin.csrf('/admin');
+  r = await admin.post(`/admin/offres/${offerId}/supprimer`, { form: { _csrf: csrf } });
+  assert.equal(r.status, 303);
+  r = await admin.get(`/admin/offres/${offerId}`);
+  assert.equal(r.status, 200, 'still there while it is running');
+
+  await admin.post(`/admin/offres/${offerId}/fermer`, { form: { _csrf: csrf } });
+  r = await admin.post(`/admin/offres/${offerId}/supprimer`, { form: { _csrf: csrf } });
+  assert.equal(r.status, 303);
+  assert.match(r.location, /\/admin\/offres$/);
+
+  // Gone from both the admin and the contact side.
+  r = await admin.get(`/admin/offres/${offerId}`);
+  assert.equal(r.status, 404);
+  r = await admin.get(`/offres/${offerId}`);
+  assert.equal(r.status, 404);
+  r = await admin.get('/admin/offres');
+  assert.doesNotMatch(r.text, /Pommes/);
+  // And its deliveries are out of the text log.
+  r = await admin.get('/admin/sms');
+  assert.doesNotMatch(r.text, /Pommes/);
 });
