@@ -29,6 +29,7 @@ export default {
   'meta.og_title': 'A tool for sharing the gospel of Jesus Christ',
   'meta.og_desc': 'Surplus food from Centre Espoir de Gatineau, redistributed the same day by the churches of the Outaouais.',
   'meta.title_suffix': 'Surplus food, Centre Espoir de Gatineau',
+  'meta.og_image_alt': 'The Centre Espoir de Gatineau lighthouse, with the words “A tool for sharing the gospel of Jesus Christ”.',
 
   // ---- login ----
   'login.title': 'Sign in',

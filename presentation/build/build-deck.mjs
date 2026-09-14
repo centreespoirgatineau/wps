@@ -243,6 +243,7 @@ const html = `<!doctype html>
 <meta property="og:image" content="__ORIGIN__/static/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Le phare du Centre Espoir de Gatineau, et les mots « Un outil pour annoncer l’Évangile de Jésus-Christ »">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Comment une église annonce l’Évangile de Jésus-Christ en redistribuant les surplus alimentaires du Centre Espoir de Gatineau.">
 <title>Un outil pour annoncer l’Évangile de Jésus-Christ</title>
@@ -261,7 +262,7 @@ const html = `<!doctype html>
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg)}
 body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
-  -webkit-tap-highlight-color:transparent}
+  -webkit-tap-highlight-color:transparent;text-wrap:pretty}
 
 /* One tall page that stops neatly on each slide. Scrolling is the navigation:
    a flick of the thumb on a phone, the wheel on a laptop, arrows on a clicker. */

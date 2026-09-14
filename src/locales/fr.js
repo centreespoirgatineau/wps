@@ -29,6 +29,7 @@ export default {
   'meta.og_title': 'Un outil pour annoncer l’Évangile de Jésus-Christ',
   'meta.og_desc': 'Les surplus alimentaires du Centre Espoir de Gatineau, redistribués le jour même par les églises de l’Outaouais.',
   'meta.title_suffix': 'Surplus alimentaires, Centre Espoir de Gatineau',
+  'meta.og_image_alt': 'Le phare du Centre Espoir de Gatineau, et les mots « Un outil pour annoncer l’Évangile de Jésus-Christ ».',
 
   // ---- login ----
   'login.title': 'Connexion',
