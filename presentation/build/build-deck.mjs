@@ -75,7 +75,7 @@ slides.push(`
     <div class="steps">
       <div class="step"><span class="n">1</span><h3>Le Centre Espoir publie</h3><p>Ce que contient un lot, combien de lots, où aller le récupérer, et jusqu’à quelle heure.</p></div>
       <div class="step"><span class="n">2</span><h3>Les églises reçoivent un texto</h3><p>Toutes au même moment, avec un lien qui ouvre l’offre.</p></div>
-      <div class="step"><span class="n">3</span><h3>Chacune réserve sa part</h3><p>Premier arrivé, premier servi. Vous venez chercher, et c’est tout.</p></div>
+      <div class="step"><span class="n">3</span><h3>Chacune réserve sa part</h3><p>Premier arrivé, premier servi. Il ne reste qu’à venir la chercher.</p></div>
     </div>
   </div>
 </section>`);
@@ -131,7 +131,7 @@ slides.push(`
       <ul class="ticks">
         <li>Un lot réservé disparaît aussitôt pour les autres.</li>
         <li>Vous voyez qui a pris quoi, en direct.</li>
-        <li>Une réservation vous engage à venir le chercher.</li>
+        <li>Réserver un lot, c’est s’engager à venir le chercher.</li>
       </ul>
     </div>
     <div class="col shot-col">${phone('offer', 600)}</div>
@@ -235,6 +235,8 @@ const html = `<!doctype html>
 <!-- Link preview. __ORIGIN__ is filled in by the /presentation route, so the
      address stays a setting rather than something baked into this file. -->
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Centre Espoir de Gatineau">
+<meta property="og:locale" content="fr_CA">
 <meta property="og:title" content="Un outil pour annoncer l’Évangile de Jésus-Christ">
 <meta property="og:description" content="Comment une église annonce l’Évangile de Jésus-Christ en redistribuant les surplus alimentaires du Centre Espoir de Gatineau.">
 <meta property="og:url" content="__ORIGIN__/presentation">
@@ -242,7 +244,8 @@ const html = `<!doctype html>
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<title>Un outil pour annoncer l’Évangile — Centre Espoir de Gatineau</title>
+<meta name="description" content="Comment une église annonce l’Évangile de Jésus-Christ en redistribuant les surplus alimentaires du Centre Espoir de Gatineau.">
+<title>Un outil pour annoncer l’Évangile de Jésus-Christ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
