@@ -42,7 +42,10 @@ before(async () => {
   });
   proc.stderr.on('data', (d) => process.stderr.write(d));
   await new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('server did not start')), 8000);
+    // Generous: on a cold machine (files not yet cached, a virus scanner
+    // reading node.exe and the sources for the first time) boot can take well
+    // over 8 s, and a timeout here fails the whole file for no real reason.
+    const t = setTimeout(() => reject(new Error('server did not start')), 30000);
     proc.stdout.on('data', (d) => { if (String(d).includes('listening')) { clearTimeout(t); resolve(); } });
   });
   // First admin via CLI
@@ -167,7 +170,8 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   await john.get(`/o/${offerId}/${jtoken}`);
   r = await john.get(`/offres/${offerId}`);
   assert.match(r.text, /Marie T\./);
-  assert.match(r.text, /\(819\) 555-0002/);
+  assert.doesNotMatch(r.text, /\(819\) 555-0002/); // phones are for admins only
+  assert.doesNotMatch(r.text, /tel:/);
   assert.match(r.text, /Reserve/); // English UI for John
   const jcsrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
   const lot2 = /data-reserve="(\d+)"/.exec(r.text)[1];
@@ -177,6 +181,11 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   // Taken lot cannot be reserved again by John (max) nor by anyone
   r = await john.post(`/offres/${offerId}/lots/${lotId}/reserver`, { json: {}, headers: { 'X-CSRF': jcsrf } });
   assert.equal(r.status, 409);
+
+  // The same offer page, seen by an admin, does show the numbers.
+  r = await admin.get(`/offres/${offerId}`);
+  assert.match(r.text, /\(819\) 555-0002/);
+  assert.match(r.text, /tel:/);
 
   // Admin marks Marie picked up, John no-show; closes the offer
   r = await admin.post(`/admin/offres/${offerId}/lots/${lotId}`, { json: { action: 'picked_up' }, headers: { 'X-CSRF': csrf } });
@@ -354,4 +363,23 @@ test('demonstration number: signs in with no code, looks at everything, changes 
   r = await admin.get('/admin/sms');
   assert.match(r.text, /Compte de test/);
   assert.doesNotMatch(r.text, /\(555\) 555-5555[\s\S]{0,400}?(Envoyé|Livré)/);
+});
+
+test('French by default, whatever the browser asks for', async () => {
+  // An English phone or laptop must still land on the French interface:
+  // English is a choice the visitor makes, not a negotiation.
+  const en = client();
+  let r = await en.get('/connexion', { headers: { 'Accept-Language': 'en-CA,en;q=0.9' } });
+  assert.match(r.text, /Connexion/);
+  assert.match(r.text, /Numéro de cellulaire/);
+  assert.doesNotMatch(r.text, /Phone number/);
+  assert.match(r.text, /<html lang="fr"/);
+  // The About page too, for a visitor with no cookie and no account.
+  r = await en.get('/a-propos', { headers: { 'Accept-Language': 'en-US,en' } });
+  assert.match(r.text, /<html lang="fr"/);
+  // Asking for English explicitly still works, and sticks.
+  r = await en.get('/connexion?lang=en');
+  assert.equal(r.status, 303);
+  r = await en.get('/connexion', { headers: { 'Accept-Language': 'fr-CA,fr' } });
+  assert.match(r.text, /<html lang="en"/);
 });

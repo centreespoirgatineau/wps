@@ -26,10 +26,13 @@
       <div class="who">
         <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong></div>
         <% if (!mine) { %><div class="org"><%= l.organization %></div>
+          <%# Phone numbers are for admins only; contacts coordinate in the chat. %>
+          <% if (isAdmin) { %>
           <div class="contact-links">
             <a href="tel:<%= l.phone %>"><%= fmtPhone(l.phone) %></a>
             <a href="sms:<%= l.phone %>"><%= t('offer.text') %></a>
           </div>
+          <% } %>
         <% } %>
       </div>
     <% } %>

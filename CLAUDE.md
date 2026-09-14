@@ -43,6 +43,14 @@ Other hard constraints:
   server's local time implicitly.
 - **French display conventions:** times as `14H05` (capital H, no space), phones as
   `(819) 208-5721`. See `src/lib/phone.js`, `src/lib/time.js`.
+- **French by default, always.** The browser's `Accept-Language` is deliberately
+  ignored: an English phone must still land on the French interface, and English
+  is a choice the visitor makes with the EN toggle (then remembered on the
+  contact and in a cookie). Covered by a test.
+- **Phone numbers are admin-only.** A contact never sees another contact's
+  number: no number, no `tel:`/`sms:` link on the lots list. Admins still see
+  them everywhere, and a contact still sees their own on `/reglages`. Contacts
+  coordinate through the per-offer chat instead.
 - **Static assets are content-hashed** (`app.css?v=<hash>` computed at boot in
   `src/server.js`); HTML is `Cache-Control: no-store`. This exists because a stale
   cached stylesheet once broke the live layout. Keep it.
@@ -157,7 +165,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (15 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (16 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -168,7 +176,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 15 tests: rules engine + end-to-end HTTP
+npm test                     # 16 tests: rules engine + end-to-end HTTP
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

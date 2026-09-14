@@ -20,13 +20,3 @@ export function translator(lang) {
   t.lang = lang;
   return t;
 }
-
-/** Pick language from Accept-Language header. */
-export function fromAcceptLanguage(header, dflt = 'fr') {
-  if (!header) return dflt;
-  for (const part of String(header).split(',')) {
-    const code = part.trim().slice(0, 2).toLowerCase();
-    if (LANGS.includes(code)) return code;
-  }
-  return dflt;
-}

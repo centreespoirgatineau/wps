@@ -22,12 +22,20 @@ export const isDemo = (contact) => Boolean(contact) && contact.phone === DEMO_PH
  */
 export function ensureDemoContact(db, lang = 'fr') {
   const existing = db.get('SELECT * FROM contacts WHERE phone = ?', DEMO_PHONE);
-  if (existing) return existing;
+  if (existing) {
+    // Older rows carried the name in both fields, which read as
+    // "Démonstration · Démonstration" on the offer page. Tidy that once.
+    if (existing.organization === 'Démonstration' && existing.first_name === 'Démonstration') {
+      db.run(`UPDATE contacts SET organization = '', updated_at = ? WHERE id = ?`, Date.now(), existing.id);
+      existing.organization = '';
+    }
+    return existing;
+  }
   const now = Date.now();
   db.run(
     `INSERT INTO contacts(first_name, last_name, organization, phone, lang, role, status, token, notes, no_sms, created_at, updated_at)
      VALUES (?, '', ?, ?, ?, 'user', 'active', ?, ?, 1, ?, ?)`,
-    'Démonstration', 'Démonstration', DEMO_PHONE, lang, newToken(12),
+    'Démonstration', '', DEMO_PHONE, lang, newToken(12),
     'Compte de démonstration : ouvre le tableau de bord sans texto, en lecture seule.',
     now, now,
   );

@@ -6,12 +6,12 @@ import { config } from './config.js';
 import { App, HttpError } from './lib/http.js';
 import { openDb } from './lib/db.js';
 import { render, renderPartial } from './lib/view.js';
-import { translator, normalizeLang, fromAcceptLanguage } from './lib/i18n.js';
+import { translator, normalizeLang } from './lib/i18n.js';
 import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
 import { isDemo } from './lib/demo.js';
 import { startScheduler } from './lib/scheduler.js';
 import { formatPhone } from './lib/phone.js';
-import { formatDate, formatDateTimeShort, hmToH } from './lib/time.js';
+import { formatDate, formatDateTimeShort, formatDateTimeLong, hmToH } from './lib/time.js';
 import { publicRoutes } from './routes/public.js';
 import { contactRoutes } from './routes/contact.js';
 import { adminRoutes } from './routes/admin.js';
@@ -49,7 +49,10 @@ app.use((ctx) => {
 app.use(loadSession(db));
 
 app.use((ctx) => {
-  // Language: ?lang= (and persist) > contact preference > cookie > Accept-Language > default
+  // Language: ?lang= (and persist) > contact preference > cookie > French.
+  // The browser's Accept-Language is deliberately NOT consulted: the platform
+  // is French by default and English is a choice the visitor makes, otherwise
+  // a phone set to English opens the site in English on the first visit.
   let lang;
   if (ctx.query.lang) {
     lang = normalizeLang(ctx.query.lang, config.defaultLang);
@@ -62,7 +65,7 @@ app.use((ctx) => {
     const u = new URL(ctx.url); u.searchParams.delete('lang');
     return ctx.redirect(u.pathname + (u.search || ''));
   }
-  lang = ctx.state.contact?.lang || normalizeLang(ctx.cookies.wps_lang, '') || fromAcceptLanguage(ctx.req.headers['accept-language'], config.defaultLang);
+  lang = ctx.state.contact?.lang || normalizeLang(ctx.cookies.wps_lang, '') || config.defaultLang;
   ctx.state.lang = lang;
   ctx.t = translator(lang);
 
@@ -91,6 +94,7 @@ app.use((ctx) => {
       fmtPhone: formatPhone,
       fmtDate: (ms, withTime) => formatDate(ms, config.timezone, lang, withTime),
       fmtShort: (ms) => formatDateTimeShort(ms, config.timezone, lang),
+      fmtWhen: (ms) => formatDateTimeLong(ms, config.timezone, lang),
       hmToH: (hm) => hmToH(hm, lang),
       ...locals,
     };

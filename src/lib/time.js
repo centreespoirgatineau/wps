@@ -63,6 +63,13 @@ export function formatDate(ms, tz, lang = 'fr', withTime = false) {
   return lang === 'fr' ? s.replace(/ (\d{2}) h (\d{2})/, ' $1H$2') : s;
 }
 
+/** "11 septembre à 15H13" — the chat byline. */
+export function formatDateTimeLong(ms, tz, lang = 'fr') {
+  const opts = { timeZone: tz, day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+  const s = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-CA' : 'en-CA', opts).format(new Date(ms));
+  return lang === 'fr' ? s.replace(/(\d{1,2}) h (\d{2})/, '$1H$2') : s;
+}
+
 export function formatDateTimeShort(ms, tz, lang = 'fr') {
   const opts = { timeZone: tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
   const s = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-CA' : 'en-CA', opts).format(new Date(ms));

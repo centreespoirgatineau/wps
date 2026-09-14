@@ -193,9 +193,10 @@ input.big { font-size: 1.25rem; }
 /* Chat */
 .chat { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; padding: 4px 2px; scroll-behavior: smooth; }
 .msg { max-width: 85%; padding: 8px 12px; border-radius: 16px; background: var(--surface-2); font-size: .95rem; word-wrap: break-word; }
-.msg .by { display: block; font-size: .75rem; color: var(--ink-3); margin-bottom: 2px; }
+.msg .by { display: block; font-size: .75rem; color: var(--ink-3); }
+.msg .at { display: block; font-size: .7rem; color: var(--ink-3); opacity: .8; margin-bottom: 3px; }
 .msg.mine { align-self: flex-end; background: var(--accent-soft); color: var(--ink); border-bottom-right-radius: 4px; }
-.msg.mine .by { color: var(--accent-ink); }
+.msg.mine .by, .msg.mine .at { color: var(--accent-ink); }
 .msg:not(.mine) { border-bottom-left-radius: 4px; }
 .chat-form { display: flex; gap: 8px; margin-top: 10px; }
 .chat-form textarea { min-height: 46px; max-height: 120px; resize: none; border-radius: 22px; padding: 11px 14px; }

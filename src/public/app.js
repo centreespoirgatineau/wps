@@ -134,8 +134,16 @@
     const form = $('#chat-form');
     const scrollChat = () => { chat.scrollTop = chat.scrollHeight; };
     scrollChat();
-    function fmtTime(ms) {
-      return new Intl.DateTimeFormat(document.documentElement.lang === 'fr' ? 'fr-CA' : 'en-CA', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms)).replace(/ h /, 'H');
+    // Same shape as the server's fmtWhen: "11 septembre a 15H13". The zone is
+    // pinned so a contact reading from another time zone still sees pickup
+    // times as Gatineau sees them, like every server-rendered date.
+    function fmtWhen(ms) {
+      const fr = document.documentElement.lang === 'fr';
+      const s = new Intl.DateTimeFormat(fr ? 'fr-CA' : 'en-CA', {
+        timeZone: 'America/Toronto', day: 'numeric', month: 'long',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+      }).format(new Date(ms));
+      return fr ? s.replace(/(\d{1,2}) h (\d{2})/, '$1H$2') : s;
     }
     function addMessage(m) {
       if (m.id <= lastMsg || $(`.msg[data-id="${m.id}"]`, chat)) return;
@@ -145,8 +153,10 @@
       const div = document.createElement('div');
       div.className = 'msg' + (mine ? ' mine' : ''); div.dataset.id = m.id;
       const by = document.createElement('span'); by.className = 'by';
-      by.textContent = `${mine ? (T.you || (document.documentElement.lang === 'fr' ? 'Vous' : 'You')) : m.name + (m.org ? ' · ' + m.org : '')} · ${fmtTime(m.at)}`;
-      div.appendChild(by); div.appendChild(document.createTextNode(m.body));
+      by.textContent = mine ? (T.you || (document.documentElement.lang === 'fr' ? 'Vous' : 'You')) : m.name + (m.org ? ' - ' + m.org : '');
+      const at = document.createElement('span'); at.className = 'at';
+      at.textContent = fmtWhen(m.at);
+      div.appendChild(by); div.appendChild(at); div.appendChild(document.createTextNode(m.body));
       chat.appendChild(div); scrollChat();
     }
     form?.addEventListener('submit', async (e) => {

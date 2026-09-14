@@ -7,7 +7,7 @@
       <% if (offer.active) { %><%= t('offer.published', { date: fmtDate(offer.published_at, true) }) %><% } else { %><%= t('offer.ended', { date: fmtDate(offer.ended_at || offer.expires_at || offer.created_at, true) }) %><% } %>
       <% if (isAdmin) { %> · <a href="/admin/offres/<%= offer.id %>"><%= t('nav.admin') %></a><% } %>
     </div>
-    <div class="tiny"><%= t('offer.you') %> <%= contact.first_name %> · <%= fmtPhone(contact.phone) %></div>
+    <div class="tiny"><%= t('offer.you') %> <%= contact.first_name %><% if (contact.organization) { %> · <%= contact.organization %><% } %></div>
   </div>
   <%- include('_status_badge', { status: offer.effective }) %>
 </div>
@@ -21,7 +21,7 @@
 <div class="card">
   <dl class="kv">
     <dt><%= t('offer.lot_content') %></dt><dd><strong><%= offer.lot_description %></strong></dd>
-    <dt><%= t('offer.lots') %></dt><dd><%= offer.lot_count %> · <span class="muted"><%= t('offer.max_hint', { n: offer.max_per_contact }) %></span></dd>
+    <dt><%= t('offer.lot_count_label') %></dt><dd><%= offer.lot_count %> · <span class="muted"><%= t('offer.max_hint', { n: offer.max_per_contact }) %></span></dd>
   </dl>
   <% if (offer.description) { %><p class="mt-s" style="white-space:pre-line"><%= offer.description %></p><% } %>
 </div>
@@ -54,7 +54,8 @@
     <% if (!messages.length) { %><div class="tiny center" id="chat-empty"><%= t('chat.empty') %></div><% } %>
     <% for (const m of messages) { %>
       <div class="msg <%= m.contact_id === myId ? 'mine' : '' %>" data-id="<%= m.id %>">
-        <span class="by"><%= m.contact_id === myId ? t('chat.you') : (m.first_name + (m.last_name ? ' ' + m.last_name[0] + '.' : '') + (m.organization ? ' · ' + m.organization : '')) %> · <%= fmtShort(m.created_at) %></span>
+        <span class="by"><%= m.contact_id === myId ? t('chat.you') : (m.first_name + (m.last_name ? ' ' + m.last_name[0] + '.' : '') + (m.organization ? ' - ' + m.organization : '')) %></span>
+        <span class="at"><%= fmtWhen(m.created_at) %></span>
         <%= m.body %>
       </div>
     <% } %>
