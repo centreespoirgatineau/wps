@@ -123,7 +123,7 @@ main.centered .hero { padding-top: 0; }
 .field { display: block; margin-bottom: 14px; }
 .field > span, .field > label { display: block; font-size: .85rem; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
 .field .hint { font-weight: 400; color: var(--ink-3); font-size: .8rem; margin-top: 4px; }
-.input, input[type=text], input[type=tel], input[type=number], input[type=time], input[type=search], select, textarea {
+.input, input[type=text], input[type=tel], input[type=url], input[type=number], input[type=time], input[type=search], select, textarea {
   width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: var(--radius-s);
   background: var(--surface); outline: none;
 }

@@ -4,6 +4,7 @@ import { sessionId, token as newToken, loginCode, hmac, safeEqual } from './cryp
 import { sendSms, gsmSafe } from './sms.js';
 import { translator } from './i18n.js';
 import { HttpError } from './http.js';
+import { publicUrl } from './site.js';
 
 const DAY = 86_400_000;
 export const SESSION_COOKIE = 'wps_sid';
@@ -120,7 +121,7 @@ export function rateLimit(db, key, max, windowMs) {
 }
 
 export function personalLink(contact, offerId = null) {
-  return offerId ? `${config.appUrl}/o/${offerId}/${contact.token}` : `${config.appUrl}/r/${contact.token}`;
+  return offerId ? `${publicUrl()}/o/${offerId}/${contact.token}` : `${publicUrl()}/r/${contact.token}`;
 }
 
 /** Periodic cleanup. */

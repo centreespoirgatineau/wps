@@ -7,7 +7,7 @@ import { validateTwilioSignature, mapStatus } from '../lib/sms.js';
 import { config } from '../config.js';
 
 function verify(ctx, params) {
-  const url = `${config.appUrl}${ctx.path}`;
+  const url = `${publicUrl()}${ctx.path}`;
   if (!validateTwilioSignature(ctx.req.headers['x-twilio-signature'], url, params)) {
     throw new HttpError(403, 'bad signature');
   }

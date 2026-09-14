@@ -2,6 +2,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { config } from '../config.js';
 import { DEMO_PHONE } from './demo.js';
+import { publicUrl, publicIsHttps } from './site.js';
 
 export function smsConfigured() {
   const t = config.twilio;
@@ -40,7 +41,7 @@ export async function sendSms(db, { to, body, kind = 'other', contactId = null, 
   const t = config.twilio;
   const url = `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(t.accountSid)}/Messages.json`;
   const params = new URLSearchParams({ To: to, From: t.from, Body: body });
-  if (config.isHttps()) params.set('StatusCallback', `${config.appUrl}/twilio/status`);
+  if (publicIsHttps()) params.set('StatusCallback', `${publicUrl()}/twilio/status`);
 
   try {
     const res = await fetch(url, {

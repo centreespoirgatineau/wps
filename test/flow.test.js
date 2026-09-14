@@ -484,3 +484,44 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   // Taps and swipes have to reach the deck through the phone pictures.
   assert.match(r.text, /iframe\{[^}]*pointer-events:none/);
 });
+
+test('the public address can be changed from Réglages, and links follow it', async () => {
+  const admin = await adminClient();
+  let csrf = await admin.csrf('/admin');
+  let r = await admin.get('/admin/parametres');
+  assert.match(r.text, /name="public_url"/);
+
+  // A contact's personal link is built from the current address.
+  r = await admin.get('/admin/contacts');
+  const id = /\/admin\/contacts\/(\d+)/.exec(r.text)[1];
+  r = await admin.get(`/admin/contacts/${id}`);
+  const before = /(https?:\/\/[^/]+)\/r\//.exec(r.text)[1];
+
+  const base = {
+    pickup_name: 'Centre Espoir', pickup_address: '791 Maloney', pickup_details: '',
+    sms_fr: '', sms_en: '',
+  };
+  const save = async (publicUrlValue) => {
+    const c = await admin.csrf('/admin');
+    return admin.post('/admin/parametres', { form: { ...base, _csrf: c, public_url: publicUrlValue } });
+  };
+  const linkOn = async () => (await admin.get(`/admin/contacts/${id}`)).text;
+
+  // A trailing slash must be tolerated, and the links must follow.
+  r = await save('https://jc.centreespoir.ca/');
+  assert.equal(r.status, 303);
+  let page = await linkOn();
+  assert.ok(page.includes('https://jc.centreespoir.ca/r/'), 'links follow the new address');
+  assert.ok(!page.includes(before + '/r/'), 'the old address is gone');
+
+  // Something that is not an address is refused, and nothing changes.
+  r = await save('pas une adresse');
+  assert.equal(r.status, 303);
+  page = await linkOn();
+  assert.ok(page.includes('https://jc.centreespoir.ca/r/'), 'the bad value was not stored');
+
+  // Emptying the field falls back to APP_URL from the environment.
+  await save('');
+  page = await linkOn();
+  assert.ok(page.includes(before + '/r/'), 'back to the address from the environment');
+});

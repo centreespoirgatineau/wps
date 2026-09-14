@@ -332,6 +332,9 @@ export default {
   'settings.reset_default': 'Texte par défaut',
   'settings.app_name': 'Nom affiché',
   'settings.default_pickup': 'Lieu de ramassage par défaut',
+  'settings.public_url': 'Adresse du site',
+  'settings.public_url_hint': 'L’adresse publique de la plateforme, sans barre oblique à la fin. C’est elle qui bâtit le lien personnel envoyé dans chaque texto. Ne la changez que si le site change de domaine.',
+  'settings.public_url_invalid': 'Adresse invalide. Exemple : https://jc.centreespoir.ca',
   'settings.saved': 'Paramètres enregistrés.',
   'settings.info': 'Informations techniques',
 

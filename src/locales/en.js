@@ -332,6 +332,9 @@ export default {
   'settings.reset_default': 'Default wording',
   'settings.app_name': 'Display name',
   'settings.default_pickup': 'Default pickup location',
+  'settings.public_url': 'Site address',
+  'settings.public_url_hint': 'The public address of the platform, with no trailing slash. Every personal link sent by text is built from it. Change it only if the site moves to another domain.',
+  'settings.public_url_invalid': 'Not a valid address. Example: https://jc.centreespoir.ca',
   'settings.saved': 'Settings saved.',
   'settings.info': 'Technical information',
 

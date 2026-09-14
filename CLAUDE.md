@@ -178,6 +178,17 @@ Notes that have already caught me out:
   certificate through Cloudflare's proxy. The root and `www` serve the main
   Wix site and a `*` wildcard exists; the explicit `jc` record wins over it.
   Never touch the root, `www`, or the wildcard.
+- **Changing the address no longer needs the terminal.** The public address is a
+  setting (Admin → Réglages → *Adresse du site*, stored in `settings.public_url`),
+  read at boot by `src/lib/site.js` and falling back to `APP_URL`. Every personal
+  link and the Twilio status callback are built from `publicUrl()` — never from
+  `config.appUrl` directly. Cookie security deliberately still follows the
+  environment's `APP_URL`, so a typo in the setting cannot sign everyone out.
+- **`update.sh` syncs the reverse-proxy file** from
+  `deploy/docker-compose.override.traefik.yml` on every deploy, so routing and
+  domain changes ship by pushing to `main`. Editing
+  `/opt/wps/docker-compose.override.yml` by hand no longer sticks — change the
+  file in the repository instead (or set `WPS_NO_OVERRIDE_SYNC=1`).
 - **Auto-deploy:** `autoupdate.sh` runs every 2 minutes from root's crontab; it
   fetches `origin/main`, and if it differs, hard-resets and runs `update.sh`. Log:
   `/var/log/wps-autoupdate.log`. **So: push to main = live within 2 minutes.**
@@ -202,7 +213,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (22 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (23 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -213,7 +224,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 22 tests: rules engine + end-to-end HTTP
+npm test                     # 23 tests: rules engine + end-to-end HTTP
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

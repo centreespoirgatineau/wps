@@ -13,8 +13,15 @@
     <%- include('admin/_photo_field', { fieldName: 'pickup_photo', files: s.pickup_photo ? [s.pickup_photo] : [], multiple: false, max: 1, label: t('offer.form.pickup_photo') }) %>
   </div>
 
+  <div class="section-title"><%= t('settings.public_url') %></div>
+  <div class="card">
+    <label class="field"><span><%= t('settings.public_url') %></span>
+      <input type="url" name="public_url" value="<%= publicUrl %>" placeholder="https://jc.centreespoir.ca" inputmode="url">
+      <span class="hint"><%= t('settings.public_url_hint') %></span></label>
+  </div>
+
   <div class="section-title"><%= t('settings.sms_templates') %></div>
-  <div class="card" data-sample="<%= JSON.stringify({ title: 'Légumes frais', n: 4, url: config.appUrl + '/o/12/xxxxxxxxxxxx' }) %>" id="sms-settings">
+  <div class="card" data-sample="<%= JSON.stringify({ title: 'Légumes frais', n: 4, url: publicUrl + '/o/12/xxxxxxxxxxxx' }) %>" id="sms-settings">
     <p class="tiny"><%= t('settings.sms_hint') %></p>
     <label class="field"><span><%= t('settings.sms_fr') %></span>
       <textarea class="mono" name="sms_fr" data-sms-template="fr" maxlength="600"><%= s.sms_fr %></textarea>
@@ -32,10 +39,10 @@
   <summary><span class="summary-text"><%= t('settings.info') %></span></summary>
   <div class="fold-body tiny">
     <dl class="kv">
-      <dt>URL</dt><dd><code><%= config.appUrl %></code></dd>
+      <dt>URL</dt><dd><code><%= publicUrl %></code></dd>
       <dt>SMS</dt><dd><%= smsOk ? 'Twilio ✓' : t('sms.status.dry_run') %></dd>
       <dt>Fuseau</dt><dd><%= config.timezone %></dd>
-      <dt>Webhooks</dt><dd><code><%= config.appUrl %>/twilio/status</code><br><code><%= config.appUrl %>/twilio/inbound</code></dd>
+      <dt>Webhooks</dt><dd><code><%= publicUrl %>/twilio/status</code><br><code><%= publicUrl %>/twilio/inbound</code></dd>
     </dl>
   </div>
 </details>

@@ -9,6 +9,7 @@ import { render, renderPartial } from './lib/view.js';
 import { translator, normalizeLang } from './lib/i18n.js';
 import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
 import { isDemo } from './lib/demo.js';
+import { loadPublicUrl, publicUrl } from './lib/site.js';
 import { startScheduler } from './lib/scheduler.js';
 import { formatPhone } from './lib/phone.js';
 import { formatDate, formatDateTimeShort, formatDateTimeLong, hmToH } from './lib/time.js';
@@ -19,6 +20,7 @@ import { twilioRoutes } from './routes/twilio.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const db = openDb(config.dbPath);
+loadPublicUrl(db);   // the address links are built from; may be overridden in Réglages
 
 // Static assets are addressed by content hash (?v=…) so browsers never keep a stale stylesheet.
 const assetVersion = createHash('sha1')
@@ -86,6 +88,7 @@ app.use((ctx) => {
       contact: ctx.state.contact || null,
       isAdmin: isAdmin(ctx),
       isDemo: isDemo(ctx.state.contact),
+      publicUrl: publicUrl(),
       adminFresh: adminFresh(ctx),
       csrf: ctx.state.session?.csrf || '',
       path: ctx.path,
@@ -129,7 +132,7 @@ app.onError((err, ctx) => {
 startScheduler(db);
 
 app.listen(config.port, config.host, () => {
-  console.log(`wps listening on http://${config.host}:${config.port} (${config.appUrl}) tz=${config.timezone} sms=${config.twilio.dryRun || !config.twilio.accountSid ? 'dry-run' : 'twilio'}`);
+  console.log(`wps listening on http://${config.host}:${config.port} (${publicUrl()}) tz=${config.timezone} sms=${config.twilio.dryRun || !config.twilio.accountSid ? 'dry-run' : 'twilio'}`);
 });
 
 for (const sig of ['SIGINT', 'SIGTERM']) {

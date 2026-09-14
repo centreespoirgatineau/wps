@@ -9,6 +9,7 @@ import { normalizeLang, translator } from '../lib/i18n.js';
 import { token as newToken } from '../lib/crypto.js';
 import { sendSms, gsmSafe, smsConfigured } from '../lib/sms.js';
 import { DEMO_PHONE } from '../lib/demo.js';
+import { publicUrl, savePublicUrl } from '../lib/site.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
@@ -185,7 +186,7 @@ export function adminRoutes(app, db) {
     // of the recipients list rather than sitting there unticked forever.
     const contacts = db.all(`SELECT * FROM contacts WHERE status = 'active' AND phone != ? ORDER BY organization, first_name`, DEMO_PHONE);
     const templates = { fr: smsTemplate(db, 'fr', offer), en: smsTemplate(db, 'en', offer) };
-    const sample = { title: offer.title, n: offer.lot_count, url: `${config.appUrl}/o/${offer.id}/xxxxxxxxxxxx` };
+    const sample = { title: offer.title, n: offer.lot_count, url: `${publicUrl()}/o/${offer.id}/xxxxxxxxxxxx` };
     ctx.render('admin/offer_confirm', { title: ctx.t('offer.confirm.title'), offer, contacts, templates, sample, smsOk: smsConfigured() });
   });
 
@@ -478,6 +479,12 @@ export function adminRoutes(app, db) {
     db.setSetting('pickup_address', str(body.pickup_address, 300));
     db.setSetting('pickup_details', str(body.pickup_details, 1000));
     db.setSetting('pickup_photo', /^[A-Za-z0-9_-]+\.jpg$/.test(body.pickup_photo || '') ? body.pickup_photo : '');
+    // The public address: refuse anything that is not a bare origin rather than
+    // silently storing it — every text-message link is built from this.
+    if (savePublicUrl(db, body.public_url) === null) {
+      ctx.flash('error', ctx.t('settings.public_url_invalid'));
+      return ctx.redirect('/admin/parametres');
+    }
     ctx.flash('ok', ctx.t('settings.saved'));
     ctx.redirect('/admin/parametres');
   });

@@ -25,6 +25,13 @@ git push -u origin main
 
 Nothing secret is in the repository: `.env` is git-ignored.
 
+> **Moving to another address later?** Two steps, no terminal: change the `Host(...)`
+> line in `deploy/docker-compose.override.traefik.yml` and push (the server picks
+> it up within two minutes), then set the new address in **Admin → Réglages →
+> Adresse du site** so the links in the text messages follow. Add the DNS record
+> first, and leave the old one in place for a while — contacts sign in with links
+> that are still in their old text messages.
+
 ## 2. DNS at Cloudflare
 
 centreespoir.ca is on Cloudflare. The main website (Wix) is served by the root
