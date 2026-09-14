@@ -68,7 +68,7 @@ ul.clean { list-style: none; margin: 0; padding: 0; }
 .top .tabs::-webkit-scrollbar { display: none; height: 0; }
 .pill { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-size: .7rem; line-height: 18px; text-align: center; }
 main.wrap { padding-top: 20px; }
-main.centered { min-height: calc(100dvh - 60px); display: flex; flex-direction: column; justify-content: center; padding-top: 0; padding-bottom: 72px; }
+main.centered { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding-top: 0; padding-bottom: 72px; } /* no header on this page */
 main.centered .hero { padding-top: 0; }
 .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .page-head .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -79,6 +79,8 @@ main.centered .hero { padding-top: 0; }
 .grow { flex: 1; min-width: 0; }
 .right { text-align: right; }
 .center { text-align: center; }
+/* Login footer: the "what is this" and language links, wrapping on a narrow phone. */
+.login-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 18px; }
 .mt { margin-top: 16px; } .mt-s { margin-top: 8px; } .mt-l { margin-top: 28px; }
 .mb { margin-bottom: 16px; }
 

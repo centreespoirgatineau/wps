@@ -2,6 +2,7 @@ export default {
   // ---- common ----
   'lang.other': 'EN',
   'lang.other_code': 'en',
+  'lang.other_full': 'English',
   'nav.offers': 'Offres',
   'nav.me': 'Moi',
   'nav.admin': 'Admin',

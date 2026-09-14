@@ -14,6 +14,10 @@
 <meta name="csrf" content="<%= csrf %>">
 </head>
 <body>
+<%# The login page (the only centered view) has no header: it already shows the
+    mark in its hero, its home link would point at itself, and it carries its
+    own language link at the bottom. %>
+<% if (!centered) { %>
 <header class="top<%= contact ? '' : ' plain' %>">
   <div class="wrap bar">
     <a class="home" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>" aria-label="Accueil"><%- include('_mark', { small: true }) %></a>
@@ -37,6 +41,7 @@
     <% } %>
   </div>
 </header>
+<% } %>
 <main class="wrap<%= centered ? ' centered' : '' %>">
   <% if (flash) { %><div class="banner <%= flash.type === 'error' ? 'error' : 'ok' %> mb"><%= flash.text %></div><% } %>
   <% if (isDemo) { %><div class="banner info mb"><%= t('demo.banner') %></div><% } %>

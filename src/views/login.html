@@ -42,4 +42,7 @@
   <% } %>
 </div>
 
-<p class="center mt-l"><a href="/a-propos"><%= t('login.what_is_this') %></a></p>
+<p class="center mt-l login-foot">
+  <a href="/a-propos"><%= t('login.what_is_this') %></a>
+  <a href="<%= langSwitchUrl %>" rel="nofollow"><%= t('lang.other_full') %></a>
+</p>

@@ -383,3 +383,18 @@ test('French by default, whatever the browser asks for', async () => {
   r = await en.get('/connexion', { headers: { 'Accept-Language': 'fr-CA,fr' } });
   assert.match(r.text, /<html lang="en"/);
 });
+
+test('the login page has no header, but keeps a way into English', async () => {
+  const c = client();
+  let r = await c.get('/connexion');
+  assert.doesNotMatch(r.text, /<header/);
+  // The language link lives in the page instead, so a visitor can still switch.
+  assert.match(r.text, /href="\/connexion\?lang=en"[^>]*>English</);
+  // The code step is the same view and must stay bare too.
+  r = await c.post('/connexion', { form: { phone: '(819) 555-0001' } });
+  assert.match(r.text, /name="code"/);
+  assert.doesNotMatch(r.text, /<header/);
+  // Other visitor pages keep their header.
+  r = await c.get('/a-propos');
+  assert.match(r.text, /<header/);
+});
