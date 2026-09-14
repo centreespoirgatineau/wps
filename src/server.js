@@ -24,6 +24,8 @@ export const db = openDb(config.dbPath);
 const assetVersion = createHash('sha1')
   .update(fs.readFileSync(path.join(here, 'public/app.css')))
   .update(fs.readFileSync(path.join(here, 'public/app.js')))
+  .update(fs.readFileSync(path.join(here, 'public/mark.png')))
+  .update(fs.readFileSync(path.join(here, 'public/icon.png')))
   .digest('hex').slice(0, 10);
 
 // Default settings on first run.

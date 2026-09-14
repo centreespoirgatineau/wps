@@ -54,10 +54,11 @@ ul.clean { list-style: none; margin: 0; padding: 0; }
 }
 .top .bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 60px; padding-bottom: 0; }
 .top.plain { border-bottom: 0; background: transparent; backdrop-filter: none; position: static; }
-.home .mark.small { width: 36px; height: 36px; flex: none; }
+.home .mark.small { height: 34px; width: auto; flex: none; }
 .home { display: inline-flex; align-items: center; flex: none; }
-.mark { width: 96px; height: 96px; display: block; }
-.mark.small { width: 34px; height: 34px; }
+/* The mark is a wider-than-tall illustration: size it by height, width follows. */
+.mark { height: 96px; width: auto; display: block; }
+.mark.small { height: 32px; width: auto; }
 .nav { display: flex; gap: 4px; align-items: center; }
 .nav .lang { font-size: .75rem; font-weight: 600; letter-spacing: .04em; border: 1px solid var(--line-2); padding: 4px 9px; border-radius: 999px; color: var(--ink-2); }
 .nav .lang:hover { text-decoration: none; color: var(--ink); }
@@ -225,7 +226,7 @@ input.big { font-size: 1.25rem; }
 
 /* Hero (login / about) */
 .hero { text-align: center; padding: 24px 0 8px; }
-.hero svg { width: 96px; height: 96px; margin: 0 auto 12px; display: block; }
+.hero .mark { margin: 0 auto 12px; }
 .hero h1 { font-size: 1.9rem; }
 .hero p { color: var(--ink-2); max-width: 32ch; margin: 8px auto 0; }
 .steps { list-style: none; padding: 0; margin: 0; counter-reset: s; }

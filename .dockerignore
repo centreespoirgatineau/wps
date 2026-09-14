@@ -5,3 +5,5 @@ docs/
 deploy/
 *.md
 .git
+assets/
+scripts/build-mark.mjs

@@ -56,7 +56,20 @@ before(async () => {
   });
 });
 
-after(() => { proc?.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); });
+after(async () => {
+  // Wait for the server to actually exit: on Windows it still holds the SQLite
+  // file for a moment afterwards, and deleting it too early fails the run with
+  // EBUSY even though every test passed.
+  if (proc && proc.exitCode === null) {
+    const ended = new Promise((r) => proc.once('exit', r));
+    proc.kill();
+    await ended;
+  }
+  for (let i = 0; i < 30; i++) {
+    try { fs.rmSync(dataDir, { recursive: true, force: true }); return; }
+    catch { await new Promise((r) => setTimeout(r, 100)); }
+  }
+});
 
 async function loginByCode(c, phone) {
   const r1 = await c.post('/connexion', { form: { phone } });

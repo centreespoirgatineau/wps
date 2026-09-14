@@ -52,8 +52,15 @@ Other hard constraints:
   them everywhere, and a contact still sees their own on `/reglages`. Contacts
   coordinate through the per-offer chat instead.
 - **Static assets are content-hashed** (`app.css?v=<hash>` computed at boot in
-  `src/server.js`); HTML is `Cache-Control: no-store`. This exists because a stale
-  cached stylesheet once broke the live layout. Keep it.
+  `src/server.js`, over the CSS, the JS and both PNGs); HTML is
+  `Cache-Control: no-store`. This exists because a stale cached stylesheet once
+  broke the live layout. Keep it.
+- **The mark is a raster, not a vector.** David's logo (a cornucopia of loaves,
+  fish and fruit) arrived as an SVG wrapping two PNGs, so `src/public/mark.png`
+  and `icon.png` are generated from `assets/logo-source.svg` by
+  `node scripts/build-mark.mjs` and committed. It is wider than it is tall
+  (1.195:1), so `.mark` is sized by **height** with `width: auto` — never give it
+  a square box. If a true vector version ever turns up, prefer it.
 
 ## 3. Layout of the code
 
@@ -73,9 +80,11 @@ src/routes/contact.js  offers, reservations, chat, personal settings, private me
 src/routes/admin.js    offers, lots, contacts, requests, SMS log, settings
 src/routes/twilio.js   delivery-status and inbound (STOP/START) webhooks
 src/views/             templates; `_name.html` are partials, `admin/` is admin-only
-src/public/            app.css, app.js, icon.svg  (no build step)
+src/public/            app.css, app.js, mark.png, icon.png  (no build step)
 src/locales/fr.js en.js  every user-visible string; FR is the reference
 scripts/make-admin.js  create/promote an administrator from the CLI
+scripts/build-mark.mjs rebuild mark.png + icon.png from assets/logo-source.svg
+assets/logo-source.svg the master logo (kept out of the Docker image)
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
 ```
