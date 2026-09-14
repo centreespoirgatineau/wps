@@ -121,7 +121,7 @@ for (const c of contacts) {
   db.run(`INSERT INTO sms_log(contact_id, offer_id, to_phone, kind, body, status, created_at, updated_at)
           VALUES (?, ?, ?, 'offer', ?, 'delivered', ?, ?)`,
     c.id, live, c.phone,
-    `Bonjour ${c.first_name} (${c.organization}). Surplus alimentaire aujourd'hui au Centre Espoir : Plateaux de sushis et salades, 8 lot(s). Réserver : https://wps.davidhatin.com/o/${live}/${c.token}`,
+    `Bonjour ${c.first_name} (${c.organization}). Surplus alimentaire aujourd'hui au Centre Espoir : Plateaux de sushis et salades, 8 lot(s). Réserver : https://jc.centreespoir.ca/o/${live}/${c.token}`,
     now - 2 * H, now - 2 * H);
 }
 

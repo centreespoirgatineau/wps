@@ -6,7 +6,7 @@ ou à l'horizontale, tablette, portable, projecteur. Aucune bande noire, jamais.
 
 ## L'utiliser
 
-**En ligne :** https://wps.davidhatin.com/presentation — accessible à tous, sans
+**En ligne :** https://jc.centreespoir.ca/presentation — accessible à tous, sans
 connexion. C'est le lien à donner aux églises.
 
 **Hors ligne :** ouvrez `presentation-surplus.html` avec un double-clic.

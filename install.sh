@@ -9,7 +9,7 @@ set -euo pipefail
 
 REPO="${WPS_REPO:-https://github.com/centreespoirgatineau/wps.git}"
 DIR="${WPS_DIR:-/opt/wps}"
-DOMAIN="${WPS_DOMAIN:-wps.davidhatin.com}"
+DOMAIN="${WPS_DOMAIN:-jc.centreespoir.ca}"
 PORT=8087
 
 bold() { printf '\033[1m%s\033[0m\n' "$*"; }

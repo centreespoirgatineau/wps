@@ -1,5 +1,5 @@
 # The app is reachable ONLY from the VPS itself (127.0.0.1:8087).
-# Your existing reverse proxy forwards wps.davidhatin.com to it.
+# Your existing reverse proxy forwards jc.centreespoir.ca to it.
 services:
   wps:
     build: .

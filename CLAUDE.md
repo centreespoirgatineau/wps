@@ -17,7 +17,7 @@ surpluses as a tool to preach the gospel of Jesus Christ. That intent is stated 
 the About page and in rule 1 of the platform rules; keep it intact.
 
 - **Owner / only admin today:** David Hatin, Directeur général (+1 819 208 5721).
-- **Live:** https://wps.davidhatin.com
+- **Live:** https://jc.centreespoir.ca
 - **Interface:** French by default, English toggle. Mobile first — most users are
   on a phone. Unbranded: no product name anywhere in the interface.
 
@@ -173,7 +173,11 @@ Notes that have already caught me out:
   them.** wps is routed by labels in `/opt/wps/docker-compose.override.yml`
   (kept out of Git; copy in `deploy/docker-compose.override.traefik.yml`) and is
   attached to the `root_default` network.
-- **DNS:** Wix holds davidhatin.com; A record `wps` → 72.60.112.197.
+- **DNS:** Cloudflare holds centreespoir.ca; A record `jc` → 72.60.112.197,
+  **proxy off (grey cloud)** — the Traefik TLS-ALPN challenge cannot issue a
+  certificate through Cloudflare's proxy. The root and `www` serve the main
+  Wix site and a `*` wildcard exists; the explicit `jc` record wins over it.
+  Never touch the root, `www`, or the wildcard.
 - **Auto-deploy:** `autoupdate.sh` runs every 2 minutes from root's crontab; it
   fetches `origin/main`, and if it differs, hard-resets and runs `update.sh`. Log:
   `/var/log/wps-autoupdate.log`. **So: push to main = live within 2 minutes.**

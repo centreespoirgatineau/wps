@@ -1,4 +1,4 @@
-# Deployment guide — wps.davidhatin.com
+# Deployment guide — jc.centreespoir.ca
 
 For David. Estimated time: 30 minutes, most of it waiting for DNS.
 
@@ -8,7 +8,7 @@ For David. Estimated time: 30 minutes, most of it waiting for DNS.
 - Twilio Console open: **Account SID**, **Auth Token**, and your Canadian local
   number in E.164 form (`+1819…`). You are on a paid Twilio account (a trial
   account can only text numbers you verified by hand).
-- Wix DNS for davidhatin.com.
+- Cloudflare, which holds the DNS for centreespoir.ca.
 - The GitHub repository `centreespoirgatineau/wps` filled with this code (step 1).
 
 ## 1. Put the code on GitHub (once)
@@ -25,15 +25,30 @@ git push -u origin main
 
 Nothing secret is in the repository: `.env` is git-ignored.
 
-## 2. DNS at Wix
+## 2. DNS at Cloudflare
 
-Wix → Domains → davidhatin.com → *Manage DNS records* → **Add record**:
+centreespoir.ca is on Cloudflare. The main website (Wix) is served by the root
+record and by `www`; **do not touch either of them.** You are only adding one
+subdomain.
 
-| Type | Host name | Value | TTL |
-|---|---|---|---|
-| A | `wps` | *the VPS public IPv4* (hPanel → VPS → Overview) | 1 hour |
+Cloudflare → centreespoir.ca → **DNS** → *Add record*:
 
-Do not touch the other records. Propagation is usually under 15 minutes.
+| Type | Name | IPv4 address | Proxy status | TTL |
+|---|---|---|---|---|
+| A | `jc` | `72.60.112.197` | **DNS only** (grey cloud) | Auto |
+
+Two things matter here:
+
+- **The proxy must be off (grey cloud, not orange.)** The server gets its HTTPS
+  certificate from Let's Encrypt using the TLS-ALPN challenge, which needs to
+  answer the TLS handshake itself. With Cloudflare's proxy on, Cloudflare
+  answers instead and the certificate never issues — the site shows a
+  certificate error and stays broken.
+- There is a **wildcard record** (`*`) on this domain, so `jc.centreespoir.ca`
+  already resolves somewhere today. An explicit `jc` record wins over the
+  wildcard, so simply adding it is enough.
+
+Propagation is usually a couple of minutes on Cloudflare.
 
 ## 3. Install on the VPS
 
@@ -58,7 +73,7 @@ The script tells you the container and network name. Two options:
 
 - *Simplest:* deploy through the panel instead — "New application → from GitHub
   → centreespoirgatineau/wps" (it detects the `Dockerfile`), set the domain
-  `wps.davidhatin.com`, add a persistent volume mounted on `/data`, paste the
+  `jc.centreespoir.ca`, add a persistent volume mounted on `/data`, paste the
   variables from `.env.example` with your values, deploy. The panel handles
   HTTPS. In that case stop the script's container: `cd /opt/wps && docker compose down`.
 - *Or keep the script's container* and add a proxy host in the panel pointing to
@@ -68,7 +83,7 @@ The script tells you the container and network name. Two options:
 
 **b. Nginx installed on the host.** The script installs the site file
 (`deploy/nginx.conf`) and reloads Nginx. Then, once DNS is live:
-`certbot --nginx -d wps.davidhatin.com`.
+`certbot --nginx -d jc.centreespoir.ca`.
 
 **c. Caddy or Apache on the host.** Follow the printed line; snippets are in `deploy/`.
 
@@ -77,13 +92,13 @@ obtains the certificate automatically.
 
 ## 4. First login and Twilio webhooks
 
-1. Open https://wps.davidhatin.com — enter your mobile number, receive the code, sign in. You land on the admin dashboard.
+1. Open https://jc.centreespoir.ca — enter your mobile number, receive the code, sign in. You land on the admin dashboard.
 2. Admin → *Paramètres*: check the default pickup location, optionally add a photo of the door.
 3. Twilio Console → Phone Numbers → your number → *Messaging configuration*:
-   - *A message comes in* → Webhook, `https://wps.davidhatin.com/twilio/inbound`, HTTP POST.
+   - *A message comes in* → Webhook, `https://jc.centreespoir.ca/twilio/inbound`, HTTP POST.
      (Lets STOP/START texts update the contact's status. Twilio already blocks
      sending to numbers that texted STOP; this keeps the list in sync.)
-   - Delivery receipts are automatic: the app passes `https://wps.davidhatin.com/twilio/status`
+   - Delivery receipts are automatic: the app passes `https://jc.centreespoir.ca/twilio/status`
      with each message, so *Livré / Échec* shows per contact.
 4. Admin → *Contacts* → open your own contact → *Envoyer un texto de test*. You
    should receive it within seconds. If not, Admin → *Textos* shows Twilio's error.
@@ -124,7 +139,7 @@ is a complete backup.
 - **Twilio error 21211** — invalid recipient number; check the contact's phone.
 - **Personal links open the login page** — the token was regenerated, or the contact was removed. Send the link again from the contact page.
 - **Page loads but chat does not update live** — the proxy buffers responses. Use the snippets in `deploy/` (buffering off, long read timeout). The page still refreshes when reopened.
-- **Certificate errors** — DNS not propagated yet, or the A record points elsewhere; `dig +short wps.davidhatin.com` must return the VPS IP.
+- **Certificate errors** — DNS not propagated yet, or the A record points elsewhere; `dig +short jc.centreespoir.ca` must return the VPS IP.
 - **Fonts look different** — headings use *Source Serif 4* from Google Fonts with a system serif fallback; without internet access to fonts.googleapis.com the fallback shows. Cosmetic only.
 
 ## 8. Cost
