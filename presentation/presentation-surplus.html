@@ -25,7 +25,7 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 .s.on{display:flex}
 
 /* Type scale. Display type sits tight; reading type stays open. */
-h1,h2,h3,blockquote{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink)}
+h1,h2,h3,blockquote{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
 h1{font-size:116px;line-height:1.04}
 h2{font-size:72px;line-height:1.1}
 h2.headline{font-size:84px;line-height:1.12}
@@ -41,7 +41,7 @@ p:last-child{margin-bottom:0}
 .note{font-size:23px;line-height:1.6;color:var(--ink-3);max-width:48ch;margin-top:30px}
 .note.wide{max-width:none;font-size:25px;margin-top:44px}
 .note.wide-note{max-width:42ch}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:88px;align-items:center;height:100%}
+.split{display:grid;grid-template-columns:1fr 460px;gap:72px;align-items:center;height:100%}
 .col{min-width:0}
 .center-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 
@@ -106,7 +106,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
 .contact .tel{font-size:33px;color:var(--accent-ink);font-weight:600;text-decoration:none}
 
 /* text-message mock */
-.sms-phone{width:480px;border-radius:34px;background:var(--surface);border:1px solid var(--line);overflow:hidden;
+.sms-phone{width:444px;border-radius:34px;background:var(--surface);border:1px solid var(--line);overflow:hidden;
   box-shadow:0 30px 70px -40px rgba(20,20,19,.5)}
 .sms-head{padding:22px 28px;border-bottom:1px solid var(--line);font-size:19px;color:var(--ink-3);
   letter-spacing:.06em;text-transform:uppercase;font-weight:600}
@@ -116,7 +116,9 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
 .sms-time{margin-top:16px;font-size:17px;color:var(--ink-3)}
 
 /* phone frame */
-.phone{width:390px;height:844px;border-radius:52px;background:#171614;padding:12px;flex:none;
+/* 390x820 of screen plus a 12px bezel all round: the page inside is 390 wide,
+   so the frame has to be 414 or the right edge is cut off. */
+.phone{width:414px;height:844px;border-radius:52px;background:#171614;padding:12px;flex:none;
   box-shadow:0 40px 90px -40px rgba(20,20,19,.55),0 0 0 1px rgba(20,20,19,.08)}
 .screen{position:relative;width:100%;height:100%;border-radius:41px;overflow:hidden;background:var(--bg)}
 .screen iframe{position:absolute;left:0;width:390px;border:0;display:block}
@@ -163,7 +165,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
     <div class="col">
       <div class="eyebrow">Le problème</div>
       <div class="bignum">1 500 $</div>
-      <h2 class="tight">de sushis jetés,<br>le 10 septembre.</h2>
+      <h2 class="tight">de sushis jetés, le 10 septembre.</h2>
     </div>
     <div class="col">
       <p class="big">Un surplus arrive sans prévenir. Il doit repartir <strong>avant la fin de la journée</strong>.</p>
@@ -177,7 +179,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Pourquoi</div>
-      <h2>Ce n’est pas<br>qu’une question<br>de nourriture.</h2>
+      <h2>Ce n’est pas qu’une question de nourriture.</h2>
       <p class="big">Chaque lot qui sort d’ici entre dans une communauté, porté par une église.</p>
       <p class="big">Un repas partagé, une famille visitée, une conversation qui s’ouvre : <strong>voilà ce que ces surplus rendent possible.</strong></p>
     </div>
@@ -207,7 +209,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Étape 1</div>
-      <h2>Tout commence<br>par un texto.</h2>
+      <h2>Tout commence par un texto.</h2>
       <ul class="ticks">
         <li>Rien à installer.</li>
         <li>Aucun mot de passe à retenir.</li>
@@ -231,7 +233,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Étape 2</div>
-      <h2>Vous voyez<br>exactement ce<br>qui est offert.</h2>
+      <h2>Vous voyez exactement ce qui est offert.</h2>
       <ul class="ticks">
         <li>Ce que contient un lot.</li>
         <li>Combien de lots sont disponibles.</li>
@@ -250,7 +252,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Étape 3</div>
-      <h2>Vous réservez<br>en un geste.</h2>
+      <h2>Vous réservez en un geste.</h2>
       <ul class="ticks">
         <li>Un lot réservé disparaît aussitôt pour les autres.</li>
         <li>Vous voyez qui a pris quoi, en direct.</li>
@@ -269,7 +271,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Étape 4</div>
-      <h2>Vous vous<br>organisez<br>entre vous.</h2>
+      <h2>Vous vous organisez entre vous.</h2>
       <ul class="ticks">
         <li>« Je peux prendre ton lot en passant. »</li>
         <li>« Quelqu’un va vers Aylmer ? »</li>
@@ -288,7 +290,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Toujours à jour</div>
-      <h2>L’offre du jour,<br>et toutes<br>les précédentes.</h2>
+      <h2>L’offre du jour, et toutes les précédentes.</h2>
       <ul class="ticks">
         <li>Ce qui est en cours, en haut.</li>
         <li>Ce qui est passé, en dessous.</li>
@@ -306,7 +308,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Les règles</div>
-      <h2>Trois règles,<br>pour que ce<br>soit juste.</h2>
+      <h2>Trois règles, pour que ce soit juste.</h2>
       <ol class="rules">
         <li class="first"><strong>Les surplus servent l’Évangile.</strong> Ces lots sont un outil pour annoncer Jésus-Christ. C’est la première règle, et la raison d’être de la plateforme.</li>
         <li><strong>Réserver, c’est s’engager.</strong> Qui ne vient pas ne peut pas réserver à l’offre suivante. Après trois absences, le contact quitte la liste.</li>
@@ -347,7 +349,7 @@ blockquote{font-size:62px;line-height:1.32;max-width:none}
   <div class="split">
     <div class="col">
       <div class="eyebrow">Rejoindre la liste</div>
-      <h2>Vous voulez<br>en être ?</h2>
+      <h2>Vous voulez en être ?</h2>
       <p class="big">Faites votre demande en ligne, ou parlez-en directement à David.</p>
       <a class="cta" href="https://wps.davidhatin.com/demande">wps.davidhatin.com/demande</a>
       <div class="contact">
