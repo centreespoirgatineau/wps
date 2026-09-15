@@ -1,6 +1,6 @@
 # La présentation aux églises
 
-`presentation-surplus.html` — un diaporama de 13 diapositives pour présenter la
+`presentation-surplus.html` — un diaporama de 11 diapositives pour présenter la
 plateforme à d'autres églises. Il s'adapte à l'écran : téléphone à la verticale
 ou à l'horizontale, tablette, portable, projecteur. Aucune bande noire, jamais.
 
@@ -46,41 +46,51 @@ depuis la racine du projet :
 
 ```bash
 # 1. Créer la base de démonstration (églises, offre du jour, offres passées)
-node presentation/build/seed-demo.mjs presentation/build/work/data
+node presentation/build/seed-demo.mjs presentation/build/work/data jc
 
 # 2. Démarrer la plateforme sur cette base, sur le port 8100
-DATA_DIR=presentation/build/work/data PORT=8100 SMS_DRY_RUN=1 npm start
+DATA_DIR=presentation/build/work/data BRAND=jc PORT=8100 SMS_DRY_RUN=1 npm start
 
 # 3. Dans un autre terminal : capturer les pages
 node presentation/build/capture.mjs presentation/build/work/pages.json src/public/mark.svg
 
 # 4. Assembler le diaporama
 node presentation/build/build-deck.mjs presentation/build/work/pages.json \
-     src/public/mark.svg presentation/presentation-surplus.html
+     src/public/mark.svg presentation/presentation-surplus.html jc
 ```
 
 La version en ligne est lue **au démarrage** de l'application : après avoir
 refait le diaporama, il faut pousser le changement sur GitHub pour que le
 serveur redémarre et serve la nouvelle version.
 
-Le texte des diapositives se trouve dans `build/build-deck.mjs`, en haut du
-fichier, une diapositive à la fois. Les églises fictives et le contenu des offres
+Il y a **deux diaporamas** : celui des églises (`jc`) et celui des banques
+alimentaires (`spp`). Les étapes ci-dessus sont les mêmes pour l'un et l'autre :
+remplacez `jc` par `spp` partout, et les fichiers par `work/data-spp`,
+`work/pages-spp.json` et `presentation/presentation-spp.html`.
+
+Le texte des diapositives se trouve dans `build/slides.jc.mjs` et
+`build/slides.spp.mjs`, une diapositive à la fois. Le reste — la mise en page,
+les téléphones, le défilement — est commun aux deux dans `build/build-deck.mjs`.
+Après une retouche au commun, reconstruisez celui des églises et vérifiez que
+`git diff` ne montre rien : c'est la preuve que rien n'a bougé. Les églises fictives et le contenu des offres
 se trouvent dans `build/seed-demo.mjs`.
 
 `presentation/build/work/` est un dossier de travail : il n'est pas conservé dans
 Git et peut être effacé sans risque.
 
-> Seul `presentation-surplus.html` part sur le serveur ; `build/` en est exclu.
+> Seuls les deux `.html` partent sur le serveur ; `build/` en est exclu.
 
 ## L'image d'aperçu des liens
 
 Quand l'adresse du site est envoyée par texto, par courriel ou sur WhatsApp,
-c'est `src/public/og.png` qui s'affiche dans la vignette. Aucune messagerie
-n'accepte une image vectorielle à cet endroit, d'où cette seule image matricielle
-du projet. Elle se refait en une commande :
+c'est une image qui s'affiche dans la vignette — `og.png` pour les églises,
+`og-spp.png` pour les banques alimentaires. Aucune messagerie n'accepte une image
+vectorielle à cet endroit, d'où les seules images matricielles du projet. Elles
+se refont en une commande chacune :
 
 ```bash
-node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png
+node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png jc
+node presentation/build/make-og.mjs src/public/mark.svg src/public/og-spp.png spp
 ```
 
 Le texte de la carte se trouve en haut de `build/make-og.mjs`. À refaire si le
