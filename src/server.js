@@ -14,7 +14,7 @@ import { startScheduler } from './lib/scheduler.js';
 import { formatPhone, normalizePhone } from './lib/phone.js';
 import { token } from './lib/crypto.js';
 import { formatDate, formatDateTimeShort, formatDateTimeLong, hmToH } from './lib/time.js';
-import { publicRoutes } from './routes/public.js';
+import { publicRoutes, hasDeck } from './routes/public.js';
 import { contactRoutes } from './routes/contact.js';
 import { adminRoutes } from './routes/admin.js';
 import { twilioRoutes } from './routes/twilio.js';
@@ -111,6 +111,9 @@ app.use((ctx) => {
       isDemo: isDemo(ctx.state.contact),
       publicUrl: publicUrl(),
       donateUrl: db.setting('donate_url', ''),
+      // "Qu'est-ce que cette plateforme ?" opens the slideshow where this brand
+      // has one, and the About page where it does not.
+      deckUrl: hasDeck ? '/presentation' : '/a-propos',
       adminFresh: adminFresh(ctx),
       csrf: ctx.state.session?.csrf || '',
       path: ctx.path,

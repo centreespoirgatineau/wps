@@ -13,11 +13,16 @@ import { publicUrl } from '../lib/site.js';
 
 const MIN = 60_000;
 
-// The slideshow is a single static file, read once at boot. Its one inline
-// script is allowed by its SHA-256 hash rather than by 'unsafe-inline', so the
-// page stays as locked down as the rest of the site.
-const deckFile = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../presentation/presentation-surplus.html');
-const deckHtml = fs.existsSync(deckFile) ? fs.readFileSync(deckFile, 'utf8') : '';
+// The slideshow is a single static file, read once at boot, and there is one
+// per audience: the church deck is built around the gospel and must never be
+// served to the food banks. A brand with no deck of its own simply has no
+// /presentation — `hasDeck` below is what the views use to decide where
+// "Qu'est-ce que cette plateforme ?" should point.
+const DECKS = { jc: 'presentation-surplus.html', spp: 'presentation-spp.html' };
+const deckFile = path.join(path.dirname(fileURLToPath(import.meta.url)),
+  '../../presentation/', DECKS[config.brand] || '');
+const deckHtml = DECKS[config.brand] && fs.existsSync(deckFile) ? fs.readFileSync(deckFile, 'utf8') : '';
+export const hasDeck = deckHtml.length > 0;
 const deckCsp = (() => {
   const script = /<script>([\s\S]*?)<\/script>/.exec(deckHtml)?.[1] ?? '';
   const hash = createHash('sha256').update(script, 'utf8').digest('base64');
@@ -149,6 +154,7 @@ export function publicRoutes(app, db) {
   // inline script, so this route serves a policy of its own that allows only
   // this exact script, by hash. Nothing here is user-supplied.
   app.get('/presentation', (ctx) => {
+    if (!hasDeck) throw new HttpError(404);
     ctx.set('Content-Security-Policy', deckCsp);
     ctx.set('Cache-Control', 'public, max-age=300');
     ctx.html(deckFor(publicUrl()));

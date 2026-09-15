@@ -7,7 +7,7 @@
       <label><input type="radio" name="lang" value="en" <%= contact.lang === 'en' ? 'checked' : '' %> data-autosubmit><span>EN</span></label>
     </form>
   </div>
-  <p class="tiny mt"><%= t('me.link_hint') %> <a href="/presentation"><%= t('login.what_is_this') %></a></p>
+  <p class="tiny mt"><%= t('me.link_hint') %> <a href="<%= deckUrl %>"><%= t('login.what_is_this') %></a></p>
   <form method="post" action="/deconnexion" class="mt"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn secondary block" type="submit"><%= t('me.logout') %></button></form>
   <% if (!isAdmin && !isDemo && contact.status === 'active') { %><button class="btn ghost block mt-s" type="button" data-open="#optout-modal" style="color:var(--danger)"><%= t('me.opt_out') %></button><% } %>
   <% if (contact.status !== 'active') { %><div class="banner warn mt-s"><%= t('me.opted_out') %></div><% } %>
