@@ -26,11 +26,31 @@ services:
     tmpfs:
       - /tmp
 
+  # A bind mount whose directory does not exist yet is created by Docker as
+  # root, and the image runs as the unprivileged `node` user — which then cannot
+  # create its own database and crash-loops. This makes the directory writable
+  # before the app starts, using the image already built rather than pulling
+  # another one. It exits immediately and is idempotent.
+  wps-spp-init:
+    profiles: ["spp"]
+    build: .
+    image: wps:latest
+    container_name: wps-spp-init
+    user: "0:0"
+    entrypoint: ["sh", "-c", "mkdir -p /data/uploads && chown -R node:node /data"]
+    command: []
+    restart: "no"
+    volumes:
+      - ./data-spp:/data
+
   # Système de Prévention de Pertes — the food-bank platform. Same image, same
   # Twilio account and sending number; everything else is overridden here so no
   # second secrets file has to be created on the server.
   wps-spp:
     profiles: ["spp"]
+    depends_on:
+      wps-spp-init:
+        condition: service_completed_successfully
     build: .
     image: wps:latest
     container_name: wps-spp

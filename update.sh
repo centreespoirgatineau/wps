@@ -32,4 +32,9 @@ check() {  # port, name
     || { docker compose logs --tail=40 "$2"; exit 1; }
 }
 check 8087 wps
-if [ ${#PROFILE[@]} -gt 0 ]; then check 8088 wps-spp; fi
+if [ ${#PROFILE[@]} -gt 0 ]; then
+  # If the second platform will not come up, the first thing to look at is the
+  # one-shot container that prepares its data directory.
+  curl -fsS http://127.0.0.1:8088/healthz >/dev/null 2>&1 || docker compose logs --tail=20 wps-spp-init || true
+  check 8088 wps-spp
+fi
