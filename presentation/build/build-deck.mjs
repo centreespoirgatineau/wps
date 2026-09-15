@@ -186,33 +186,7 @@ slides.push(`
   </div>
 </section>`);
 
-// 11 ------------------------------------------------------------------ cost
-slides.push(`
-<section class="s">
-  <div class="mid">
-    <p class="eyebrow center">Ce que ça vous demande</p>
-    <h2 class="center">Un numéro de cellulaire. C’est tout.</h2>
-    <div class="nots">
-      <div class="not"><span>Pas</span><strong>d’application</strong><em>à télécharger</em></div>
-      <div class="not"><span>Pas</span><strong>de compte</strong><em>à créer</em></div>
-      <div class="not"><span>Pas</span><strong>de frais</strong><em>ni d’engagement</em></div>
-      <div class="not"><span>Pas</span><strong>de réunion</strong><em>à l’agenda</em></div>
-    </div>
-    <p class="note center">Vous pouvez quitter la liste vous-même, en tout temps, en deux touches.</p>
-  </div>
-</section>`);
-
-// 12 ---------------------------------------------------------------- gospel
-slides.push(`
-<section class="s gospel">
-  <div class="mid">
-    <p class="quote-mark">“</p>
-    <blockquote>Je suis le pain de vie. Celui qui vient à moi n’aura jamais faim.</blockquote>
-    <p class="attrib">Jésus — Jean 6.35</p>
-  </div>
-</section>`);
-
-// 13 ------------------------------------------------------------------ join
+// 11 ------------------------------------------------------------------ join
 slides.push(`
 <section class="s join">
   <div class="mid">
@@ -284,7 +258,7 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 
 /* Type: one fluid scale, bounded by both the width and the height of the screen
    so it works on a projector, a laptop and a phone lying on its side. */
-h1,h2,h3,blockquote{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
+h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
 h1{font-size:clamp(34px, min(6.2vw, 12vh), 116px);line-height:1.05}
 h2{font-size:clamp(25px, min(3.9vw, 7.4vh), 72px);line-height:1.12}
 h2.tight{font-size:clamp(22px, min(3.4vw, 6.4vh), 64px)}
@@ -351,22 +325,6 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 .rules li.first::before{background:var(--accent);color:#fff}
 .rules li.first strong{color:var(--accent-ink)}
 
-/* nothing-required grid */
-.nots{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.4vw,26px);margin-top:calc(var(--gap) * 1.5)}
-.not{background:var(--surface);border:1px solid var(--line);border-radius:clamp(12px,1.2vw,22px);
-  padding:clamp(12px,2vw,40px) clamp(8px,1.5vw,30px);text-align:center}
-.not span{display:block;font-size:clamp(9px,min(1vw,1.9vh),20px);color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5em}
-.not strong{display:block;font-family:var(--serif);font-size:clamp(15px,min(2vw,3.8vh),38px);font-weight:500;margin-bottom:.25em}
-.not em{font-style:normal;font-size:clamp(10px,min(1.1vw,2.1vh),21px);line-height:1.4;color:var(--ink-2)}
-
-/* gospel */
-.gospel{background:var(--accent-soft);text-align:center}
-.quote-mark{font-family:var(--serif);font-size:clamp(50px,min(7.8vw,14vh),150px);line-height:.6;
-  color:var(--accent);opacity:.5;margin-bottom:.35em}
-blockquote{font-size:clamp(24px, min(3.5vw, 6.6vh), 66px);line-height:1.3;max-width:20ch;margin:0 auto}
-.attrib{margin-top:calc(var(--gap) * 1.4);font-size:clamp(11px,min(1.15vw,2.2vh),22px);
-  color:var(--accent-ink);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
-
 /* join */
 .cta{display:inline-block;margin:calc(var(--gap) * 1.1) 0;padding:clamp(12px,1.3vw,24px) clamp(18px,2vw,40px);
   border-radius:999px;background:var(--accent);color:#fff;font-weight:600;text-decoration:none;
@@ -429,7 +387,6 @@ blockquote{font-size:clamp(24px, min(3.5vw, 6.6vh), 66px);line-height:1.3;max-wi
   .step .n{margin-bottom:0;grid-row:span 2}
   .step h3{margin:0}
   .step p{grid-column:2}
-  .nots{grid-template-columns:repeat(2,1fr)}
   .title .lede{max-width:none}
   /* Words take what they need; the phone gets exactly the rest, so nothing
      ever runs off the top or the bottom of the screen. */
@@ -473,7 +430,7 @@ for (const p of document.querySelectorAll('.phone')) {
 
 // Everything that should arrive, in reading order, with a small stagger.
 const ANIM = '.eyebrow,h1,h2,h3,.logo,.lede,.big,.note,.pull,.ticks li,'
-  + '.rules li,.step,.not,.shot,.sms,.cta,.contact,blockquote,.quote-mark,.attrib';
+  + '.rules li,.step,.shot,.sms,.cta,.contact';
 for (const s of slides) {
   [...s.querySelectorAll(ANIM)].forEach((el, i) => {
     el.classList.add('anim');
