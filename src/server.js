@@ -20,6 +20,14 @@ import { adminRoutes } from './routes/admin.js';
 import { twilioRoutes } from './routes/twilio.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+// The link-preview card, one per audience: a link to the food-bank platform must
+// not preview as the church one. Falls back to the church card if a brand has no
+// card of its own yet, so the pages never lose their preview image entirely.
+function ogImageFile() {
+  const own = config.brand === 'jc' ? 'og.png' : `og-${config.brand}.png`;
+  return fs.existsSync(path.join(here, 'public', own)) ? own : 'og.png';
+}
 export const db = openDb(config.dbPath);
 loadPublicUrl(db);   // the address links are built from; may be overridden in Réglages
 
@@ -28,7 +36,7 @@ const assetVersion = createHash('sha1')
   .update(fs.readFileSync(path.join(here, 'public/app.css')))
   .update(fs.readFileSync(path.join(here, 'public/app.js')))
   .update(fs.readFileSync(path.join(here, 'public/mark.svg')))
-  .update(fs.readFileSync(path.join(here, 'public/og.png')))
+  .update(fs.readFileSync(path.join(here, 'public', ogImageFile())))
   .digest('hex').slice(0, 10);
 
 // Default settings on first run.
@@ -111,6 +119,7 @@ app.use((ctx) => {
       isDemo: isDemo(ctx.state.contact),
       publicUrl: publicUrl(),
       donateUrl: db.setting('donate_url', ''),
+      ogImage: `/static/${ogImageFile()}`,
       // "Qu'est-ce que cette plateforme ?" opens the slideshow where this brand
       // has one, and the About page where it does not.
       deckUrl: hasDeck ? '/presentation' : '/a-propos',

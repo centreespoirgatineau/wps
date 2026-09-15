@@ -77,6 +77,16 @@ Other hard constraints:
   anything put there without a width of its own takes the whole slide and leaves
   the heading beside it one word per line (hence the `max-width:44vw` cap). The
   first two are covered by a test.
+- **There is one slideshow and one preview card per audience**, and the church
+  ones must never reach the food banks. `presentation/build/build-deck.mjs` is
+  the shell — layout, type scale, scrolling, phone mock-ups — and the wording
+  lives in `slides.jc.mjs` / `slides.spp.mjs`; `make-og.mjs` and
+  `seed-demo.mjs` both take the brand too, so the demonstration cast in the
+  mock-ups is churches or community organisations to match. A brand with no
+  deck has **no `/presentation` at all** and its "Qu'est-ce que cette
+  plateforme ?" link points at the About page instead (`deckUrl`). When
+  changing the shell, rebuild the church deck and check `git diff` is empty —
+  that is how the split was proven safe in the first place.
 - **A brand is a thin overlay of strings, never a fork.** `BRAND` in the
   environment selects one: `src/locales/spp.fr.js` and `spp.en.js` override
   only the keys that differ, and everything else falls through to `fr.js` /

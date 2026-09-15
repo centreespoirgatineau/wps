@@ -1,7 +1,10 @@
 // The social preview card: what someone sees when the address is sent by text,
 // WhatsApp or e-mail. 1200x630 PNG, because no messaging app renders an SVG.
 //
-//   node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png
+//   node presentation/build/make-og.mjs src/public/mark.svg src/public/og.png [brand]
+//
+// One card per audience: the church card names Jesus Christ, the food-bank card
+// must not. `brand` picks the wording below; it defaults to jc.
 //
 // It draws the card below in headless Edge/Chrome and screenshots it. Rerun it
 // whenever the mark or the wording changes; the PNG is committed.
@@ -10,9 +13,21 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const [markPath, outPath] = process.argv.slice(2);
-if (!markPath || !outPath) throw new Error('usage: make-og.mjs <mark.svg> <out.png>');
+const [markPath, outPath, brand = 'jc'] = process.argv.slice(2);
+if (!markPath || !outPath) throw new Error('usage: make-og.mjs <mark.svg> <out.png> [brand]');
 const mark = fs.readFileSync(markPath).toString('base64');
+
+const COPY = {
+  jc: {
+    h1: 'Un outil pour annoncer<br>l&rsquo;&Eacute;vangile de J&eacute;sus-Christ.',
+    p: 'Les surplus alimentaires du Centre Espoir de Gatineau, redistribu&eacute;s le jour m&ecirc;me\n       par les &eacute;glises de l&rsquo;Outaouais.',
+  },
+  spp: {
+    h1: 'Les surplus alimentaires,<br>redistribu&eacute;s le jour m&ecirc;me.',
+    p: 'Le Centre Espoir de Gatineau les confie aux banques alimentaires et aux organismes\n       communautaires de l&rsquo;Outaouais.',
+  },
+}[brand];
+if (!COPY) throw new Error(`no card wording for brand "${brand}"`);
 
 const html = `<!doctype html>
 <meta charset="utf-8">
@@ -52,9 +67,8 @@ const html = `<!doctype html>
 </style>
 <div class="text">
   <div class="eyebrow">Centre Espoir de Gatineau</div>
-  <h1>Un outil pour annoncer<br>l&rsquo;&Eacute;vangile de J&eacute;sus-Christ.</h1>
-  <p>Les surplus alimentaires du Centre Espoir de Gatineau, redistribu&eacute;s le jour m&ecirc;me
-     par les &eacute;glises de l&rsquo;Outaouais.</p>
+  <h1>${COPY.h1}</h1>
+  <p>${COPY.p}</p>
   <div class="cta">Rejoindre la liste <span>&rarr;</span></div>
 </div>
 <img class="mark" src="data:image/svg+xml;base64,${mark}" alt="">
