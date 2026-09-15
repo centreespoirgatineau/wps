@@ -349,7 +349,7 @@ export default {
   'dash.picked': '{n} récupéré(s)',
 
   // ---- SMS texts (keep to GSM-7 characters: avoid ç ê ô î û œ etc.) ----
-  'sms.offer': 'Bonjour {first} ({org}). Surplus alimentaire aujourd\'hui au Centre Espoir : {title}, {n} lot(s). Réserver : {url}',
+  'sms.offer': 'Bonjour {first},\n\nSurplus disponible aujourd\'hui :\n{title}, {n} lot(s).\n\n{url}',
   'sms.code': 'Votre code : {code}. Il expire dans 10 minutes.',
   'sms.welcome': 'Bonjour {first}, vous faites maintenant partie de la liste des surplus du Centre Espoir. Votre lien personnel : {url}',
   'sms.link': 'Bonjour {first}, voici votre lien personnel pour les surplus du Centre Espoir : {url}',

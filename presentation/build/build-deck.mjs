@@ -97,7 +97,7 @@ slides.push(`
     <div class="col shot-col">
       <div class="sms">
         <p class="sms-head">Centre Espoir</p>
-        <p class="bubble">Bonjour Daniel (Église Nouvelle Vie de Gatineau). Surplus alimentaire aujourd’hui au Centre Espoir&nbsp;: Plateaux de sushis et salades, 8 lot(s).<br>Réserver&nbsp;: <span class="link">__HOST__/o/1/…</span></p>
+        <p class="bubble">Bonjour Daniel,<br><br>Surplus disponible aujourd’hui&nbsp;:<br>Plateaux de sushis et salades, 8 lot(s).<br><br><span class="link">__ORIGIN__/o/1/…</span></p>
         <p class="sms-time">aujourd’hui, 10H16</p>
       </div>
     </div>

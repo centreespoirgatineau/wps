@@ -135,8 +135,8 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(r.status, 303);
   const offerId = /\/admin\/offres\/(\d+)\/confirmer/.exec(r.location)[1];
   r = await admin.get(r.location);
-  assert.match(r.text, /Surplus alimentaire aujourd(&#39;|')hui/);
-  assert.match(r.text, /Food surplus today/);
+  assert.match(r.text, /Surplus disponible aujourd(&#39;|')hui/);
+  assert.match(r.text, /Surplus available today/);
   assert.match(r.text, /Marie Tremblay/);
 
   // Publish to both contacts

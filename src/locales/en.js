@@ -349,7 +349,7 @@ export default {
   'dash.picked': '{n} picked up',
 
   // ---- SMS texts ----
-  'sms.offer': 'Hello {first} ({org}). Food surplus today at Centre Espoir: {title}, {n} lot(s). Reserve: {url}',
+  'sms.offer': 'Hello {first},\n\nSurplus available today:\n{title}, {n} lot(s).\n\n{url}',
   'sms.code': 'Your code: {code}. It expires in 10 minutes.',
   'sms.welcome': 'Hello {first}, you are now on the Centre Espoir surplus list. Your personal link: {url}',
   'sms.link': 'Hello {first}, here is your personal link for Centre Espoir surplus offers: {url}',
