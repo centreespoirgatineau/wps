@@ -89,6 +89,7 @@ app.use((ctx) => {
       isAdmin: isAdmin(ctx),
       isDemo: isDemo(ctx.state.contact),
       publicUrl: publicUrl(),
+      donateUrl: db.setting('donate_url', ''),
       adminFresh: adminFresh(ctx),
       csrf: ctx.state.session?.csrf || '',
       path: ctx.path,

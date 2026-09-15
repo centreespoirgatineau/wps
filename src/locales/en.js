@@ -26,6 +26,13 @@ export default {
   'error.csrf': 'This page expired. Reload and try again.',
   'error.too_many': 'Too many attempts. Wait a few minutes.',
   'noscript': 'This page needs JavaScript to work.',
+
+  // Shown only where an address has been set in Réglages. Left empty, the
+  // platform never mentions money anywhere.
+  'donate.link': 'Support us',
+  'donate.title': 'Support Centre Espoir',
+  'donate.body': 'This platform is free, and it will stay free. Centre Espoir de Gatineau runs on tight means: if your organisation is able, a donation helps us keep collecting this surplus and passing it on.',
+  'donate.button': 'Donate',
   'meta.og_title': 'A tool for sharing the gospel of Jesus Christ',
   'meta.og_desc': 'Surplus food from Centre Espoir de Gatineau, redistributed the same day by the churches of the Outaouais.',
   'meta.title_suffix': 'Surplus food, Centre Espoir de Gatineau',
@@ -338,6 +345,9 @@ export default {
   'settings.public_url': 'Site address',
   'settings.public_url_hint': 'The public address of the platform, with no trailing slash. Every personal link sent by text is built from it. Change it only if the site moves to another domain.',
   'settings.public_url_invalid': 'Not a valid address. Example: https://jc.centreespoir.ca',
+  'settings.donate_url': 'Donation link',
+  'settings.donate_url_hint': 'The donation page (Zeffy). Leave this empty and the platform never mentions money: no link, no invitation anywhere.',
+  'settings.donate_url_invalid': 'Invalid link. It must start with https://',
   'settings.saved': 'Settings saved.',
   'settings.info': 'Technical information',
 

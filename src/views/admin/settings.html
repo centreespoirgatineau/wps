@@ -18,6 +18,9 @@
     <label class="field"><span><%= t('settings.public_url') %></span>
       <input type="url" name="public_url" value="<%= publicUrl %>" placeholder="https://jc.centreespoir.ca" inputmode="url">
       <span class="hint"><%= t('settings.public_url_hint') %></span></label>
+    <label class="field"><span><%= t('settings.donate_url') %></span>
+      <input type="url" name="donate_url" value="<%= s.donate_url %>" placeholder="https://www.zeffy.com/…" inputmode="url">
+      <span class="hint"><%= t('settings.donate_url_hint') %></span></label>
   </div>
 
   <div class="section-title"><%= t('settings.sms_templates') %></div>

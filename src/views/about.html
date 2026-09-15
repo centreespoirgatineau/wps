@@ -22,6 +22,14 @@
   <%- include('_rules') %>
 </div>
 
+<% if (donateUrl) { %>
+<div class="section-title"><%= t('donate.title') %></div>
+<div class="card">
+  <p><%= t('donate.body') %></p>
+  <p class="mt"><a class="btn secondary" href="<%= donateUrl %>" target="_blank" rel="noopener"><%= t('donate.button') %></a></p>
+</div>
+<% } %>
+
 <% if (!contact) { %>
 <div class="center mt-l stack">
   <a class="btn primary" href="/demande"><%= t('about.join') %></a>

@@ -19,6 +19,11 @@ export const config = {
   // Public URL, no trailing slash. Used to build the links sent by SMS.
   appUrl: (env.APP_URL || 'http://localhost:8080').replace(/\/+$/, ''),
   appName: env.APP_NAME || 'Surplus',
+  // Which audience this instance serves. 'jc' is the church network at
+  // jc.centreespoir.ca; 'spp' is the Système de Prévention de Pertes at
+  // spp.centreespoir.ca, for food banks and community organisations. Only the
+  // wording differs — same rules, same code, separate database.
+  brand: ['jc', 'spp'].includes(env.BRAND) ? env.BRAND : 'jc',
   dataDir,
   dbPath: path.join(dataDir, 'wps.sqlite'),
   uploadsDir: path.join(dataDir, 'uploads'),

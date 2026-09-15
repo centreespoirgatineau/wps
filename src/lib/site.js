@@ -17,6 +17,17 @@ export function normalizeUrl(value) {
   return /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(s) ? s : null;
 }
 
+/**
+ * The donation page shown to contacts, or '' to show nothing anywhere. Must be
+ * https with nothing exotic: this address ends up in an href the whole list is
+ * given, so a javascript: URL must never survive. null means "not usable".
+ */
+export function donateUrl(value) {
+  const s = String(value ?? '').trim();
+  if (!s) return '';
+  try { return new URL(s).protocol === 'https:' ? s.slice(0, 500) : null; } catch { return null; }
+}
+
 export const publicUrl = () => current;
 export const publicIsHttps = () => current.startsWith('https://');
 

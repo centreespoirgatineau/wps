@@ -16,8 +16,16 @@ The platform exists not only to prevent waste but, in David's words, to use thes
 surpluses as a tool to preach the gospel of Jesus Christ. That intent is stated in
 the About page and in rule 1 of the platform rules; keep it intact.
 
+**There are two platforms, one codebase.** `BRAND=jc` is the church network
+described above, at jc.centreespoir.ca. `BRAND=spp` is the *Système de
+Prévention de Pertes* at spp.centreespoir.ca: the same offers, the same rules,
+the same code, for the food banks and community organisations of the region —
+with **no religious wording of any kind** and an invitation to donate. Each
+instance is its own container and its own database; only a handful of strings
+differ. See §2.
+
 - **Owner / only admin today:** David Hatin, Directeur général (+1 819 208 5721).
-- **Live:** https://jc.centreespoir.ca
+- **Live:** https://jc.centreespoir.ca and https://spp.centreespoir.ca
 - **Interface:** French by default, English toggle. Mobile first — most users are
   on a phone. Unbranded: no product name anywhere in the interface.
 
@@ -69,6 +77,24 @@ Other hard constraints:
   anything put there without a width of its own takes the whole slide and leaves
   the heading beside it one word per line (hence the `max-width:44vw` cap). The
   first two are covered by a test.
+- **A brand is a thin overlay of strings, never a fork.** `BRAND` in the
+  environment selects one: `src/locales/spp.fr.js` and `spp.en.js` override
+  only the keys that differ, and everything else falls through to `fr.js` /
+  `en.js`, so a wording fix is made once for both platforms. Never copy a
+  dictionary. `test/brand.test.js` fails if an overlay key matches nothing in
+  the reference, if a reference string naming Jesus, the gospel, churches,
+  ministries or pastors is *not* overridden for spp, or if the reference itself
+  ever stops saying why the church platform exists.
+- **The donation ask is a setting, and it is quiet.** `donate_url` (Admin →
+  Réglages) must be an https address or empty; empty means the platform never
+  mentions money anywhere, which is how the jc instance runs. When set, it
+  appears in exactly two places: a small grey text link in the header (contacts
+  and visitors, never the admin, never the login page) and one explained section
+  on the About page. **It must never touch the reservation path** — a donation
+  that appeared to buy priority would break the fairness rules, and these
+  organisations are as stretched as the Centre. Validation lives in
+  `src/lib/site.js` beside the public address, because that href is shown to the
+  whole list.
 - **`/presentation` is the one page with its own CSP.** The slideshow is a single
   self-contained file with an inline `<script>`, which the site-wide policy
   forbids; the route allows that exact script by SHA-256 hash rather than by
@@ -111,10 +137,12 @@ src/routes/twilio.js   delivery-status and inbound (STOP/START) webhooks
 src/views/             templates; `_name.html` are partials, `admin/` is admin-only
 src/public/            app.css, app.js, mark.svg  (no build step)
 src/locales/fr.js en.js  every user-visible string; FR is the reference
+src/locales/spp.fr.js en.js  the food-bank brand: only the strings that differ
 scripts/make-admin.js  create/promote an administrator from the CLI
 presentation/          the slideshow for churches, served at /presentation (see its README)
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
+test/brand.test.js     the brand overlays and the donation link, dictionaries only
 ```
 
 ## 4. The fairness rules (the heart of the app)
@@ -231,7 +259,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (23 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (30 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -242,7 +270,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 23 tests: rules engine + end-to-end HTTP
+npm test                     # 30 tests: rules, HTTP end-to-end, brand overlays
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

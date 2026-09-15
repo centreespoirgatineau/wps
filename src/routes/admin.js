@@ -9,7 +9,7 @@ import { normalizeLang, translator } from '../lib/i18n.js';
 import { token as newToken } from '../lib/crypto.js';
 import { sendSms, gsmSafe, smsConfigured } from '../lib/sms.js';
 import { DEMO_PHONE } from '../lib/demo.js';
-import { publicUrl, savePublicUrl } from '../lib/site.js';
+import { publicUrl, savePublicUrl, donateUrl } from '../lib/site.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
@@ -465,7 +465,7 @@ export function adminRoutes(app, db) {
   app.get('/admin/parametres', requireAdmin, (ctx) => {
     ctx.render('admin/settings', {
       title: ctx.t('settings.title'), smsOk: smsConfigured(),
-      s: { ...defaultPickup(db), sms_fr: smsTemplate(db, 'fr'), sms_en: smsTemplate(db, 'en') },
+      s: { ...defaultPickup(db), donate_url: db.setting('donate_url', ''), sms_fr: smsTemplate(db, 'fr'), sms_en: smsTemplate(db, 'en') },
       defaults: { sms_fr: defaultSmsTemplate('fr'), sms_en: defaultSmsTemplate('en') },
     });
   });
@@ -479,6 +479,15 @@ export function adminRoutes(app, db) {
     db.setSetting('pickup_address', str(body.pickup_address, 300));
     db.setSetting('pickup_details', str(body.pickup_details, 1000));
     db.setSetting('pickup_photo', /^[A-Za-z0-9_-]+\.jpg$/.test(body.pickup_photo || '') ? body.pickup_photo : '');
+    // The donation page: an https address with a path (Zeffy uses one), or
+    // nothing at all. Refusing anything else keeps a javascript: URL out of a
+    // link the whole list is shown.
+    const donate = donateUrl(body.donate_url);
+    if (donate === null) {
+      ctx.flash('error', ctx.t('settings.donate_url_invalid'));
+      return ctx.redirect('/admin/parametres');
+    }
+    db.setSetting('donate_url', donate);
     // The public address: refuse anything that is not a bare origin rather than
     // silently storing it — every text-message link is built from this.
     if (savePublicUrl(db, body.public_url) === null) {

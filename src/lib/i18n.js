@@ -1,7 +1,15 @@
 import fr from '../locales/fr.js';
 import en from '../locales/en.js';
+import sppFr from '../locales/spp.fr.js';
+import sppEn from '../locales/spp.en.js';
+import { config } from '../config.js';
 
-const dicts = { fr, en };
+// A brand overlays only the strings that differ for its audience; everything
+// else falls through to the reference dictionaries above, so a wording fix is
+// made once for both platforms.
+const OVERLAYS = { spp: { fr: sppFr, en: sppEn } };
+const over = OVERLAYS[config.brand] || {};
+const dicts = { fr: { ...fr, ...(over.fr || {}) }, en: { ...en, ...(over.en || {}) } };
 export const LANGS = ['fr', 'en'];
 
 export function normalizeLang(l, dflt = 'fr') {
