@@ -4,7 +4,7 @@
 //   {APP_URL}/twilio/inbound  (Phone number → "A message comes in")
 import { HttpError } from '../lib/http.js';
 import { validateTwilioSignature, mapStatus } from '../lib/sms.js';
-import { config } from '../config.js';
+import { publicUrl } from '../lib/site.js';
 
 function verify(ctx, params) {
   const url = `${publicUrl()}${ctx.path}`;

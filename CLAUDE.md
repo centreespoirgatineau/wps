@@ -269,7 +269,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (30 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (31 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -280,7 +280,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 30 tests: rules, HTTP end-to-end, brand overlays
+npm test                     # 31 tests: rules, HTTP end-to-end, brand overlays
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,
@@ -290,7 +290,11 @@ is how the automated tests sign in.
 ## 9. Open items
 
 - Twilio inbound webhook (`/twilio/inbound`, for STOP/START) to confirm in the
-  Twilio console.
+  Twilio console. **Both platforms text from the same number, and a number has
+  only one inbound webhook**, so STOP/START can only keep one of the two contact
+  lists in sync. Twilio still blocks the texts either way; the other list would
+  just keep showing the contact as active and its sends would fail with 21610.
+  A second sending number for spp is the clean fix.
 - Nightly `backup.sh` cron on the VPS not yet installed.
 - Root's crontab had the auto-update line duplicated; `crontab -l | sort -u | crontab -`
   cleans it.

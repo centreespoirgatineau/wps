@@ -495,6 +495,17 @@ test('the slideshow is served at /presentation, to anyone, with a policy that ru
   assert.match(r.text, /http:\/\/127\.0\.0\.1:\d+\/demande/);
 });
 
+test('the Twilio webhooks refuse an unsigned request instead of crashing', async () => {
+  // They once answered 500: verify() built its URL from publicUrl() without
+  // importing it, so the signature could never be checked and every webhook
+  // Twilio sent — delivery receipts, STOP and START — failed silently.
+  const anyone = client();
+  for (const path of ['/twilio/status', '/twilio/inbound']) {
+    const r = await anyone.post(path, { form: { MessageSid: 'SM0', MessageStatus: 'delivered' } });
+    assert.equal(r.status, 403, `${path} must refuse, not crash`);
+  }
+});
+
 test('the public address can be changed from Réglages, and links follow it', async () => {
   const admin = await adminClient();
   let csrf = await admin.csrf('/admin');
