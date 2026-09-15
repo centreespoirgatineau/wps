@@ -1,0 +1,11 @@
+This file is a switch, not a setting.
+
+While it exists in the repository, update.sh starts the second platform —
+spp.centreespoir.ca, the Système de Prévention de Pertes for food banks and
+community organisations — alongside the church platform. Delete it and push, and
+the next deploy takes that site offline within two minutes.
+
+Either way the data is kept: the container's database lives in /opt/wps/data-spp
+on the VPS and is never touched by starting or stopping it.
+
+Its DNS record (A, spp → 72.60.112.197, grey cloud) was added on 2026-09-15.
