@@ -1,5 +1,9 @@
-# The app is reachable ONLY from the VPS itself (127.0.0.1:8087).
-# Your existing reverse proxy forwards jc.centreespoir.ca to it.
+# Each app is reachable ONLY from the VPS itself (127.0.0.1:8087 and :8088).
+# Traefik forwards jc.centreespoir.ca and spp.centreespoir.ca to them.
+#
+# Two instances of the same image, two databases, nothing shared but the Twilio
+# credentials in .env. `wps-spp` sits behind a compose profile, so it only
+# starts once deploy/spp.enabled exists in the repository — see update.sh.
 services:
   wps:
     build: .
@@ -11,6 +15,43 @@ services:
       - "127.0.0.1:8087:8080"
     volumes:
       - ./data:/data
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Système de Prévention de Pertes — the food-bank platform. Same image, same
+  # Twilio account and sending number; everything else is overridden here so no
+  # second secrets file has to be created on the server.
+  wps-spp:
+    profiles: ["spp"]
+    build: .
+    image: wps:latest
+    container_name: wps-spp
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Overrides the values .env sets for the church platform.
+      - BRAND=spp
+      - APP_URL=https://spp.centreespoir.ca
+      # Empty on purpose: this instance generates and keeps its own cookie
+      # secret in its own data directory rather than sharing one.
+      - APP_SECRET=
+      # Creates the first administrator on first boot only (see src/server.js).
+      - ADMIN_PHONE=+18192085721
+      - ADMIN_FIRST=David
+      - ADMIN_LAST=Hatin
+      - ADMIN_ORG=Centre Espoir de Gatineau
+    ports:
+      - "127.0.0.1:8088:8080"
+    volumes:
+      - ./data-spp:/data
     mem_limit: 256m
     cpus: 0.5
     logging:

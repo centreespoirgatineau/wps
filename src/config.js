@@ -44,6 +44,15 @@ export const config = {
   // Absences (lots reserved but never picked up) before a contact is
   // removed from the list automatically.
   strikeLimit: Number(env.STRIKE_LIMIT || 3),
+  // The first administrator of a brand-new instance, created at boot so that
+  // standing one up never needs a terminal on the server. Ignored once any
+  // administrator exists.
+  bootstrapAdmin: {
+    phone: env.ADMIN_PHONE || '',
+    first: env.ADMIN_FIRST || 'Admin',
+    last: env.ADMIN_LAST || '',
+    org: env.ADMIN_ORG || '',
+  },
   adminFreshHours: Number(env.ADMIN_FRESH_HOURS || 12),
   sessionDays: Number(env.SESSION_DAYS || 90),
   loginCodeMinutes: 10,

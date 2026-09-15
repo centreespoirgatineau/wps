@@ -110,6 +110,44 @@ obtains the certificate automatically.
 4. Admin → *Contacts* → open your own contact → *Envoyer un texto de test*. You
    should receive it within seconds. If not, Admin → *Textos* shows Twilio's error.
 
+## 4b. The second platform — spp.centreespoir.ca
+
+The *Système de Prévention de Pertes* is the same platform for a different
+audience: the food banks and community organisations of the region, with no
+religious wording anywhere and an invitation to donate. It is **the same code**
+running a second time, with its own database, its own contacts and its own
+offers. Nothing you do on one shows up on the other.
+
+Standing it up is two steps.
+
+**1. Add the DNS record.** Cloudflare → centreespoir.ca → DNS → *Add record*:
+
+| Type | Name | IPv4 address | Proxy status | TTL |
+|---|---|---|---|---|
+| A | `spp` | `72.60.112.197` | **DNS only** (grey cloud) | Auto |
+
+Same rule as before: the grey cloud is not optional. With the orange cloud the
+certificate never issues and the site stays broken.
+
+**2. Tell me the record is in**, and I add one file to the repository
+(`deploy/spp.enabled`) and push. Within two minutes the second container starts,
+Traefik gets its certificate, and https://spp.centreespoir.ca is live with you
+already an administrator on it — sign in with your own mobile number, exactly
+like the church platform. Removing that file again takes it offline just as
+cleanly; the database is kept either way.
+
+Both platforms text from the same Twilio number, which costs nothing extra. A
+contact on one is not a contact on the other: the two lists are separate, so an
+organisation that belongs on both has to be added on both.
+
+**The donation link.** Admin → *Réglages* → *Lien de don* on the spp platform:
+paste the Zeffy page address there. Until you do, the platform never mentions
+money anywhere. Once set, it shows in exactly two places — a small link in the
+header and one paragraph on the *À propos* page. It never appears while someone
+is reserving a lot, on purpose: a donation must never look like it buys
+priority. Leave the field empty on the church platform, which stays free with no
+ask at all.
+
 ## 5. Daily use
 
 - **New offer:** Admin → *+ Nouvelle offre* → photos, title, what one lot contains,

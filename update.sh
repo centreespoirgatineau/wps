@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pull the latest code and restart the container without losing data.
+# Pull the latest code and restart the container(s) without losing data.
 set -euo pipefail
 cd "$(dirname "$0")"
 [ -d .git ] && [ -z "${WPS_NO_PULL:-}" ] && git pull --ff-only || true
@@ -16,5 +16,20 @@ if [ -z "${WPS_NO_OVERRIDE_SYNC:-}" ] && [ -f "$SRC" ]; then
   fi
 fi
 
-docker compose up -d --build --remove-orphans
-sleep 2 && curl -fsS http://127.0.0.1:8087/healthz >/dev/null && echo "✓ wps updated and healthy" || { docker compose logs --tail=40 wps; exit 1; }
+# The second platform (spp.centreespoir.ca) is behind a compose profile, so it
+# stays off until deploy/spp.enabled is committed — one file to add, one file to
+# remove, no terminal. Its DNS record must exist first, or Traefik cannot get a
+# certificate for it.
+PROFILE=()
+if [ -f deploy/spp.enabled ]; then PROFILE=(--profile spp); fi
+
+docker compose "${PROFILE[@]}" up -d --build --remove-orphans
+
+check() {  # port, name
+  sleep 2
+  curl -fsS "http://127.0.0.1:$1/healthz" >/dev/null \
+    && echo "✓ $2 updated and healthy" \
+    || { docker compose logs --tail=40 "$2"; exit 1; }
+}
+check 8087 wps
+if [ ${#PROFILE[@]} -gt 0 ]; then check 8088 wps-spp; fi

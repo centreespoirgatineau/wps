@@ -1,7 +1,12 @@
 # The override used on David's VPS (Traefik in container root-traefik-1, network root_default,
 # certificate resolver "mytlschallenge"). Copy to /opt/wps/docker-compose.override.yml.
 #
-# The site answers on jc.centreespoir.ca.
+# update.sh keeps this in step automatically, so routing and domain changes ship
+# by pushing to main.
+#
+# wps answers on jc.centreespoir.ca; wps-spp on spp.centreespoir.ca. The labels
+# for wps-spp do nothing until the service itself starts, which only happens
+# when deploy/spp.enabled exists.
 services:
   wps:
     networks:
@@ -15,6 +20,19 @@ services:
       - traefik.http.routers.wps.tls.certresolver=mytlschallenge
       - traefik.http.services.wps.loadbalancer.server.port=8080
       - traefik.http.services.wps.loadbalancer.responseforwarding.flushinterval=-1
+  wps-spp:
+    networks:
+      - default
+      - root_default
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=root_default
+      - traefik.http.routers.wps-spp.rule=Host(`spp.centreespoir.ca`)
+      - traefik.http.routers.wps-spp.entrypoints=websecure
+      - traefik.http.routers.wps-spp.tls.certresolver=mytlschallenge
+      - traefik.http.services.wps-spp.loadbalancer.server.port=8080
+      # Server-sent events must not be buffered, or the live updates arrive late.
+      - traefik.http.services.wps-spp.loadbalancer.responseforwarding.flushinterval=-1
 networks:
   root_default:
     external: true

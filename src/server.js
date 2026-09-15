@@ -11,7 +11,8 @@ import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
 import { isDemo } from './lib/demo.js';
 import { loadPublicUrl, publicUrl } from './lib/site.js';
 import { startScheduler } from './lib/scheduler.js';
-import { formatPhone } from './lib/phone.js';
+import { formatPhone, normalizePhone } from './lib/phone.js';
+import { token } from './lib/crypto.js';
 import { formatDate, formatDateTimeShort, formatDateTimeLong, hmToH } from './lib/time.js';
 import { publicRoutes } from './routes/public.js';
 import { contactRoutes } from './routes/contact.js';
@@ -37,6 +38,26 @@ if (!db.setting('pickup_name')) {
   db.setSetting('pickup_details', '');
 }
 if (!db.setting('app_name')) db.setSetting('app_name', config.appName);
+
+// The first administrator of a brand-new instance, from ADMIN_PHONE. Only ever
+// when the list has no administrator at all: it cannot promote, overwrite or
+// resurrect anyone once the platform is in use, so leaving the variable in the
+// environment forever is harmless.
+if (config.bootstrapAdmin.phone && !db.get(`SELECT id FROM contacts WHERE role = 'admin' LIMIT 1`)) {
+  const a = config.bootstrapAdmin;
+  const phone = normalizePhone(a.phone);
+  if (!phone) {
+    console.error(`[boot] ADMIN_PHONE is not a usable number: ${a.phone}`);
+  } else if (db.get('SELECT id FROM contacts WHERE phone = ?', phone)) {
+    console.error(`[boot] ${a.phone} is already on the list; promote it from another admin account.`);
+  } else {
+    const now = Date.now();
+    db.run(`INSERT INTO contacts(first_name, last_name, organization, phone, lang, role, status, token, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 'fr', 'admin', 'active', ?, ?, ?)`,
+      a.first, a.last, a.org, phone, token(12), now, now);
+    console.log(`[boot] first administrator created: ${a.first} ${a.last} ${formatPhone(phone)}`);
+  }
+}
 
 const app = new App();
 
