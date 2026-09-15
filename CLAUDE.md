@@ -252,7 +252,10 @@ Notes that have already caught me out:
 - **Secrets** live only in `/opt/wps/.env` (chmod 600, git-ignored): Twilio SID,
   token, sending number (a Canadian local number — no A2P 10DLC needed for
   Canadian recipients), `APP_SECRET`. Never print or commit them.
-- **Data** is `/opt/wps/data/` (SQLite + uploads). `backup.sh` snapshots it.
+- **Data** is `/opt/wps/data/` for the church platform and `/opt/wps/data-spp/`
+  for the food-bank one (SQLite + uploads), separate databases that share
+  nothing. `backup.sh` snapshots both, keeping 14 of each; it skips the second
+  when that container is not running.
 
 Full operator documentation for David: `DEPLOYMENT_GUIDE.md` (English, written for
 a non-developer). Update it when operations change.
