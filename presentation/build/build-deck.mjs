@@ -159,6 +159,7 @@ h2+.big,h2+.ticks,h2+.contact{margin-top:var(--gap)}
 .contact strong{color:var(--ink)}
 .contact .tel{color:var(--accent-ink);font-weight:600;text-decoration:none;
   font-size:clamp(17px, min(1.72vw, 3.2vh), 33px)}
+.contact .mail{color:var(--accent-ink);text-decoration:none}
 .big.center{margin-inline:auto}
 
 /* text-message mock */

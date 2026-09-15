@@ -5,7 +5,7 @@
 // Nothing here may name Jesus Christ, the gospel, churches or pastors. This
 // audience is the food banks and community organisations of the Outaouais.
 export const meta = {
-  title: 'Que rien ne se perde — Centre Espoir de Gatineau',
+  title: 'Évitons le gaspillage — Centre Espoir de Gatineau',
   ogTitle: 'Les surplus alimentaires, redistribués le jour même',
   ogDesc: 'Comment un organisme de l’Outaouais récupère les surplus alimentaires du Centre Espoir de Gatineau, le jour même.',
   ogAlt: 'Le phare du Centre Espoir de Gatineau, et les mots « Les surplus alimentaires, redistribués le jour même »',
@@ -20,7 +20,7 @@ export function slides({ phone, mark }) {
 <section class="s title">
   <div class="mid">
     <img class="logo" src="data:image/svg+xml;base64,${mark}" alt="">
-    <h1>Que rien ne se perde.</h1>
+    <h1>Évitons le gaspillage</h1>
     <p class="lede">Le Centre Espoir de Gatineau redistribue ses surplus alimentaires
       le jour même aux banques alimentaires et aux organismes communautaires
       de l’Outaouais.</p>
@@ -139,11 +139,11 @@ export function slides({ phone, mark }) {
   <div class="split">
     <div class="col">
       <p class="eyebrow">Étape 4</p>
-      <h2>Vous vous organisez entre vous.</h2>
+      <h2>Une discussion de groupe pour chaque offre.</h2>
       <ul class="ticks">
         <li>«&nbsp;Je peux prendre ton lot en passant.&nbsp;»</li>
         <li>«&nbsp;Quelqu’un va vers Aylmer&nbsp;?&nbsp;»</li>
-        <li>Chaque organisme a sa couleur, d’un coup d’œil.</li>
+        <li>Avant comme après le ramassage, tout se coordonne là.</li>
       </ul>
     </div>
     <div class="col shot-col">${phone('offer', 1340)}</div>
@@ -174,7 +174,7 @@ export function slides({ phone, mark }) {
     <p class="eyebrow center">Les règles</p>
     <h2 class="center">Trois règles, pour que ce soit juste.</h2>
     <ol class="rules">
-      <li class="first"><strong>Les lots nourrissent des gens.</strong> Ils doivent servir à nourrir des personnes dans le besoin, et ne peuvent être ni revendus ni utilisés à des fins commerciales.</li>
+      <li class="first"><strong>Destinés aux personnes dans le besoin.</strong> Ces lots doivent servir à nourrir des personnes dans le besoin, et ne peuvent être ni revendus ni utilisés à des fins commerciales.</li>
       <li><strong>Réserver, c’est s’engager.</strong> Qui ne vient pas ne peut pas réserver à l’offre suivante. Après trois absences, le contact quitte la liste.</li>
       <li><strong>Tout reste confidentiel.</strong> Les coordonnées et les discussions ne sortent pas de la plateforme.</li>
     </ol>
@@ -187,12 +187,12 @@ export function slides({ phone, mark }) {
   <div class="mid">
     <p class="eyebrow center">Rejoindre la liste</p>
     <h2 class="center">Vous voulez en être&nbsp;?</h2>
-    <p class="big center">Faites votre demande en ligne, ou parlez-en directement à David.</p>
     <p class="center"><a class="cta" href="__ORIGIN__/demande">__HOST__/demande</a></p>
     <p class="contact center"><strong>David Hatin</strong> · Directeur général<br>Centre Espoir de Gatineau<br>
-      <a class="tel" href="tel:+18192085721">819-208-5721</a></p>
+      <a class="tel" href="tel:+18192085721">819-208-5721</a><br>
+      <a class="mail" href="mailto:direction@centreespoir.ca">direction@centreespoir.ca</a></p>
     <p class="note center"><strong>Un seul représentant par organisme.</strong><br>Désignez la personne chargée d’aller chercher les lots.</p>
-    <p class="note center">Le service est gratuit et le restera. Le Centre Espoir, lui, fonctionne avec des moyens serrés&nbsp;: si votre organisme en a la capacité, un don nous aide à continuer.</p>
+    <p class="note center"><strong>Le service est entièrement gratuit, et le restera.</strong><br>Si votre organisme en a la possibilité, un don, même modeste, nous aidera concrètement à poursuivre notre mission.</p>
   </div>
 </section>`);
 
