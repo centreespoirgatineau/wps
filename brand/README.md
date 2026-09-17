@@ -27,15 +27,34 @@ Utile seulement si le dessin du phare change, ou le texte.
 node brand/build/make-logo.mjs
 ```
 
-Le script a besoin des trois polices dans `build/work/`. Elles ne sont pas
-conservées dans Git ; pour les retélécharger :
+Les polices sont dans `fonts/`, rien à télécharger.
 
-```bash
-cd brand/build/work
-B=https://raw.githubusercontent.com/adobe-fonts
-curl -sLO $B/source-serif/release/TTF/SourceSerif4Display-Regular.ttf
-curl -sLO $B/source-sans/release/TTF/SourceSans3-Semibold.ttf
-```
+## Les polices
+
+Elles sont ici, sous licence libre (SIL Open Font License), utilisables pour
+l'impression, le web et le marchandisage, sans redevance ni mention obligatoire.
+Double-cliquez un `.ttf` puis « Installer » pour l'ajouter à Windows et à
+Illustrator.
+
+| Fichier | À quoi il sert |
+|---|---|
+| `SourceSerif4-VariableFont_opsz,wght.ttf` | Le serif, toutes les graisses et toutes les tailles optiques dans un seul fichier. **C'est celui à employer dans Illustrator** : réglez `wght` à 500 et `opsz` à 60 dans le panneau Caractère. |
+| `SourceSerif4_48pt-Medium.ttf` | La coupe fixe la plus proche, si les curseurs de police variable vous embêtent. Environ 3 % plus large. |
+| `SourceSerif4Display-Regular.ttf` | Ce qu'emploie `make-logo.mjs`. |
+| `SourceSans3-Semibold.ttf` | « Banque alimentaire ». Une seule coupe, aucun réglage. |
+| `SourceSans3VF-Upright.ttf` | Le même en police variable, si vous préférez. |
+| `OFL-*.txt` | Les licences. À conserver si vous transmettez les polices. |
+
+### La taille optique, la seule chose à surveiller
+
+Source Serif 4 se redessine selon la taille à laquelle on l'emploie : plus c'est
+gros, plus les lettres sont étroites et les déliés fins. Entre les deux
+extrêmes, l'écart atteint **13 % de largeur**. Un logo doit être figé sur une
+seule taille optique, sinon il change de forme entre une signature de courriel
+et une affiche. Le nôtre est calé sur **60**.
+
+Une fois le nom composé dans Illustrator, faites **Texte → Vectoriser** avant
+d'enregistrer le fichier maître. La forme est alors fixée pour de bon.
 
 ## Deux décisions, pour mémoire
 

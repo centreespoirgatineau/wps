@@ -12,7 +12,8 @@
 // Everything is derived, nothing is eyeballed: the tracking under the name is
 // solved so the descriptor measures exactly the width of the name, and the two
 // baselines sit where the browser put them, from the fonts' own vertical
-// metrics. Fonts are fetched at build time into build/work/ and never committed.
+// metrics. The fonts live in brand/fonts/, committed under their open licence,
+// so this runs with no network and no font installed on the machine.
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -20,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { readFont, glyphPath } from './ttf.mjs';
 
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
-const WORK = path.join(here, 'work');
+const FONTS = path.resolve(here, '../fonts');   // committed, so the build needs no network
 const OUT = path.resolve(here, '..');
 const MARK_SVG = path.resolve(here, '../../src/public/mark.svg');
 
@@ -41,8 +42,8 @@ const MARK_H_STACK = 2.40;    // mark height, icon above the words
 const GAP_ROW = 0.55;         // between mark and words, side by side
 const GAP_STACK = 0.50;       // between mark and words, stacked
 
-const serif = readFont(path.join(WORK, 'SourceSerif4Display-Regular.ttf'));
-const sans = readFont(path.join(WORK, 'SourceSans3-Semibold.ttf'));
+const serif = readFont(path.join(FONTS, 'SourceSerif4Display-Regular.ttf'));
+const sans = readFont(path.join(FONTS, 'SourceSans3-Semibold.ttf'));
 
 // ------------------------------------------------------------- setting a run
 /** Lay a string out glyph by glyph and report its paths and its ink bounds. */
