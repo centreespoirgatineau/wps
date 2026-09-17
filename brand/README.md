@@ -43,6 +43,7 @@ Illustrator.
 | `SourceSerif4Display-Regular.ttf` | Ce qu'emploie `make-logo.mjs`. |
 | `SourceSans3-Semibold.ttf` | « Banque alimentaire ». Une seule coupe, aucun réglage. |
 | `SourceSans3VF-Upright.ttf` | Le même en police variable, si vous préférez. |
+| `SourceSerif4-Italic.ttf` | L'italique de la même famille. Elle ne sert pas au texte du logo : c'est d'elle que vient la croix dans le « o » d'Espoir, qui est un « t » italique dont le pied a été coupé. |
 | `OFL-*.txt` | Les licences. À conserver si vous transmettez les polices. |
 
 ### La taille optique, la seule chose à surveiller
