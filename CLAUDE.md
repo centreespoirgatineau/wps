@@ -115,6 +115,20 @@ Other hard constraints:
   same file is the in-page mark and the browser-tab icon, and it is inlined as a
   data URI into the slideshow. No PNG copies, no build step — an earlier
   cornucopia logo needed both, and that tooling is gone.
+- **The official logo lives in `brand/logo/`, and nowhere else.** David drew it
+  in Adobe Illustrator; `Edit.ai` is the master, and every anniversary poster,
+  letterhead, email signature or site asset starts from those files. Source
+  them from there — never regenerate a logo, and never hand out anything from
+  `brand/propositions/`, which is what I had generated *before* the official one
+  existed and is kept only as a record. `brand/build/` composes those proposals
+  from `brand/fonts/`; it never reads `brand/logo/`. Three warnings, all in
+  `brand/README.md`: five files hold only three drawings (`Icon-01`/`Icon-02`
+  are the two lockups renamed, only `Icon-03` is the symbol); the text is
+  already outlined; and each SVG carries Illustrator's private `i:pgf` copy of
+  the document, which is why thirty paths weigh 320 KB — fine for a printer,
+  twenty times too heavy for a web page, so re-export before using one online.
+  The master's terracotta is **`#DA7757`**; `--accent` in `src/public/app.css`
+  is still `#D97757`, one digit off, and has been since before the logo existed.
 - **The link preview is the one raster image**, `src/public/og.png` (1200x630),
   because no messenger renders an SVG in a preview card. It is generated from
   the mark and a few lines of copy by `presentation/build/make-og.mjs` and
@@ -150,6 +164,8 @@ src/locales/fr.js en.js  every user-visible string; FR is the reference
 src/locales/spp.fr.js en.js  the food-bank brand: only the strings that differ
 scripts/make-admin.js  create/promote an administrator from the CLI
 presentation/          the slideshow for churches, served at /presentation (see its README)
+brand/logo/            THE OFFICIAL LOGO — David's Illustrator masters. Source every logo here
+brand/fonts/ build/ propositions/   the typefaces, the generators, and superseded proposals
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
 test/brand.test.js     the brand overlays and the donation link, dictionaries only

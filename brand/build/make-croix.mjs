@@ -24,7 +24,7 @@ import { readFont } from './ttf.mjs';
 
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 const FONTS = path.resolve(here, '../fonts');
-const OUT = path.resolve(here, '..');
+const OUT = path.resolve(here, '../propositions');   // David's masters live in brand/logo/ — these are working proposals
 
 const serif = readFont(path.join(FONTS, 'SourceSerif4_48pt-Medium.ttf'));
 const italic = readFont(path.join(FONTS, 'SourceSerif4-Italic.ttf'));
@@ -381,7 +381,7 @@ ${VARIANTS.map((v) => `
 `;
 
 fs.writeFileSync(path.join(OUT, 'croix.html'), page);
-console.log('written brand/croix.html');
+console.log('written brand/propositions/croix.html');
 for (const v of VARIANTS) {
   const b = bbox(oParts(v.v).cross.flat());
   console.log(`  · ${v.key} ${v.label.padEnd(36)} ${b.w.toFixed(0)} x ${b.h.toFixed(0)} unités`);

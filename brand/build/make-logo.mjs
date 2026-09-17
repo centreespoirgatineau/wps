@@ -22,7 +22,7 @@ import { readFont, glyphPath } from './ttf.mjs';
 
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 const FONTS = path.resolve(here, '../fonts');   // committed, so the build needs no network
-const OUT = path.resolve(here, '..');
+const OUT = path.resolve(here, '../propositions');   // David's masters live in brand/logo/ — these are working proposals
 const MARK_SVG = path.resolve(here, '../../src/public/mark.svg');
 
 // ---------------------------------------------------------------- the design

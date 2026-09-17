@@ -1,30 +1,54 @@
 # Le logo du Centre Espoir de Gatineau
 
-Le phare, le nom, et « Banque alimentaire » en dessous. Deux verrouillages
-(horizontal et empilé), trois couleurs, plus le symbole seul.
+**Les logos officiels sont dans `logo/`.** C'est David qui les a dessinés dans
+Adobe Illustrator, et c'est la seule référence : toute affiche, tout courriel,
+tout document, tout site part de ces fichiers-là. Le reste de ce dossier est du
+matériel de travail — les polices, les scripts, et les propositions que j'avais
+générées avant.
 
-Ouvrez **`apercu.html`** d'un double-clic : tout y est, avec la zone de
-protection et la taille minimale.
+## Le contenu de `logo/`
 
-## Quel fichier donner
-
-| À qui | Quoi |
+| Fichier | Ce que c'est |
 |---|---|
-| Un imprimeur, un graphiste | `logo-horizontal.svg` ou `logo-vertical.svg` |
-| Canva, Word, les réseaux sociaux | les `.png` (fond transparent) |
-| Un fond foncé ou terracotta | les versions `-creme` |
-| Une gravure, un tampon, un fax | les versions `-encre` |
-| Une icône, une photo de profil | `logo-symbole.svg` |
+| `Horizontaly aligned-02.svg` | **Le verrouillage horizontal** : le phare à gauche, le nom à droite. 335 × 77. |
+| `Vertically aligned-01.svg` | **Le verrouillage vertical** : le phare au-dessus, le nom en dessous. 234 × 167. |
+| `Icon-03.svg` | **Le symbole seul**, le phare sur son disque. 98 × 96. Pour une photo de profil, une favicone, un tampon. |
+| `Icon-01.svg` | Un doublon exact de `Vertically aligned-01.svg`. |
+| `Icon-02.svg` | Un doublon exact de `Horizontaly aligned-02.svg`. |
+| `Edit.ai` | Le fichier maître Illustrator. C'est lui qu'on rouvre pour modifier quoi que ce soit. |
 
-Le texte des SVG est **en tracés**, pas en caractères : aucune police à
-fournir, aucune substitution possible chez l'imprimeur.
+Trois choses à savoir avant de s'en servir :
 
-## Le refaire
+- **Il n'y a que trois dessins pour cinq fichiers.** `Icon-01` et `Icon-02` ne
+  sont pas des icônes : ce sont les deux verrouillages sous un autre nom. Seul
+  `Icon-03` est le symbole. Vérifié en comparant les tracés, pas les noms.
+- **Le texte est déjà en tracés**, pas en caractères : aucune police à fournir
+  à un imprimeur, aucune substitution possible.
+- **Les SVG pèsent 320 Ko chacun pour trente tracés.** Illustrator y conserve une
+  copie privée du document (`i:pgf`) qui ne sert qu'à lui. C'est sans
+  conséquence pour un imprimeur, mais c'est vingt fois trop lourd pour une page
+  web. Pour le web, réexporter avec **Fichier → Exporter → Exporter pour les
+  écrans**, ou décocher « Conserver les fonctions d'édition Illustrator ».
 
-Utile seulement si le dessin du phare change, ou le texte.
+Les couleurs sont `#DA7757` (terracotta) et `#141413` (encre).
+
+## Ce qu'il y a d'autre ici
+
+| Dossier | Quoi |
+|---|---|
+| `fonts/` | Les polices, sous licence libre. Voir plus bas. |
+| `build/` | Les scripts qui ont servi aux propositions. |
+| `propositions/` | Ce que j'avais généré avant les logos officiels : `apercu.html` (les verrouillages proposés) et `croix.html` (la croix dans le « o » d'Espoir). Conservé comme trace, ce ne sont pas les logos. |
+
+## Refaire les propositions
+
+Le logo officiel se modifie dans `logo/Edit.ai`, pas ici. Ces scripts ne
+regarderont jamais les fichiers de `logo/` : ils recomposent les propositions
+à partir des polices, et écrivent dans `propositions/`.
 
 ```bash
-node brand/build/make-logo.mjs
+node brand/build/make-logo.mjs     # les verrouillages proposés + apercu.html
+node brand/build/make-croix.mjs    # la croix dans le « o » + croix.html
 ```
 
 Les polices sont dans `fonts/`, rien à télécharger.
