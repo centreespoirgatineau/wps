@@ -248,7 +248,19 @@ Notes that have already caught me out:
   for every offer except a draft, which has no contact page until published.
   The controls need a **fresh** admin session, because the routes behind them do;
   arriving by personal link is not fresh, so the strip then shows *Vérifier pour
-  gérer* rather than letting the controls quietly vanish. Admin pages require a
+  gérer* rather than letting the controls quietly vanish.
+  **`?vue=contact` previews the contact's view** of that same page. The route
+  simply passes `isAdmin: false` down to the view layer, so every existing check
+  hides itself and there is no second rendering path to drift; `isAdminReal`
+  stays true for the one bar offering the way back, and `/offres/:id/lots`
+  honours the flag too (the client appends `location.search`) or the buttons
+  would reappear the moment anyone reserved. It is a view, never a permission:
+  the override still applies while previewing, and a test asserts exactly that.
+- **The pickup card shows the place, not the directions.** Address, then the
+  from/to window; the written directions and the photo of the spot sit behind a
+  `details.fold.plain` — a fold nested inside a card, so it borrows the card's
+  border instead of drawing a second box inside the first. A driver needs the
+  address and the hours at a glance and the directions once, before setting off. Admin pages require a
   code-verified session younger than `ADMIN_FRESH_HOURS` (12); opening a personal
   link is enough for contact pages but not for admin ones.
 - **Test account (`no_sms=1`)** — for David to test alone with one real phone.
@@ -321,7 +333,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (37 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (38 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -332,7 +344,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 37 tests: rules, HTTP end-to-end, brand overlays
+npm test                     # 38 tests: rules, HTTP end-to-end, brand overlays
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

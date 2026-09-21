@@ -62,9 +62,18 @@ export function contactRoutes(app, db) {
     // This is the only offer page there is, so for an administrator it also
     // carries what used to sit on a management page of its own. Queried only
     // when it will actually be shown: a contact never sees either list.
-    const admin = isAdmin(ctx) && adminFresh(ctx);
+    //
+    // `?vue=contact` is the administrator looking at their own page as a church
+    // gets it. It switches off `isAdmin` for the view layer only, so every
+    // existing check hides itself and there is no second rendering path to keep
+    // in step; `isAdminReal` stays true for the one bar that offers the way
+    // back. Nothing about permissions changes — the server still knows exactly
+    // who is asking, and every admin route behind these controls is unmoved.
+    const preview = isAdmin(ctx) && ctx.query.vue === 'contact';
+    const admin = isAdmin(ctx) && adminFresh(ctx) && !preview;
     ctx.render('offer', {
       title: offer.title, ...offerViewModel(db, ctx, offer), messages,
+      preview, isAdminReal: isAdmin(ctx), isAdmin: isAdmin(ctx) && !preview,
       sms: admin ? offerSms(db, offer.id) : [],
       penalties: admin ? db.all(`SELECT p.*, c.first_name, c.last_name, c.organization FROM penalties p
         JOIN contacts c ON c.id = p.contact_id WHERE p.target_offer_id = ? AND p.status = 'active'
@@ -72,10 +81,13 @@ export function contactRoutes(app, db) {
     });
   });
 
-  // Partial: the lots block, re-fetched on SSE "refresh".
+  // Partial: the lots block, re-fetched on SSE "refresh". It carries the
+  // preview flag too, or an administrator previewing the contact view would
+  // watch the admin buttons reappear the moment anybody reserved a lot.
   app.get('/offres/:id/lots', requireContact, (ctx) => {
     const offer = loadOffer(db, ctx.params.id);
-    ctx.partial('_lots', offerViewModel(db, ctx, offer));
+    const preview = isAdmin(ctx) && ctx.query.vue === 'contact';
+    ctx.partial('_lots', { ...offerViewModel(db, ctx, offer), isAdmin: isAdmin(ctx) && !preview });
   });
 
   app.get('/offres/:id/stream', requireContact, (ctx) => {

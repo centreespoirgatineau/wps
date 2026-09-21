@@ -2,7 +2,7 @@
   <div class="banner info mb"><%= t('offer.inactive') %></div>
 <%# Never a silent privilege: if the waiting period and the limit are not being
     applied to whoever is reading, the page says so. %>
-<% } else if (check.override) { %>
+<% } else if (check.override && isAdmin) { %>
   <div class="banner accent mb"><%= t('offer.admin.override') %></div>
 <% } else if (!check.ok && check.reason === 'cooldown') { %>
   <div class="banner accent mb" id="cooldown" data-until="<%= check.until %>"><%- t('offer.cooldown', { time: '<span class="countdown">…</span>' }) %></div>

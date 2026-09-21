@@ -84,7 +84,12 @@ main.centered .hero { padding-top: 0; }
 /* The one strip on the offer page that belongs to the administrator and not to
    the contacts reading the same page. Marked by a rule down its edge rather
    than by a colour fill, so it stays quiet next to the offer itself. */
-.card.admin-bar { border-left: 2px solid var(--accent); }
+.card.admin-bar { border-left: 2px solid var(--accent); margin-bottom: 12px; }
+/* The contact preview: deliberately not a card, so it cannot be mistaken for
+   part of the page it is previewing. */
+.preview-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  border: 1px dashed var(--line-2); border-radius: var(--radius-s); padding: 8px 12px; margin-bottom: 12px;
+  font-size: .8rem; color: var(--ink-3); }
 .grow { flex: 1; min-width: 0; }
 .right { text-align: right; }
 .center { text-align: center; }
@@ -283,6 +288,12 @@ details.fold > summary::-webkit-details-marker { display: none; }
 details.fold > summary::after { content: "›"; margin-left: auto; color: var(--ink-3); font-size: 1.3rem; transition: transform .15s; }
 details.fold[open] > summary::after { transform: rotate(90deg); }
 details.fold > .fold-body { padding: 0 16px 14px; }
+/* A fold nested inside a card, not beside one: it borrows the card's border and
+   padding instead of drawing a second box within the first. */
+details.fold.plain { border: 0; background: none; border-radius: 0; }
+details.fold.plain > summary { padding: 6px 0; }
+details.fold.plain > summary .summary-text { color: var(--accent-ink); font-weight: 500; }
+details.fold.plain > .fold-body { padding: 2px 0 0; }
 .summary-text { font-size: .95rem; color: var(--ink); }
 .summary-text small { display: block; color: var(--ink-2); }
 .lot .n.plain { background: var(--surface-2); color: var(--ink-2); }

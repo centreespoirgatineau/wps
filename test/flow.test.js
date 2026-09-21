@@ -684,3 +684,49 @@ test('one offer page: the admin sees what contacts see, plus the admin controls 
   assert.doesNotMatch(theirs.text, /data-lot-action/, 'no admin controls');
   assert.doesNotMatch(theirs.text, /\/admin\/offres\//, 'no admin links');
 });
+
+test('the admin can preview the contact view, and it is a view and not a permission', async () => {
+  const admin = await adminClient();
+  let r = await admin.get('/admin');
+  const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+
+  r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Carottes', lot_description: '1 sac',
+    lot_count: '2', max_per_contact: '1', pickup_name: 'Centre Espoir', pickup_address: '791 Maloney',
+    pickup_details: 'Derrière le bâtiment, sur la table.' } });
+  const id = /\/admin\/offres\/(\d+)\//.exec(r.location)[1];
+  const conf = await admin.get(`/admin/offres/${id}/confirmer`);
+  const ids = [...conf.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  await admin.post(`/admin/offres/${id}/publier`, { form: { _csrf: csrf, contacts: ids[0] } });
+
+  const normal = await admin.get(`/offres/${id}`);
+  assert.match(normal.text, /\?vue=contact/, 'the way in');
+  assert.match(normal.text, /\/admin\/offres\/\d+\/fermer/, 'admin controls present');
+
+  const preview = await admin.get(`/offres/${id}?vue=contact`);
+  assert.equal(preview.status, 200);
+  assert.doesNotMatch(preview.text, /\/admin\/offres\//, 'no admin links in the preview');
+  assert.doesNotMatch(preview.text, /data-lot-action/, 'no admin lot buttons');
+  assert.doesNotMatch(preview.text, /offre\.admin\.override|sans délai d’attente/, 'no override banner');
+  assert.match(preview.text, /id="chat-form"/, 'the contact page itself is intact');
+  assert.match(preview.text, /Revenir/, 'and a way back');
+
+  // It changes what is drawn, never what is allowed: the admin override still
+  // applies while previewing.
+  const tok = /name="csrf" content="([^"]+)"/.exec(preview.text)[1];
+  const lots = [...preview.text.matchAll(/data-reserve="(\d+)"/g)].map((m) => m[1]);
+  const take = (l) => admin.post(`/offres/${id}/lots/${l}/reserver`, { json: {}, headers: { 'X-CSRF': tok } });
+  assert.match((await take(lots[0])).text, /"ok":true/);
+  assert.match((await take(lots[1])).text, /"ok":true/, 'still past the maximum of 1');
+
+  // Now that lots are held, the admin buttons exist — and the refreshed partial
+  // must stay in whichever view asked for it, or they would reappear the moment
+  // anyone reserved.
+  assert.match((await admin.get(`/offres/${id}/lots`)).text, /data-lot-action/,
+    'the normal view has them');
+  assert.doesNotMatch((await admin.get(`/offres/${id}/lots?vue=contact`)).text, /data-lot-action/,
+    'the preview does not');
+
+  // The pickup details are behind the fold, not gone.
+  assert.match(normal.text, /Plus de détails/, 'the fold exists');
+  assert.match(normal.text, /Derrière le bâtiment/, 'and still carries the directions');
+});

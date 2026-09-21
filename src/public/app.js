@@ -108,7 +108,9 @@
     async function refreshLots() {
       if (refreshing) return; refreshing = true;
       try {
-        const res = await fetch(`/offres/${offerId}/lots`, { credentials: 'same-origin', headers: { Accept: 'text/html' } });
+        // location.search carries ?vue=contact, so an administrator previewing
+        // the contact view does not watch the admin buttons reappear here.
+        const res = await fetch(`/offres/${offerId}/lots${location.search}`, { credentials: 'same-origin', headers: { Accept: 'text/html' } });
         if (res.ok) { lotsBox.innerHTML = await res.text(); startCountdown(); }
       } finally { refreshing = false; }
     }
