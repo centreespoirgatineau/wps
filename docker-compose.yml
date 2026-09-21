@@ -1,9 +1,10 @@
 # Each app is reachable ONLY from the VPS itself (127.0.0.1:8087 and :8088).
 # Traefik forwards jc.centreespoir.ca and spp.centreespoir.ca to them.
 #
-# Two instances of the same image, two databases, nothing shared but the Twilio
-# credentials in .env. `wps-spp` sits behind a compose profile, so it only
-# starts once deploy/spp.enabled exists in the repository — see update.sh.
+# Two instances of the same image, two databases, sharing only what is in .env:
+# the Twilio credentials and the Resend key for the notices to the Centre.
+# `wps-spp` sits behind a compose profile, so it only starts once
+# deploy/spp.enabled exists in the repository — see update.sh.
 services:
   wps:
     build: .

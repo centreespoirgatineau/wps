@@ -7,6 +7,7 @@ import { normalizeLang } from '../lib/i18n.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
+import { notifyReservation } from '../lib/mailer.js';
 
 /** The offer's text deliveries, for the administrator's fold on the offer page. */
 export function offerSms(db, offerId) {
@@ -103,6 +104,16 @@ export function contactRoutes(app, db) {
       const lot = rules.reserveLot(db, ctx.state.contact, Number(ctx.params.lotId));
       if (lot.offer_id !== Number(ctx.params.id)) throw new HttpError(404);
       sse.publish(ctx.params.id, 'refresh', { reason: 'reserved', lot: lot.number });
+      // Tell the Centre by email. This is the single place a lot is ever
+      // reserved — an administrator's override comes through here too — so one
+      // hook covers both platforms and every case. Not awaited: the contact is
+      // waiting on this response and the reservation is already committed, so a
+      // mail outage must never look like a failed reservation.
+      const offer = loadOffer(db, lot.offer_id);
+      const { n: held } = db.get(
+        `SELECT COUNT(*) AS n FROM lots WHERE offer_id = ? AND reserved_by = ? AND status IN ('reserved','picked_up')`,
+        offer.id, ctx.state.contact.id);
+      notifyReservation({ contact: ctx.state.contact, offer, lot, held, override: isAdmin(ctx) });
       ctx.json({ ok: true, message: ctx.t('offer.reserved_ok') });
     } catch (e) {
       if (!(e instanceof rules.RuleError)) throw e;

@@ -105,6 +105,19 @@ Other hard constraints:
   (`changedFields` → `announceEdit`), posted as the administrator who made it,
   in French: a stored message has no locale to switch on. No SMS is resent —
   David's call, texting thirty organisations over a typo is worse than the typo.
+- **Every reservation emails the Centre**, on both platforms, to the addresses
+  in `MAIL_TO`. `src/lib/mail.js` is the transport — the Resend REST API over
+  plain `fetch`, because a mailer library would be the first npm dependency —
+  and `src/lib/mailer.js` is the French wording. Hooked in one place, the
+  reserve route, which is the only way a lot is ever taken (an admin override
+  goes through it too). **Never awaited and never allowed to throw:** the lot is
+  already committed and the contact is waiting on the response, so a mail outage
+  must not look like a failed reservation. It also means a dead key is silent —
+  nothing on screen says so, only `[mail] failed` in the log. Both containers
+  read the same `.env`, so one key serves both; empty `MAIL_TO` turns it off,
+  which is how a local copy runs. Because both platforms write to the same two
+  inboxes, **every message names the platform it came from**, in the subject and
+  in the body — covered by a test in `test/mail.test.js`.
 - **The donation ask is a setting, and it is quiet.** `donate_url` (Admin →
   Réglages) must be an https address or empty; empty means the platform never
   mentions money anywhere, which is how the jc instance runs. When set, it
@@ -163,6 +176,8 @@ src/lib/rules.js       THE FAIRNESS RULES — see §4. Unit-tested in isolation.
 src/lib/auth.js        sessions, SMS login codes, CSRF, rate limits, personal links
 src/lib/sms.js         Twilio REST, webhook signature check, GSM-7 flattening
 src/lib/sse.js         one live channel per offer
+src/lib/mail.js        Resend REST API (fetch, no SDK); never throws
+src/lib/mailer.js      what the Centre reads: the French notices
 src/lib/scheduler.js   30 s tick: expire offers at end of day, tidy auth tables
 src/routes/public.js   login, personal links, about, join requests, /presentation
 src/routes/contact.js  offers, reservations, chat, personal settings, private media
@@ -179,6 +194,7 @@ brand/fonts/ build/ propositions/   the typefaces, the generators, and supersede
 test/rules.test.js     rules engine, in-memory DB, no server
 test/flow.test.js      end-to-end HTTP against a real server process, SMS in dry-run
 test/brand.test.js     the brand overlays and the donation link, dictionaries only
+test/mail.test.js      the wording of the notices, no network
 ```
 
 ## 4. The fairness rules (the heart of the app)
@@ -333,7 +349,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (38 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (43 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -344,7 +360,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 38 tests: rules, HTTP end-to-end, brand overlays
+npm test                     # 43 tests: rules, HTTP end-to-end, brand overlays
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

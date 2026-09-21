@@ -162,6 +162,42 @@ ask at all.
 - **Admin re-verification:** admin pages ask for an SMS code once every 12 hours.
   Contacts opening their personal link never see a code.
 
+## 5b. Email notices to the Centre
+
+Every time a lot is reserved — on either platform — a short French email goes to
+`direction@centreespoir.ca` and `communications@centreespoir.ca`. It says which
+organisation reserved, who, their phone number, which offer, which lot, and how
+many lots that organisation now holds. When an administrator reserves in
+override, the message says so.
+
+It is off until you add three lines to `/opt/wps/.env`, and both containers read
+that same file, so one entry covers jc and spp:
+
+```
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+MAIL_FROM=Surplus Centre Espoir <notifications@centreespoir.ca>
+MAIL_TO=direction@centreespoir.ca,communications@centreespoir.ca
+```
+
+Then `sudo bash /opt/wps/update.sh`.
+
+The key comes from **resend.com → API Keys**. `centreespoir.ca` is already a
+verified sending domain on that account, so `MAIL_FROM` can be any address on
+it; the mailbox does not need to exist, since nobody replies to these.
+
+Three things to know:
+
+- **One email per reservation.** An offer of twenty lots taken by twenty
+  churches sends twenty emails. That is the point, but check the sending limit
+  on your Resend plan before a large offer.
+- **Leaving `MAIL_TO` empty switches it off** completely, which is how a local
+  copy runs. `MAIL_DRY_RUN=1` writes the message to the container log instead of
+  sending it — useful for a first test without filling an inbox.
+- **A failed email never affects a reservation.** The lot is already committed
+  before the message is attempted; a failure is written to the log and nothing
+  else. So an expired key means silence, not a broken platform — worth knowing,
+  because nothing on screen will tell you.
+
 ## 6. Operations
 
 | Task | Command (on the VPS) |
@@ -171,6 +207,7 @@ ask at all.
 | Logs | `docker compose -f /opt/wps/docker-compose.yml logs -f` |
 | Backup (DB + photos → `/opt/wps/backups`) | `sudo bash /opt/wps/backup.sh` — add to cron: `0 3 * * * bash /opt/wps/backup.sh` |
 | Change a setting (e.g. Twilio number) | `nano /opt/wps/.env` then `sudo bash /opt/wps/update.sh` |
+| Turn the email notices on/off, or change who gets them | `nano /opt/wps/.env` (`MAIL_TO=`, empty to stop) then `sudo bash /opt/wps/update.sh` |
 | Add another admin | Admin → Contacts → open the contact → Rôle: Administrateur |
 | Remove everything | `cd /opt/wps && docker compose down && cd / && rm -rf /opt/wps` (plus the proxy host entry) |
 
@@ -179,6 +216,9 @@ is a complete backup.
 
 ## 7. Troubleshooting
 
+- **No email when a lot is reserved** — `.env` is missing `RESEND_API_KEY`,
+  `MAIL_FROM` or `MAIL_TO`, or `MAIL_DRY_RUN=1`. The container log says
+  `[mail not configured]` or `[mail dry-run]`; a rejected key says `[mail] failed`.
 - **SMS "Simulé" instead of sent** — `.env` is missing a Twilio value or `SMS_DRY_RUN=1`. Fix and run `update.sh`.
 - **Twilio error 21608** — trial account: upgrade, or verify the recipient's number in the Twilio console.
 - **Twilio error 21211** — invalid recipient number; check the contact's phone.

@@ -40,6 +40,16 @@ export const config = {
     // When true, SMS are logged instead of sent. Handy for local testing.
     dryRun: bool(env.SMS_DRY_RUN, false),
   },
+  // Internal notifications by email (Resend). Both platforms report to the same
+  // two Centre Espoir addresses, so every message has to say which one it came
+  // from — see mailer.js. Empty MAIL_TO switches the whole thing off, which is
+  // how a local copy runs.
+  mail: {
+    apiKey: env.RESEND_API_KEY || '',
+    from: env.MAIL_FROM || '',
+    to: (env.MAIL_TO || '').split(',').map((s) => s.trim()).filter(Boolean),
+    dryRun: bool(env.MAIL_DRY_RUN, false),
+  },
   cooldownMinutes: Number(env.COOLDOWN_MINUTES || 15),
   // Absences (lots reserved but never picked up) before a contact is
   // removed from the list automatically.
