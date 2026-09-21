@@ -210,6 +210,9 @@ export default {
   'offer.form.window_hint': 'Laissez vide pour « jusqu’à la fin de la journée ». L’offre se ferme de toute façon à 23H59.',
   'offer.form.required': 'Titre, contenu d’un lot et nombre de lots sont requis.',
   'offer.form.reset_pickup': 'Remettre le lieu par défaut',
+  'offer.form.edit_title_live': 'Modifier l’offre',
+  'offer.form.lot_count_locked': 'Figé : des lots sont déjà réservés.',
+  'offer.form.saved': 'Offre modifiée. Les contacts en sont avisés dans la discussion.',
 
   // confirm & send
   'offer.confirm.title': 'Confirmer l’envoi',
@@ -242,6 +245,10 @@ export default {
   'offer.admin.deliveries': 'Livraison des textos',
   'offer.admin.resend': 'Renvoyer',
   'offer.admin.view_as_user': 'Voir comme un contact',
+  'offer.admin.bar': 'Vous êtes administrateur',
+  'offer.admin.edit': 'Modifier',
+  'offer.admin.manage': 'Lots, absences, envois',
+  'offer.admin.override': 'Comme administrateur, vous pouvez prendre un lot sans délai d’attente ni maximum. Les autres contacts y restent soumis.',
   'offer.admin.no_show_hint': '« Non récupéré » bloque le contact pour la prochaine offre.',
   'offer.admin.penalties': 'Pénalités actives sur cette offre',
   'offer.admin.penalty.cooldown': 'Attente 15 min',

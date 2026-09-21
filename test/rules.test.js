@@ -242,3 +242,83 @@ test('reinstating a contact stops their past absences from counting', () => {
   // The lots still say what happened.
   assert.equal(db.all(`SELECT id FROM lots WHERE reserved_by = ? AND status = 'no_show'`, carol.id).length, 3);
 });
+
+// ---- the administrator override -------------------------------------------
+//
+// An admin reserves by hand: no waiting period, no per-contact limit, and no
+// cooldown earned. Each test below also checks an ordinary contact in the same
+// situation, because the danger of a privilege is not that it fails to work —
+// it is that it quietly applies to everyone.
+
+function admin(db) {
+  const now = Date.now();
+  const { lastInsertRowid } = db.run(
+    `INSERT INTO contacts(first_name, last_name, organization, phone, lang, role, status, token, created_at, updated_at)
+     VALUES ('David', 'Hatin', 'Centre Espoir', '+18192085721', 'fr', 'admin', 'active', 'tokadmin', ?, ?)`, now, now);
+  return db.get('SELECT * FROM contacts WHERE id = ?', lastInsertRowid);
+}
+
+test('admin override: no per-contact maximum, and none of it leaks to a contact', () => {
+  const { db, alice } = fresh();
+  const boss = admin(db);
+  const offer = rules.publishOffer(db, draft(db, { lots: 5, max: 1 }));
+  const lots = db.all('SELECT * FROM lots WHERE offer_id = ? ORDER BY number', offer.id);
+
+  rules.reserveLot(db, boss, lots[0].id);
+  const second = rules.canReserve(db, boss, offer);
+  assert.equal(second.ok, true, 'the admin is past the maximum of 1 and may still reserve');
+  assert.equal(second.override, true);
+  rules.reserveLot(db, boss, lots[1].id);
+  assert.equal(db.all(`SELECT * FROM lots WHERE reserved_by = ?`, boss.id).length, 2);
+
+  // The same offer, the same moment, an ordinary contact: still one lot only.
+  rules.reserveLot(db, alice, lots[2].id);
+  const hers = rules.canReserve(db, alice, offer);
+  assert.equal(hers.ok, false);
+  assert.equal(hers.reason, 'max');
+  assert.throws(() => rules.reserveLot(db, alice, lots[3].id), (e) => e.reason === 'max');
+});
+
+test('admin override: no cooldown earned, and no cooldown applied', () => {
+  const { db, alice } = fresh();
+  const boss = admin(db);
+  const t0 = Date.now();
+  const first = rules.publishOffer(db, draft(db, { lots: 3 }), t0);
+  rules.reserveLot(db, boss, db.get('SELECT * FROM lots WHERE offer_id = ?', first.id).id, t0);
+  rules.reserveLot(db, alice, db.all('SELECT * FROM lots WHERE offer_id = ? ORDER BY number', first.id)[1].id, t0);
+
+  // Reserving earns Alice a pending cooldown. It must not earn the admin one:
+  // it could never apply, and it would sit in the offer's penalties list.
+  assert.equal(db.all(`SELECT * FROM penalties WHERE contact_id = ?`, boss.id).length, 0);
+  assert.equal(db.all(`SELECT * FROM penalties WHERE contact_id = ?`, alice.id).length, 1);
+
+  const t1 = t0 + 60 * MIN;
+  const next = rules.publishOffer(db, draft(db, { lots: 3 }), t1);
+  assert.equal(rules.canReserve(db, boss, next, t1 + 1000).ok, true, 'admin waits for nothing');
+  const hers = rules.canReserve(db, alice, next, t1 + 1000);
+  assert.equal(hers.ok, false);
+  assert.equal(hers.reason, 'cooldown');
+});
+
+test('admin override waives the fairness rules only — never the rest', () => {
+  const { db } = fresh();
+  const boss = admin(db);
+
+  // A closed offer stays closed.
+  const offer = rules.publishOffer(db, draft(db, { lots: 2 }));
+  const lot = db.get('SELECT * FROM lots WHERE offer_id = ?', offer.id);
+  const ended = { ...offer, status: 'expired' };
+  assert.equal(rules.canReserve(db, boss, ended).ok, false);
+  assert.equal(rules.canReserve(db, boss, ended).reason, 'inactive');
+
+  // An admin who has left the list is refused like anyone else.
+  db.run(`UPDATE contacts SET status = 'removed' WHERE id = ?`, boss.id);
+  const gone = db.get('SELECT * FROM contacts WHERE id = ?', boss.id);
+  assert.equal(rules.canReserve(db, gone, offer).reason, 'contact_inactive');
+
+  // And a lot already taken is still taken.
+  db.run(`UPDATE contacts SET status = 'active' WHERE id = ?`, boss.id);
+  const back = db.get('SELECT * FROM contacts WHERE id = ?', boss.id);
+  rules.reserveLot(db, back, lot.id);
+  assert.throws(() => rules.reserveLot(db, back, lot.id), (e) => e.reason === 'taken');
+});

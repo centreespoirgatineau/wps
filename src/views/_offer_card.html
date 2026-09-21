@@ -1,4 +1,8 @@
-<a class="card card-link" href="<%= (typeof adminView !== 'undefined' && adminView) ? '/admin/offres/' + o.id : '/offres/' + o.id %>">
+<%# An administrator opens the same page as everyone else — read, discussed and
+    corrected there — with the management page (lots, absences, deliveries) one
+    click away on it. A draft is the exception: it has no contact page at all
+    until it is published, so it still opens in the admin. %>
+<a class="card card-link" href="<%= (typeof adminView !== 'undefined' && adminView && o.status === 'draft') ? '/admin/offres/' + o.id : '/offres/' + o.id %>">
   <div class="row between">
     <div class="grow">
       <h2><%= o.title %></h2>

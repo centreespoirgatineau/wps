@@ -5,12 +5,26 @@
     <h1><%= offer.title %></h1>
     <div class="tiny mt-s">
       <% if (offer.active) { %><%= t('offer.published', { date: fmtDate(offer.published_at, true) }) %><% } else { %><%= t('offer.ended', { date: fmtDate(offer.ended_at || offer.expires_at || offer.created_at, true) }) %><% } %>
-      <% if (isAdmin) { %> · <a href="/admin/offres/<%= offer.id %>"><%= t('nav.admin') %></a><% } %>
     </div>
     <div class="tiny"><%= t('offer.you') %> <%= contact.first_name %><% if (contact.organization) { %> · <%= contact.organization %><% } %></div>
   </div>
   <%- include('_status_badge', { status: offer.effective }) %>
 </div>
+
+<%# An administrator works from this page, not from a different one: they read
+    exactly what the contacts read, and the few things only they can do sit in
+    one row here rather than on a page of their own. %>
+<% if (isAdmin) { %>
+<div class="card admin-bar">
+  <div class="row between wrap-row">
+    <div class="tiny"><strong><%= t('offer.admin.bar') %></strong></div>
+    <div class="row wrap-row">
+      <% if (offer.active) { %><a class="btn sm secondary" href="/admin/offres/<%= offer.id %>/modifier"><%= t('offer.admin.edit') %></a><% } %>
+      <a class="btn sm ghost" href="/admin/offres/<%= offer.id %>"><%= t('offer.admin.manage') %></a>
+    </div>
+  </div>
+</div>
+<% } %>
 
 <% if (offer.photos.length) { %>
 <div class="photos <%= offer.photos.length === 1 ? 'one' : offer.photos.length === 2 ? 'two' : '' %>">

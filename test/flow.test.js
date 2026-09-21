@@ -546,3 +546,88 @@ test('the public address can be changed from Réglages, and links follow it', as
   page = await linkOn();
   assert.ok(page.includes(before + '/r/'), 'back to the address from the environment');
 });
+
+test('a published offer can still be corrected, with the lot count frozen and the contacts told', async () => {
+  const admin = await adminClient();
+  let r = await admin.get('/admin');
+  const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+
+  r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Pains', lot_description: '2 sacs',
+    lot_count: '3', max_per_contact: '1', pickup_name: 'Centre Espoir', pickup_address: '791 Maloney', pickup_from: '13:00', pickup_to: '15:00' } });
+  const offerId = /\/admin\/offres\/(\d+)\//.exec(r.location)[1];
+  const conf = await admin.get(`/admin/offres/${offerId}/confirmer`);
+  const ids = [...conf.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  r = await admin.post(`/admin/offres/${offerId}/publier`, { form: { _csrf: csrf, contacts: ids[0] } });
+  assert.equal(r.status, 303);
+
+  // The edit form opens on a live offer, and refuses to let the count be typed.
+  const form = await admin.get(`/admin/offres/${offerId}/modifier`);
+  assert.equal(form.status, 200, 'a published offer is editable');
+  assert.match(form.text, /name="lot_count"[^>]*disabled|disabled[^>]*name="lot_count"|value="3" disabled/,
+    'the number of lots is not an editable field');
+
+  // Move the pickup window and the address; try to shrink the lots at the same time.
+  r = await admin.post(`/admin/offres/${offerId}`, { form: { _csrf: csrf, title: 'Pains', lot_description: '2 sacs',
+    lot_count: '1', max_per_contact: '1', pickup_name: 'Centre Espoir', pickup_address: '12 rue Principale',
+    pickup_from: '16:00', pickup_to: '18:00' } });
+  assert.equal(r.status, 303);
+  assert.equal(r.location, `/offres/${offerId}`, 'an edit lands back on the offer page');
+
+  const page = await admin.get(`/offres/${offerId}`);
+  assert.match(page.text, /12 rue Principale/, 'the new address is shown');
+  assert.match(page.text, /16H00/, 'the new pickup window is shown');
+  assert.equal((page.text.match(/data-lot="/g) || []).length, 3, 'still three lots, not one');
+  assert.match(page.text, /Offre modifiée/, 'the change is announced in the chat');
+  assert.match(page.text, /adresse/, 'the announcement names what changed');
+
+  // An offer that has ended is left alone.
+  await admin.post(`/admin/offres/${offerId}/fermer`, { form: { _csrf: csrf } });
+  const closed = await admin.get(`/admin/offres/${offerId}/modifier`);
+  assert.equal(closed.status, 303, 'an ended offer is not editable');
+});
+
+test('over HTTP: an admin reserves past the maximum, a contact is still stopped at it', async () => {
+  const admin = await adminClient();
+  let r = await admin.get('/admin');
+  const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+
+  r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Conserves', lot_description: '1 caisse',
+    lot_count: '4', max_per_contact: '1', pickup_name: 'Centre Espoir', pickup_address: '791 Maloney' } });
+  const id = /\/admin\/offres\/(\d+)\//.exec(r.location)[1];
+  const conf = await admin.get(`/admin/offres/${id}/confirmer`);
+  const ids = [...conf.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  await admin.post(`/admin/offres/${id}/publier`, { form: { _csrf: csrf, contacts: ids[0] } });
+
+  const page = await admin.get(`/offres/${id}`);
+  assert.match(page.text, /administrateur/, 'the page says the limits are not being applied');
+  const lots = [...page.text.matchAll(/data-reserve="(\d+)"/g)].map((m) => m[1]);
+  const take = (c, lot, tok) => c.post(`/offres/${id}/lots/${lot}/reserver`, { json: {}, headers: { 'X-CSRF': tok } });
+
+  const tok = /name="csrf" content="([^"]+)"/.exec(page.text)[1];
+  assert.match((await take(admin, lots[0], tok)).text, /"ok":true/);
+  assert.match((await take(admin, lots[1], tok)).text, /"ok":true/, 'a second lot despite max_per_contact = 1');
+
+  // The same endpoint, the same offer, an ordinary contact: one lot and no more.
+  // A contact created for this test: the others have reserved earlier in this
+  // file and would be inside their cooldown here, which would prove the wrong
+  // thing. This one arrives by personal link, since login codes are
+  // rate-limited per phone.
+  let rr = await admin.post('/admin/contacts', { form: { _csrf: csrf, first_name: 'Lucie', last_name: 'Gagnon',
+    organization: 'Maison du Partage', phone: '(819) 555-0077', lang: 'fr', role: 'user', status: 'active' } });
+  const lucieId = /\/admin\/contacts\/(\d+)/.exec(rr.location) ? /\/admin\/contacts\/(\d+)/.exec(rr.location)[1] : null;
+  const card = await admin.get(lucieId ? `/admin/contacts/${lucieId}` : '/admin/contacts');
+  const link = /(\/r\/[A-Za-z0-9_-]+)/.exec(card.text)[1];
+  const lucie = client();
+  await lucie.get(link);
+
+  // She was not a recipient of this offer, but the offer page is open to the
+  // whole list — what matters is that the maximum is applied to her.
+  const hers = await lucie.get(`/offres/${id}`);
+  const herTok = /name="csrf" content="([^"]+)"/.exec(hers.text)[1];
+  const herLots = [...hers.text.matchAll(/data-reserve="(\d+)"/g)].map((m) => m[1]);
+  assert.ok(herLots.length >= 2, 'she can see free lots to reserve');
+  assert.match((await take(lucie, herLots[0], herTok)).text, /"ok":true/);
+  const second = await take(lucie, herLots[1], herTok);
+  assert.equal(second.status, 409, 'the limit still applies to a contact');
+  assert.doesNotMatch(second.text, /"ok":true/);
+});

@@ -11,8 +11,16 @@
     <label class="field"><span><%= t('offer.form.lot_description') %></span>
       <input type="text" name="lot_description" value="<%= form.lot_description %>" placeholder="<%= t('offer.form.lot_description_placeholder') %>" maxlength="300" required></label>
     <div class="grid-2">
+      <%# Once the offer is out, its lots may be reserved: the count is frozen so
+          nothing can be pulled out from under whoever is holding one. %>
       <label class="field"><span><%= t('offer.form.lot_count') %></span>
-        <input type="number" name="lot_count" inputmode="numeric" min="1" max="500" value="<%= form.lot_count %>" required></label>
+        <% if (published) { %>
+          <input type="number" value="<%= form.lot_count %>" disabled>
+          <small class="muted"><%= t('offer.form.lot_count_locked') %></small>
+        <% } else { %>
+          <input type="number" name="lot_count" inputmode="numeric" min="1" max="500" value="<%= form.lot_count %>" required>
+        <% } %>
+      </label>
       <label class="field"><span><%= t('offer.form.max_per_contact') %></span>
         <input type="number" name="max_per_contact" inputmode="numeric" min="1" max="500" value="<%= form.max_per_contact || 1 %>" required></label>
     </div>
@@ -39,6 +47,6 @@
     </div>
   </details>
 
-  <button class="btn primary block" type="submit"><%= t('btn.continue') %> →</button>
-  <a class="btn ghost block" href="<%= offerId ? '/admin/offres/' + offerId + '/confirmer' : '/admin' %>"><%= t('btn.cancel') %></a>
+  <button class="btn primary block" type="submit"><%= published ? t('btn.save') : t('btn.continue') + ' →' %></button>
+  <a class="btn ghost block" href="<%= published ? '/offres/' + offerId : offerId ? '/admin/offres/' + offerId + '/confirmer' : '/admin' %>"><%= t('btn.cancel') %></a>
 </form>

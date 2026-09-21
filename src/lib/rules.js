@@ -20,6 +20,22 @@ export class RuleError extends Error {
 
 const cooldownMs = () => config.cooldownMinutes * 60_000;
 
+/**
+ * An administrator reserves as a manual override.
+ *
+ * The waiting period and the per-contact limit exist to keep thirty
+ * organisations on an equal footing *with each other*. An administrator is not
+ * one of them — they are the Centre, the party the rules are applied by — so a
+ * lot they place by hand (someone phoned in, a pickup has to be arranged) is
+ * not them taking a turn. They earn no cooldown either, since one could never
+ * apply to them and would only clutter the penalties list.
+ *
+ * This is deliberately the *only* thing being waived. A closed offer, a
+ * contact who has left the list, the demonstration account and a lot already
+ * taken are all still refused for an administrator, exactly as for anyone else.
+ */
+export const isAdminContact = (c) => !!c && c.role === 'admin';
+
 export function getOffer(db, id) {
   return db.get('SELECT * FROM offers WHERE id = ?', id);
 }
@@ -81,6 +97,7 @@ export function canReserve(db, contact, offer, now = Date.now()) {
   if (isDemo(contact)) return { ok: false, reason: 'demo' };
   if (!isActive(offer, now)) return { ok: false, reason: 'inactive' };
   if (contact.status !== 'active') return { ok: false, reason: 'contact_inactive' };
+  if (isAdminContact(contact)) return { ok: true, override: true };   // see isAdminContact
   const pens = penaltiesFor(db, contact.id, offer.id);
   if (pens.some((p) => p.type === 'no_show')) return { ok: false, reason: 'no_show' };
   const cd = pens.find((p) => p.type === 'cooldown');
@@ -102,8 +119,10 @@ export function reserveLot(db, contact, lotId, now = Date.now()) {
     if (!check.ok) throw new RuleError(check.reason, check);
     if (lot.status !== 'available') throw new RuleError('taken');
     db.run(`UPDATE lots SET status = 'reserved', reserved_by = ?, reserved_at = ? WHERE id = ? AND status = 'available'`, contact.id, now, lotId);
-    // One pending cooldown per contact — reserving twice does not stack.
-    const pending = db.get(`SELECT id FROM penalties WHERE contact_id = ? AND type = 'cooldown' AND status = 'pending'`, contact.id);
+    // One pending cooldown per contact — reserving twice does not stack, and an
+    // administrator earns none at all (see isAdminContact).
+    const pending = isAdminContact(contact) ||
+      db.get(`SELECT id FROM penalties WHERE contact_id = ? AND type = 'cooldown' AND status = 'pending'`, contact.id);
     if (!pending) {
       db.run(`INSERT INTO penalties(contact_id, type, source_offer_id, status, created_at) VALUES (?, 'cooldown', ?, 'pending', ?)`, contact.id, offer.id, now);
     }

@@ -210,6 +210,9 @@ export default {
   'offer.form.window_hint': 'Leave empty for “until the end of the day”. The offer closes at 23:59 regardless.',
   'offer.form.required': 'Title, lot content and number of lots are required.',
   'offer.form.reset_pickup': 'Reset to default location',
+  'offer.form.edit_title_live': 'Edit the offer',
+  'offer.form.lot_count_locked': 'Frozen: some lots are already reserved.',
+  'offer.form.saved': 'Offer updated. The contacts are told in the chat.',
 
   // confirm & send
   'offer.confirm.title': 'Confirm sending',
@@ -242,6 +245,10 @@ export default {
   'offer.admin.deliveries': 'Text delivery',
   'offer.admin.resend': 'Resend',
   'offer.admin.view_as_user': 'View as a contact',
+  'offer.admin.bar': 'You are an administrator',
+  'offer.admin.edit': 'Edit',
+  'offer.admin.manage': 'Lots, absences, deliveries',
+  'offer.admin.override': 'As an administrator you can take a lot with no waiting period and no limit. Everyone else is still held to both.',
   'offer.admin.no_show_hint': '“Not picked up” blocks the contact for the next offer.',
   'offer.admin.penalties': 'Active penalties on this offer',
   'offer.admin.penalty.cooldown': '15-min wait',

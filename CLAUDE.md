@@ -95,6 +95,16 @@ Other hard constraints:
   the reference, if a reference string naming Jesus, the gospel, churches,
   ministries or pastors is *not* overridden for spp, or if the reference itself
   ever stops saying why the church platform exists.
+- **A published offer can still be corrected, but not resized.** `/modifier`
+  accepts a draft or a *running* offer (`editable()` in `src/routes/admin.js`);
+  an offer that has ended is left alone. `lot_count` is frozen once published —
+  the field is disabled in the form *and* overwritten server-side from the
+  stored offer, because contacts are already holding lots and shrinking the
+  count would pull one out from under them. Every other field is editable, and
+  the change is announced in that offer's own chat naming what moved
+  (`changedFields` → `announceEdit`), posted as the administrator who made it,
+  in French: a stored message has no locale to switch on. No SMS is resent —
+  David's call, texting thirty organisations over a typo is worse than the typo.
 - **The donation ask is a setting, and it is quiet.** `donate_url` (Admin →
   Réglages) must be an https address or empty; empty means the platform never
   mentions money anywhere, which is how the jc instance runs. When set, it
@@ -188,6 +198,17 @@ semantics without asking him.
 
 Notes that have already caught me out:
 
+- **An administrator reserves as a manual override.** `canReserve()` waives the
+  cooldown and the per-contact maximum for `role = 'admin'`, and `reserveLot()`
+  gives them no cooldown either — one could never apply, and it would clutter
+  the offer's penalties list. That is *all* it waives: a closed offer, a contact
+  who has left the list, the demonstration account and a lot already taken are
+  refused for an administrator exactly as for anyone else. The lot then shows as
+  held by the administrator's own organisation, which is what a contact sees on
+  the page. It is never silent: the lots list carries a banner
+  (`offer.admin.override`) saying the limits are not being applied to whoever is
+  reading. Three tests in `rules.test.js` and one in `flow.test.js` check both
+  halves — that it works, and that an ordinary contact is still stopped.
 - **A reservation cannot be undone by the contact who made it.** There is no
   cancel button, no route, and no rules function — reserving is a commitment, and
   a lot handed back late is a lot nobody else planned for. The escape hatch for a
@@ -215,7 +236,14 @@ Notes that have already caught me out:
 - **Contact (`role=user`)** — offers, reservations, chat, `/reglages` (language,
   sign out, leave the list). **Never sees admin navigation.** The header shows the
   icon and a gear, nothing else.
-- **Admin (`role=admin`)** — everything, plus the tabs row. Admin pages require a
+- **Admin (`role=admin`)** — everything, plus the tabs row. **The admin works
+  from the contact offer page**, `/offres/:id`, not from a page of their own:
+  they read exactly what the contacts read, chat with them there, and reserve
+  there (as an override, see §4). The admin card in a list opens that page for
+  every offer except a draft, which has no contact page until it is published.
+  One strip on it (`.admin-bar`) carries *Modifier* and a link to
+  `/admin/offres/:id`, which remains the management page — freeing a lot,
+  marking an absence, the SMS delivery log, deleting an ended offer. Admin pages require a
   code-verified session younger than `ADMIN_FRESH_HOURS` (12); opening a personal
   link is enough for contact pages but not for admin ones.
 - **Test account (`no_sms=1`)** — for David to test alone with one real phone.
@@ -288,7 +316,7 @@ a non-developer). Update it when operations change.
   off-white, terracotta accent, serif headings); unbranded; mobile first. When in
   doubt, remove something. He notices layout details — check at 360 px, ~440 px and
   desktop before declaring done.
-- **Verify before claiming.** Run `npm test` (31 tests), and for UI changes take
+- **Verify before claiming.** Run `npm test` (36 tests), and for UI changes take
   real screenshots with Playwright. Two bugs reached him because I asserted instead
   of checking: a stale CSS cache, and test accounts still being texted.
 - **Ask rather than guess** on product decisions; he answers quickly and precisely.
@@ -299,7 +327,7 @@ a non-developer). Update it when operations change.
 cp .env.example .env         # APP_URL=http://localhost:8080, SMS_DRY_RUN=1
 npm start                    # no install step — zero dependencies
 npm run admin -- "(819) 555-0001" David Hatin "Centre Espoir"
-npm test                     # 31 tests: rules, HTTP end-to-end, brand overlays
+npm test                     # 36 tests: rules, HTTP end-to-end, brand overlays
 ```
 
 With `SMS_DRY_RUN=1` (or no Twilio credentials) texts are logged rather than sent,

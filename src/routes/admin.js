@@ -13,7 +13,7 @@ import { publicUrl, savePublicUrl, donateUrl } from '../lib/site.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
-import { loadOffer } from './contact.js';
+import { loadOffer, messageJson } from './contact.js';
 
 const MIN = 60_000;
 const str = (v, max = 500) => String(v ?? '').trim().slice(0, max);
@@ -85,6 +85,52 @@ function offerFromBody(body) {
   };
 }
 
+/**
+ * Which parts of a published offer an edit actually touched.
+ *
+ * Only the things a contact acts on are compared, and each maps to one plain
+ * word — the point is to tell thirty organisations *what* to re-read, not to
+ * print a diff. The photo lists are compared as text because their order is
+ * what the page shows.
+ */
+function changedFields(ctx, offer, form) {
+  const was = { ...offer, photos: (offer.photos || []).map((p) => p.file).join(',') };
+  const now = { ...form, photos: form.photos.join(',') };
+  const WATCHED = [
+    ['title', 'offer.form.name'],
+    ['lot_description', 'offer.form.lot_description'],
+    ['description', 'offer.form.description'],
+    ['max_per_contact', 'offer.form.max_per_contact'],
+    ['pickup_name', 'offer.form.pickup_name'],
+    ['pickup_address', 'offer.form.pickup_address'],
+    ['pickup_details', 'offer.form.pickup_details'],
+    ['photos', 'offer.form.photos'],
+  ];
+  const out = WATCHED.filter(([k]) => String(was[k] ?? '') !== String(now[k] ?? '')).map(([, key]) => ctx.t(key).toLowerCase());
+  // The two time fields are one thing to a reader: the pickup window.
+  if (was.pickup_from !== now.pickup_from || was.pickup_to !== now.pickup_to) out.push(ctx.t('offer.form.pickup_window').toLowerCase());
+  return out;
+}
+
+/**
+ * Say in the offer's own chat that something moved.
+ *
+ * It is posted as the administrator who made the change, not as a nameless
+ * system voice, because `messages.contact_id` is NOT NULL and — more to the
+ * point — a change to a live offer has a person behind it, and that is who a
+ * contact will want to reply to. Written in French: a stored message has no
+ * locale to switch on, and French is this platform's reference language.
+ */
+function announceEdit(db, offerId, admin, changed) {
+  const text = `⚙️ Offre modifiée : ${changed.join(', ')}. Merci de relire les détails ci-dessus.`;
+  const now = Date.now();
+  const { lastInsertRowid } = db.run('INSERT INTO messages(offer_id, contact_id, body, created_at) VALUES (?, ?, ?, ?)', offerId, admin.id, text, now);
+  const msg = { id: Number(lastInsertRowid), body: text, created_at: now, contact_id: admin.id,
+    first_name: admin.first_name, last_name: admin.last_name, organization: admin.organization };
+  sse.publish(offerId, 'message', messageJson(msg));
+  sse.publish(offerId, 'refresh', { reason: 'edited' });   // the lots list re-reads itself
+}
+
 export function adminRoutes(app, db) {
   // ---- admin re-verification by SMS code ----
   app.get('/admin/verifier', requireContact, async (ctx) => {
@@ -135,14 +181,14 @@ export function adminRoutes(app, db) {
 
   app.get('/admin/offres/nouvelle', requireAdmin, (ctx) => {
     const form = { title: '', description: '', lot_description: '', lot_count: '', max_per_contact: 1, pickup_from: '', pickup_to: '', photos: [], ...defaultPickup(db) };
-    ctx.render('admin/offer_form', { title: ctx.t('offer.form.title'), form, offerId: null, defaults: defaultPickup(db) });
+    ctx.render('admin/offer_form', { title: ctx.t('offer.form.title'), form, offerId: null, published: false, defaults: defaultPickup(db) });
   });
 
   app.post('/admin/offres', requireAdmin, async (ctx) => {
     const body = await ctx.body(); checkCsrf(ctx, body);
     const form = offerFromBody(body);
     if (!form.title || !form.lot_description || !form.lot_count) {
-      return ctx.render('admin/offer_form', { title: ctx.t('offer.form.title'), form, offerId: null, defaults: defaultPickup(db), error: ctx.t('offer.form.required') });
+      return ctx.render('admin/offer_form', { title: ctx.t('offer.form.title'), form, offerId: null, published: false, defaults: defaultPickup(db), error: ctx.t('offer.form.required') });
     }
     const id = db.tx(() => {
       const { lastInsertRowid } = db.run(`
@@ -155,28 +201,44 @@ export function adminRoutes(app, db) {
     ctx.redirect(`/admin/offres/${id}/confirmer`);
   });
 
+  // A published offer can still be corrected: a pickup time moves, an address
+  // has a typo, more detail is needed. Two things make that safe. The number of
+  // lots is frozen — contacts are already holding some, and shrinking the count
+  // would pull one out from under them. And whoever is watching the page is
+  // told what changed, in the offer's own chat, because they may have read the
+  // old wording in a text message an hour ago. An offer that has ended is left
+  // alone: rewriting history helps nobody.
+  const editable = (offer) => offer.status === 'draft' || rules.isActive(offer);
+
   app.get('/admin/offres/:id/modifier', requireAdmin, (ctx) => {
     const offer = loadOffer(db, ctx.params.id);
-    if (offer.status !== 'draft') return ctx.redirect(`/admin/offres/${offer.id}`);
+    if (!editable(offer)) return ctx.redirect(`/admin/offres/${offer.id}`);
     const form = { ...offer, photos: offer.photos.map((p) => p.file) };
-    ctx.render('admin/offer_form', { title: ctx.t('offer.form.edit_title'), form, offerId: offer.id, defaults: defaultPickup(db) });
+    const live = offer.status !== 'draft';
+    ctx.render('admin/offer_form', { title: ctx.t(live ? 'offer.form.edit_title_live' : 'offer.form.edit_title'), form, offerId: offer.id, published: live, defaults: defaultPickup(db) });
   });
 
   app.post('/admin/offres/:id', requireAdmin, async (ctx) => {
     const body = await ctx.body(); checkCsrf(ctx, body);
     const offer = loadOffer(db, ctx.params.id);
-    if (offer.status !== 'draft') throw new HttpError(409, 'not a draft');
+    if (!editable(offer)) throw new HttpError(409, 'offer is not editable');
+    const published = offer.status !== 'draft';
     const form = offerFromBody(body);
+    if (published) form.lot_count = offer.lot_count;      // frozen; the field is disabled in the form too
     if (!form.title || !form.lot_description || !form.lot_count) {
-      return ctx.render('admin/offer_form', { title: ctx.t('offer.form.edit_title'), form, offerId: offer.id, defaults: defaultPickup(db), error: ctx.t('offer.form.required') });
+      return ctx.render('admin/offer_form', { title: ctx.t(published ? 'offer.form.edit_title_live' : 'offer.form.edit_title'), form, offerId: offer.id, published, defaults: defaultPickup(db), error: ctx.t('offer.form.required') });
     }
+    const changed = published ? changedFields(ctx, offer, form) : [];
     db.tx(() => {
       db.run(`UPDATE offers SET title=?, description=?, lot_description=?, lot_count=?, max_per_contact=?, pickup_name=?, pickup_address=?, pickup_details=?, pickup_photo=?, pickup_from=?, pickup_to=? WHERE id=?`,
         form.title, form.description, form.lot_description, form.lot_count, form.max_per_contact, form.pickup_name, form.pickup_address, form.pickup_details, form.pickup_photo, form.pickup_from, form.pickup_to, offer.id);
       db.run('DELETE FROM offer_photos WHERE offer_id = ?', offer.id);
       form.photos.forEach((f, i) => db.run('INSERT INTO offer_photos(offer_id, file, position) VALUES (?, ?, ?)', offer.id, f, i));
     });
-    ctx.redirect(`/admin/offres/${offer.id}/confirmer`);
+    if (!published) return ctx.redirect(`/admin/offres/${offer.id}/confirmer`);
+    if (changed.length) announceEdit(db, offer.id, ctx.state.contact, changed);
+    ctx.flash('ok', ctx.t('offer.form.saved'));
+    ctx.redirect(`/offres/${offer.id}`);
   });
 
   app.get('/admin/offres/:id/confirmer', requireAdmin, (ctx) => {

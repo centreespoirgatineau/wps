@@ -81,6 +81,10 @@ main.centered .hero { padding-top: 0; }
 .row { display: flex; gap: 10px; align-items: center; }
 .row.between { justify-content: space-between; }
 .row.wrap-row { flex-wrap: wrap; }
+/* The one strip on the offer page that belongs to the administrator and not to
+   the contacts reading the same page. Marked by a rule down its edge rather
+   than by a colour fill, so it stays quiet next to the offer itself. */
+.card.admin-bar { border-left: 2px solid var(--accent); }
 .grow { flex: 1; min-width: 0; }
 .right { text-align: right; }
 .center { text-align: center; }
