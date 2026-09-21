@@ -145,7 +145,12 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   r = await admin.post(`/admin/offres/${offerId}/publier`, { form: new URLSearchParams([['_csrf', csrf], ...ids.map((i) => ['contacts', i])]) });
   assert.equal(r.status, 303);
   await new Promise((res) => setTimeout(res, 300));
+  // The old admin page is gone: it redirects to the one offer page, which now
+  // carries the delivery log itself.
   r = await admin.get(`/admin/offres/${offerId}`);
+  assert.equal(r.status, 303);
+  assert.equal(r.location, `/offres/${offerId}`);
+  r = await admin.get(`/offres/${offerId}`);
   assert.match(r.text, /Simulé/); // dry-run deliveries logged
   assert.equal((r.text.match(/Simulé/g) || []).length, 3);
 
@@ -237,7 +242,9 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   assert.equal(r.status, 409);
   assert.equal(r.json().reason, 'cooldown');
   // Admin lifts Marie's penalty → she can reserve
-  r = await admin.get(`/admin/offres/${offer2}`);
+  r = await admin.get(`/offres/${offer2}`);
+  // Anchored on the penalties markup: the delivery log on the same page lists
+  // the same name, and a looser match finds that first.
   const penId = /<li><div class="grow"><strong>Marie Tremblay<\/strong>[\s\S]*?\/admin\/penalites\/(\d+)\/lever/.exec(r.text)[1];
   r = await admin.post(`/admin/penalites/${penId}/lever`, { form: { _csrf: csrf, back: '/admin' } });
   assert.equal(r.status, 303, r.text.slice(0, 300));
@@ -363,7 +370,7 @@ test('demonstration number: signs in with no code, looks at everything, changes 
   assert.equal(r.status, 403);
   assert.equal(r.json().reason, 'demo');
   // The lot really is still free afterwards.
-  r = await admin.get(`/admin/offres/${offerId}`);
+  r = await admin.get(`/offres/${offerId}`);
   assert.doesNotMatch(r.text, /Démonstration/);
 
   // Writing in the chat is refused too.
@@ -443,7 +450,7 @@ test('an admin can erase an offer and everything attached to it', async () => {
   csrf = await admin.csrf('/admin');
   r = await admin.post(`/admin/offres/${offerId}/supprimer`, { form: { _csrf: csrf } });
   assert.equal(r.status, 303);
-  r = await admin.get(`/admin/offres/${offerId}`);
+  r = await admin.get(`/offres/${offerId}`);
   assert.equal(r.status, 200, 'still there while it is running');
 
   await admin.post(`/admin/offres/${offerId}/fermer`, { form: { _csrf: csrf } });
@@ -453,7 +460,7 @@ test('an admin can erase an offer and everything attached to it', async () => {
 
   // Gone from both the admin and the contact side.
   r = await admin.get(`/admin/offres/${offerId}`);
-  assert.equal(r.status, 404);
+  assert.equal(r.status, 404, 'even the old link 404s once the offer is erased');
   r = await admin.get(`/offres/${offerId}`);
   assert.equal(r.status, 404);
   r = await admin.get('/admin/offres');
@@ -630,4 +637,50 @@ test('over HTTP: an admin reserves past the maximum, a contact is still stopped 
   const second = await take(lucie, herLots[1], herTok);
   assert.equal(second.status, 409, 'the limit still applies to a contact');
   assert.doesNotMatch(second.text, /"ok":true/);
+});
+
+test('one offer page: the admin sees what contacts see, plus the admin controls on it', async () => {
+  const admin = await adminClient();
+  let r = await admin.get('/admin');
+  const csrf = /name="csrf" content="([^"]+)"/.exec(r.text)[1];
+
+  r = await admin.post('/admin/offres', { form: { _csrf: csrf, title: 'Yogourts', lot_description: '1 caisse',
+    lot_count: '3', max_per_contact: '1', pickup_name: 'Centre Espoir', pickup_address: '791 Maloney' } });
+  const id = /\/admin\/offres\/(\d+)\//.exec(r.location)[1];
+  const conf = await admin.get(`/admin/offres/${id}/confirmer`);
+  const ids = [...conf.text.matchAll(/name="contacts" value="(\d+)"/g)].map((m) => m[1]);
+  await admin.post(`/admin/offres/${id}/publier`, { form: { _csrf: csrf, contacts: ids[0] } });
+  await new Promise((res) => setTimeout(res, 250));
+
+  const page = await admin.get(`/offres/${id}`);
+  // What a contact gets, which the old admin page did not have at all:
+  assert.match(page.text, /id="chat-form"/, 'the chat box');
+  assert.match(page.text, /data-reserve="/, 'the reserve buttons');
+  assert.match(page.text, /Ramassage/, 'the pickup details');
+  // What only an administrator gets, now on the same page:
+  assert.match(page.text, /\/admin\/offres\/\d+\/modifier/, 'the edit link');
+  assert.match(page.text, /\/admin\/offres\/\d+\/fermer/, 'closing the offer');
+  assert.match(page.text, /offre.admin.deliveries|Livraison|Deliver/i, 'the delivery log');
+
+  // Freeing a lot works from this page, and the lots partial that the live
+  // refresh re-fetches carries the same controls — otherwise they would vanish
+  // the moment anyone reserved anything.
+  const tok = /name="csrf" content="([^"]+)"/.exec(page.text)[1];
+  const lot = /data-reserve="(\d+)"/.exec(page.text)[1];
+  await admin.post(`/offres/${id}/lots/${lot}/reserver`, { json: {}, headers: { 'X-CSRF': tok } });
+  const partial = await admin.get(`/offres/${id}/lots`);
+  assert.match(partial.text, /data-lot-action/, 'the refreshed lots keep the admin actions');
+  r = await admin.post(`/admin/offres/${id}/lots/${lot}`, { json: { action: 'free' }, headers: { 'X-CSRF': tok } });
+  assert.match(r.text, /"ok":true/, 'the lot can be freed from the offer page');
+
+  // A contact must never see any of it.
+  const contacts = await admin.get('/admin/contacts');
+  const someone = [...contacts.text.matchAll(/\/admin\/contacts\/(\d+)/g)].map((m) => m[1])[0];
+  const card = await admin.get(`/admin/contacts/${someone}`);
+  const c = client();
+  await c.get(/(\/r\/[A-Za-z0-9_-]+)/.exec(card.text)[1]);
+  const theirs = await c.get(`/offres/${id}`);
+  assert.equal(theirs.status, 200);
+  assert.doesNotMatch(theirs.text, /data-lot-action/, 'no admin controls');
+  assert.doesNotMatch(theirs.text, /\/admin\/offres\//, 'no admin links');
 });

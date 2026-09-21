@@ -88,6 +88,22 @@
       refreshLots();
     });
 
+    // An administrator's actions on a lot (free it, mark an absence, undo one)
+    // sit on the same rows, so they are handled here rather than on a page of
+    // their own. Delegated from the container because refreshLots() replaces
+    // its contents on every live update, taking any bound form with it.
+    lotsBox.addEventListener('submit', async (e) => {
+      const f = e.target.closest('form[data-lot-action]');
+      if (!f) return;
+      e.preventDefault();
+      const btn = e.submitter;
+      if (btn?.dataset.confirm && !confirm(btn.dataset.confirm)) return;
+      const r = await post(f.getAttribute('action'), { action: btn?.value });
+      if (!r.ok) toast(r.error || 'Erreur', true);
+      else if (r.notice) toast(r.notice);
+      refreshLots();
+    });
+
     let refreshing = false;
     async function refreshLots() {
       if (refreshing) return; refreshing = true;
@@ -246,31 +262,6 @@
     $('#sel-none')?.addEventListener('click', () => { boxes().forEach((b) => (b.checked = false)); update(); });
     update();
     $('#publish-form')?.addEventListener('submit', (e) => { if (!confirm(btn.dataset.confirm)) e.preventDefault(); else btn.classList.add('busy'); });
-  }
-
-  // ---- admin offer page: live refresh of lots/deliveries ----
-  const adminOffer = $('#admin-offer');
-  if (adminOffer && 'EventSource' in window) {
-    const id = adminOffer.dataset.offer;
-    let t;
-    const refresh = async () => {
-      const res = await fetch(`/admin/offres/${id}/lots`, { credentials: 'same-origin' });
-      if (res.ok) $('#admin-lots').innerHTML = await res.text();
-    };
-    const es = new EventSource(`/offres/${id}/stream`);
-    es.addEventListener('refresh', () => { clearTimeout(t); t = setTimeout(refresh, 300); });
-    es.addEventListener('message', () => {});
-    // Lot actions via fetch to avoid full reloads
-    $('#admin-lots').addEventListener('submit', async (e) => {
-      const f = e.target.closest('form[data-lot-action]'); if (!f) return;
-      e.preventDefault();
-      if (f.dataset.confirm && !confirm(f.dataset.confirm)) return;
-      const action = e.submitter?.value || f.action_value?.value;
-      const r = await post(f.getAttribute('action'), { action });
-      if (!r.ok) toast(r.error || 'Erreur', true);
-      else if (r.notice) toast(r.notice);
-      refresh();
-    });
   }
 
   // ---- copy to clipboard ----

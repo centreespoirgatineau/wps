@@ -1,12 +1,19 @@
 // Signed-in contact routes: offers, reservations, chat, profile, private media.
 import path from 'node:path';
 import { HttpError, sendFile } from '../lib/http.js';
-import { requireContact, checkCsrf, destroySession, rateLimit } from '../lib/auth.js';
+import { requireContact, checkCsrf, destroySession, rateLimit, isAdmin, adminFresh } from '../lib/auth.js';
 import { isDemo } from '../lib/demo.js';
 import { normalizeLang } from '../lib/i18n.js';
 import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
+
+/** The offer's text deliveries, for the administrator's fold on the offer page. */
+export function offerSms(db, offerId) {
+  return db.all(`SELECT s.*, c.first_name, c.last_name, c.organization FROM sms_log s
+    LEFT JOIN contacts c ON c.id = s.contact_id
+    WHERE s.offer_id = ? AND s.kind = 'offer' ORDER BY s.id`, offerId);
+}
 
 export function loadOffer(db, id) {
   const offer = db.get('SELECT * FROM offers WHERE id = ?', Number(id));
@@ -52,7 +59,17 @@ export function contactRoutes(app, db) {
     const messages = db.all(`
       SELECT m.*, c.first_name, c.last_name, c.organization FROM messages m JOIN contacts c ON c.id = m.contact_id
       WHERE m.offer_id = ? ORDER BY m.id ASC LIMIT 500`, offer.id);
-    ctx.render('offer', { title: offer.title, ...offerViewModel(db, ctx, offer), messages });
+    // This is the only offer page there is, so for an administrator it also
+    // carries what used to sit on a management page of its own. Queried only
+    // when it will actually be shown: a contact never sees either list.
+    const admin = isAdmin(ctx) && adminFresh(ctx);
+    ctx.render('offer', {
+      title: offer.title, ...offerViewModel(db, ctx, offer), messages,
+      sms: admin ? offerSms(db, offer.id) : [],
+      penalties: admin ? db.all(`SELECT p.*, c.first_name, c.last_name, c.organization FROM penalties p
+        JOIN contacts c ON c.id = p.contact_id WHERE p.target_offer_id = ? AND p.status = 'active'
+        ORDER BY p.type, c.first_name`, offer.id) : [],
+    });
   });
 
   // Partial: the lots block, re-fetched on SSE "refresh".

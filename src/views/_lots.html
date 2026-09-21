@@ -28,7 +28,7 @@
       <div class="tiny"><%= offer.lot_description %></div>
     <% } else { %>
       <div class="who">
-        <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong></div>
+        <div><strong><%= mine ? t('offer.your_lot') : (l.first_name + ' ' + (l.last_name ? l.last_name[0] + '.' : '')) %></strong><% if (isAdmin && l.status === 'no_show') { %> <span class="badge danger"><%= t('offer.no_show') %></span><% } %></div>
         <% if (!mine) { %><div class="org"><%= l.organization %></div>
           <%# Phone numbers are for admins only; contacts coordinate in the chat. %>
           <% if (isAdmin) { %>
@@ -46,5 +46,26 @@
   <% } else if (free && offer.active && check.reason === 'cooldown') { %>
     <button class="btn primary sm" type="button" data-reserve="<%= l.id %>" disabled data-wait><%= t('offer.reserve') %></button>
   <% } %>
+  <%# The administrator's actions on a taken lot, on the same row the contacts
+      read. They live here rather than on a page of their own so that this
+      partial — which the live refresh re-renders — carries them too. Hidden
+      unless the admin session is fresh, because the route behind them would
+      redirect to re-verification and the button would appear to do nothing. %>
+  <% if (!free && isAdmin && adminFresh) { %>
+  <form method="post" action="/admin/offres/<%= offer.id %>/lots/<%= l.id %>" data-lot-action>
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <% if (l.status === 'no_show') { %>
+      <button class="btn sm ghost" name="action" value="reserved" type="submit"><%= t('offer.admin.no_show_undo') %></button>
+    <% } else if (offer.active) { %>
+      <button class="btn sm ghost" name="action" value="free" type="submit" data-confirm="<%= t('offer.admin.free_confirm') %>"><%= t('offer.admin.free') %></button>
+    <% } else { %>
+      <button class="btn sm ghost" name="action" value="no_show" type="submit" style="color:var(--danger)"><%= t('offer.admin.mark_no_show') %></button>
+    <% } %>
+  </form>
+  <% } %>
 </div>
+<% } %>
+
+<% if (isAdmin && !offer.active && offer.lots.some(l => l.status !== 'available')) { %>
+  <p class="tiny mt-s"><%= t('offer.admin.no_show_hint') %></p>
 <% } %>

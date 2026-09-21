@@ -11,16 +11,29 @@
   <%- include('_status_badge', { status: offer.effective }) %>
 </div>
 
-<%# An administrator works from this page, not from a different one: they read
-    exactly what the contacts read, and the few things only they can do sit in
-    one row here rather than on a page of their own. %>
+<%# There is no second offer page. An administrator reads exactly what the
+    contacts read — the photos, the details, the lots, the chat — and the things
+    only they can do are folded into this one page: this strip, the buttons on
+    each taken lot, and the two folds at the bottom. %>
 <% if (isAdmin) { %>
 <div class="card admin-bar">
   <div class="row between wrap-row">
     <div class="tiny"><strong><%= t('offer.admin.bar') %></strong></div>
     <div class="row wrap-row">
-      <% if (offer.active) { %><a class="btn sm secondary" href="/admin/offres/<%= offer.id %>/modifier"><%= t('offer.admin.edit') %></a><% } %>
-      <a class="btn sm ghost" href="/admin/offres/<%= offer.id %>"><%= t('offer.admin.manage') %></a>
+      <%# Arriving by personal link signs an administrator in, but not freshly
+          enough for admin actions. Rather than let the controls quietly vanish,
+          say so and offer the one code that brings them back. %>
+      <% if (!adminFresh) { %>
+        <a class="btn sm secondary" href="/admin/verifier?next=<%= encodeURIComponent('/offres/' + offer.id) %>"><%= t('offer.admin.verify') %></a>
+      <% } else if (offer.active) { %>
+        <a class="btn sm secondary" href="/admin/offres/<%= offer.id %>/modifier"><%= t('offer.admin.edit') %></a>
+        <form method="post" action="/admin/offres/<%= offer.id %>/fermer" data-confirm="<%= t('offer.admin.close_confirm') %>">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="btn sm ghost" type="submit"><%= t('offer.admin.close') %></button>
+        </form>
+      <% } else { %>
+        <button class="btn sm ghost" type="button" data-open="#delete-offer-modal" style="color:var(--danger)"><%= t('offer.admin.delete') %></button>
+      <% } %>
     </div>
   </div>
 </div>
@@ -85,6 +98,39 @@
     <div class="tiny mt-s"><%= t('chat.closed') %></div>
   <% } %>
 </div>
+
+<%# Admin only, and last on the page: the deliveries of this offer's texts, the
+    penalties it is currently applying, and the way to erase it once it is over.
+    None of this concerns a contact, so it sits below their chat, folded. %>
+<% if (isAdmin && adminFresh) { %>
+  <%- include('admin/_deliveries') %>
+
+  <% if (penalties.length) { %>
+  <div class="section-title"><%= t('offer.admin.penalties') %></div>
+  <div class="card">
+    <ul class="list">
+      <% for (const p of penalties) { %>
+      <li><div class="grow"><strong><%= p.first_name %> <%= p.last_name %></strong><div class="meta"><%= p.organization %> · <span class="badge <%= p.type === 'no_show' ? 'danger' : 'accent' %>"><%= t('offer.admin.penalty.' + p.type) %></span></div></div>
+        <form method="post" action="/admin/penalites/<%= p.id %>/lever"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="/offres/<%= offer.id %>"><button class="btn sm ghost" type="submit"><%= t('offer.admin.clear_penalty') %></button></form></li>
+      <% } %>
+    </ul>
+  </div>
+  <% } %>
+
+  <% if (!offer.active) { %>
+  <div class="modal" id="delete-offer-modal" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <h2><%= t('offer.admin.delete_title') %></h2>
+      <p class="muted"><%= t('offer.admin.delete_body') %></p>
+      <form method="post" action="/admin/offres/<%= offer.id %>/supprimer" class="actions">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button class="btn secondary" type="button" data-close><%= t('btn.cancel') %></button>
+        <button class="btn danger" type="submit"><%= t('offer.admin.delete') %></button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+<% } %>
 
 <!-- Rules modal -->
 <div class="modal" id="rules-modal" aria-hidden="true">

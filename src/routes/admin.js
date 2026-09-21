@@ -298,19 +298,14 @@ export function adminRoutes(app, db) {
     ctx.redirect('/admin/offres');
   });
 
+  // There is no separate admin offer page any more: the contact page is the
+  // offer page, and everything an administrator does is on it. This route stays
+  // only so old links, bookmarks and the publish redirect still land somewhere
+  // sensible.
   app.get('/admin/offres/:id', requireAdmin, (ctx) => {
     const offer = loadOffer(db, ctx.params.id);
     if (offer.status === 'draft') return ctx.redirect(`/admin/offres/${offer.id}/confirmer`);
-    const sms = db.all(`SELECT s.*, c.first_name, c.last_name, c.organization FROM sms_log s LEFT JOIN contacts c ON c.id = s.contact_id WHERE s.offer_id = ? AND s.kind = 'offer' ORDER BY s.id`, offer.id);
-    const penalties = db.all(`SELECT p.*, c.first_name, c.last_name, c.organization FROM penalties p JOIN contacts c ON c.id = p.contact_id WHERE p.target_offer_id = ? AND p.status = 'active' ORDER BY p.type, c.first_name`, offer.id);
-    ctx.render('admin/offer', { title: offer.title, offer, sms, penalties });
-  });
-
-  // Partial for live refresh of the admin lots table
-  app.get('/admin/offres/:id/lots', requireAdmin, (ctx) => {
-    const offer = loadOffer(db, ctx.params.id);
-    const sms = db.all(`SELECT s.*, c.first_name, c.last_name, c.organization FROM sms_log s LEFT JOIN contacts c ON c.id = s.contact_id WHERE s.offer_id = ? AND s.kind = 'offer' ORDER BY s.id`, offer.id);
-    ctx.partial('admin/_offer_lots', { offer, sms });
+    ctx.redirect(`/offres/${offer.id}`);
   });
 
   app.post('/admin/offres/:id/lots/:lotId', requireAdmin, async (ctx) => {
