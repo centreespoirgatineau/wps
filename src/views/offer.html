@@ -2,6 +2,7 @@
 
 <div class="page-head">
   <div class="grow">
+    <p class="eyebrow"><%= t('eyebrow.offer') %></p>
     <h1><%= offer.title %></h1>
     <div class="tiny mt-s">
       <% if (offer.active) { %><%= t('offer.published', { date: fmtDate(offer.published_at, true) }) %><% } else { %><%= t('offer.ended', { date: fmtDate(offer.ended_at || offer.expires_at || offer.created_at, true) }) %><% } %>

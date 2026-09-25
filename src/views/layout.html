@@ -8,9 +8,8 @@
 <%# The page's own name alone is far too short to say anything — "Connexion" tells
     a link preview or a browser tab nothing. The suffix names the project. %>
 <title><%= title || t('offers.title') %> — <%= t('meta.title_suffix') %></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="preload" href="/static/SourceSerif4-normal-400-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/SourceSans3-normal-400-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/app.css?v=<%= v %>">
 <link rel="icon" href="/static/mark.svg?v=<%= v %>" type="image/svg+xml">
 <%# Link preview: the address is shared by text and by e-mail, and every
@@ -36,7 +35,7 @@
     own language link at the bottom. %>
 <% if (!centered) { %>
 <header class="top<%= contact ? '' : ' plain' %>">
-  <div class="wrap bar">
+  <div class="container bar">
     <a class="home" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>" aria-label="Accueil"><%- include('_mark', { small: true }) %></a>
     <% if (contact && isAdmin) { %>
     <nav class="tabs grow">

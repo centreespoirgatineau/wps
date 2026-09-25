@@ -99,6 +99,11 @@ export default {
   'join.required': 'Prénom, organisme et cellulaire sont requis.',
 
   // ---- offers ----
+  'eyebrow.admin': 'Administration',
+  'eyebrow.offers': 'Surplus alimentaires',
+  'eyebrow.offer': 'Offre',
+  'eyebrow.account': 'Mon compte',
+  'eyebrow.join': 'Rejoindre la liste',
   'offers.title': 'Offres',
   'offers.active': 'Offres en cours',
   'dash.active_short': 'En cours',

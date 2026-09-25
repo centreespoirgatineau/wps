@@ -1,5 +1,5 @@
 <div class="page-head">
-  <h1><%= t('admin.dashboard') %></h1>
+  <div><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('admin.dashboard') %></h1></div>
   <div class="actions"><a class="btn primary" href="/admin/offres/nouvelle">+ <%= t('admin.new_offer') %></a></div>
 </div>
 <% if (!smsOk) { %><div class="banner warn mb"><%= t('sms.not_configured') %></div><% } %>

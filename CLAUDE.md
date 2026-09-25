@@ -150,8 +150,18 @@ Other hard constraints:
   already outlined; and each SVG carries Illustrator's private `i:pgf` copy of
   the document, which is why thirty paths weigh 320 KB — fine for a printer,
   twenty times too heavy for a web page, so re-export before using one online.
-  The master's terracotta is **`#DA7757`**; `--accent` in `src/public/app.css`
-  is still `#D97757`, one digit off, and has been since before the logo existed.
+  The master's terracotta is **`#DA7757`**, and `--accent` in `src/public/app.css`
+  has matched it since the restyle of 2026-09-25.
+- **The look is the aide platform's** (aide.centreespoir.ca, repo `crm`; David,
+  2026-09-25): the same tokens (cream `#FAF9F5`, ink, terracotta `#DA7757`, radii
+  10/16/24, the two whisper shadows), Source Serif 4 and Source Sans 3
+  **self-hosted** in `src/public/` (flat: the static route serves one level, so no
+  `fonts/` folder; no Google Fonts, the CSP allows `font-src 'self'` only), the glass
+  header on a wide container with the mark at 44/50 px, the admin menu as text links
+  underlined in terracotta (wrapping onto its own row on a phone), pill buttons of
+  50 px with the terracotta glow, white cards, 50 px fields, and a terracotta
+  eyebrow above each page title (`eyebrow.*` strings, neutral for both brands).
+  When the aide platform's look changes, bring the change here too.
 - **The link preview is the one raster image**, `src/public/og.png` (1200x630),
   because no messenger renders an SVG in a preview card. It is generated from
   the mark and a few lines of copy by `presentation/build/make-og.mjs` and

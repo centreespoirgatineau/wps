@@ -1,4 +1,4 @@
-<div class="page-head"><h1><%= t('sms.title') %></h1></div>
+<div class="page-head"><div><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('sms.title') %></h1></div></div>
 <% if (!smsOk) { %><div class="banner warn mb"><%= t('sms.not_configured') %></div><% } %>
 <div class="card">
   <% if (!rows.length) { %><div class="empty"><%= t('sms.none') %></div><% } %>

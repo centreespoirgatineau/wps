@@ -1,5 +1,5 @@
 <div class="page-head">
-  <div class="grow"><h1><%= t('offer.confirm.title') %></h1><div class="tiny mt-s"><%= t('offer.confirm.summary', { lots: offer.lot_count, max: offer.max_per_contact }) %></div></div>
+  <div class="grow"><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('offer.confirm.title') %></h1><div class="tiny mt-s"><%= t('offer.confirm.summary', { lots: offer.lot_count, max: offer.max_per_contact }) %></div></div>
   <%- include('_status_badge', { status: 'draft' }) %>
 </div>
 

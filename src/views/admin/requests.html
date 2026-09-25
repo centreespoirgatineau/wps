@@ -1,4 +1,4 @@
-<div class="page-head"><h1><%= t('requests.title') %></h1></div>
+<div class="page-head"><div><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('requests.title') %></h1></div></div>
 <% if (!pending.length) { %><div class="card flat empty"><%= t('requests.none') %></div><% } %>
 <% for (const r of pending) { %>
 <div class="card">

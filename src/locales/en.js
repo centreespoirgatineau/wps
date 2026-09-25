@@ -99,6 +99,11 @@ export default {
   'join.required': 'First name, organization and mobile are required.',
 
   // ---- offers ----
+  'eyebrow.admin': 'Administration',
+  'eyebrow.offers': 'Food surplus',
+  'eyebrow.offer': 'Offer',
+  'eyebrow.account': 'My account',
+  'eyebrow.join': 'Join the list',
   'offers.title': 'Offers',
   'offers.active': 'Current offers',
   'dash.active_short': 'Open',

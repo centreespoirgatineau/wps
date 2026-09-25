@@ -76,7 +76,7 @@ app.use((ctx) => {
   ctx.set('Referrer-Policy', 'same-origin');
   ctx.set('X-Robots-Tag', 'noindex, nofollow');
   if (!ctx.path.startsWith('/static/') && !ctx.path.startsWith('/media/')) ctx.set('Cache-Control', 'no-store');
-  ctx.set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
+  ctx.set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
 });
 
 app.use(loadSession(db));

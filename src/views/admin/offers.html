@@ -1,5 +1,5 @@
 <div class="page-head">
-  <h1><%= t('admin.offers') %></h1>
+  <div><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('admin.offers') %></h1></div>
   <div class="actions"><a class="btn primary sm" href="/admin/offres/nouvelle">+ <%= t('admin.new_offer') %></a></div>
 </div>
 <% if (!offers.length) { %><div class="card flat empty"><%= t('dash.no_active') %></div><% } %>

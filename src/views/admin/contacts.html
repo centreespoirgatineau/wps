@@ -1,5 +1,5 @@
 <div class="page-head">
-  <h1><%= t('contacts.title') %> <span class="badge"><%= contacts.filter(c => c.status === 'active').length %></span></h1>
+  <div><p class="eyebrow"><%= t('eyebrow.admin') %></p><h1><%= t('contacts.title') %> <span class="badge"><%= contacts.filter(c => c.status === 'active').length %></span></h1></div>
   <div class="actions"><a class="btn primary sm" href="/admin/contacts/nouveau">+ <%= t('contacts.add') %></a></div>
 </div>
 <form method="get" action="/admin/contacts" class="mb"><input type="search" name="q" value="<%= q %>" placeholder="<%= t('contacts.search') %>"></form>
