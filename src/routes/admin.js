@@ -138,7 +138,7 @@ export function adminRoutes(app, db) {
     const next = safeNext(ctx.query.next);
     let sent = false;
     if (rateLimit(db, `verify:${ctx.state.contact.id}`, 1, MIN)) { await issueLoginCode(db, ctx.state.contact); sent = true; }
-    ctx.render('admin/verify', { title: ctx.t('admin.verify_title'), next, sent });
+    ctx.render('admin/verify', { centered: true, title: ctx.t('admin.verify_title'), next, sent });
   });
 
   app.post('/admin/verifier', requireContact, async (ctx) => {
@@ -148,7 +148,7 @@ export function adminRoutes(app, db) {
     const next = safeNext(body.next);
     if (!rateLimit(db, `verifycode:${ctx.state.contact.id}`, 10, 15 * MIN)) throw new HttpError(429);
     const r = verifyLoginCode(db, ctx.state.contact.phone, body.code || '');
-    if (r !== 'ok') return ctx.render('admin/verify', { title: ctx.t('admin.verify_title'), next, sent: true, error: ctx.t(r === 'expired' ? 'login.code_expired' : 'login.code_invalid') });
+    if (r !== 'ok') return ctx.render('admin/verify', { centered: true, title: ctx.t('admin.verify_title'), next, sent: true, error: ctx.t(r === 'expired' ? 'login.code_expired' : 'login.code_invalid') });
     db.run('UPDATE sessions SET admin_verified_at = ? WHERE id = ?', Date.now(), ctx.state.session.id);
     ctx.redirect(next);
   });

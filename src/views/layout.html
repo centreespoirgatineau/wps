@@ -30,14 +30,14 @@
 <meta name="csrf" content="<%= csrf %>">
 </head>
 <body>
-<%# The login page (the only centered view) has no header: it already shows the
-    mark in its hero, its home link would point at itself, and it carries its
-    own language link at the bottom. %>
+<%# The sign-in pages (login and the administrator's code check, the centered
+    views) have no header: the menu shows only once the person is signed in,
+    the mark is already in their hero, and they carry their own language link. %>
 <% if (!centered) { %>
 <header class="top<%= contact ? '' : ' plain' %>">
   <div class="container bar">
     <a class="home" href="<%= contact ? (isAdmin ? '/admin' : '/offres') : '/' %>" aria-label="Accueil"><%- include('_mark', { small: true }) %></a>
-    <% if (contact && isAdmin) { %>
+    <% if (contact && isAdmin && adminFresh) { %>
     <nav class="tabs grow">
       <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>"><%= t('admin.dashboard') %></a>
       <a href="/admin/offres" class="<%= path.startsWith('/admin/offres') || path.startsWith('/offres') ? 'on' : '' %>"><%= t('admin.offers') %></a>
