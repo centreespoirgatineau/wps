@@ -118,6 +118,13 @@ Other hard constraints:
   which is how a local copy runs. Because both platforms write to the same two
   inboxes, **every message names the platform it came from**, in the subject and
   in the body — covered by a test in `test/mail.test.js`.
+- **Every reservation also texts the administrators** (`src/lib/adminsms.js`,
+  hooked beside the email in the reserve route, never awaited): every active
+  admin of that platform except the one who reserved, each with their own
+  personal link to the offer (`/o/:id/:token` keeps an existing fresh session).
+  The text starts with the platform's address, since both platforms text from
+  one number. Logged as kind `reserved` in the SMS log. David's choice
+  (2026-11-17) over web push, which needs a home-screen install on iPhone.
 - **The donation ask is a setting, and it is quiet.** `donate_url` (Admin →
   Réglages) must be an https address or empty; empty means the platform never
   mentions money anywhere, which is how the jc instance runs. When set, it

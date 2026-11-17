@@ -8,6 +8,7 @@ import { config } from '../config.js';
 import * as rules from '../lib/rules.js';
 import * as sse from '../lib/sse.js';
 import { notifyReservation } from '../lib/mailer.js';
+import { textAdmins } from '../lib/adminsms.js';
 
 /** The offer's text deliveries, for the administrator's fold on the offer page. */
 export function offerSms(db, offerId) {
@@ -114,6 +115,7 @@ export function contactRoutes(app, db) {
         `SELECT COUNT(*) AS n FROM lots WHERE offer_id = ? AND reserved_by = ? AND status IN ('reserved','picked_up')`,
         offer.id, ctx.state.contact.id);
       notifyReservation({ contact: ctx.state.contact, offer, lot, held, override: isAdmin(ctx) });
+      textAdmins(db, { contact: ctx.state.contact, offer, lot });
       ctx.json({ ok: true, message: ctx.t('offer.reserved_ok') });
     } catch (e) {
       if (!(e instanceof rules.RuleError)) throw e;

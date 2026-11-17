@@ -178,6 +178,11 @@ test('full admin → offer → contact → reserve → chat flow', async () => {
   r = await marie.post(`/offres/${offerId}/lots/${lotId}/reserver`, { json: {}, headers: { 'X-CSRF': mcsrf } });
   assert.equal(r.status, 200);
   assert.equal(r.json().ok, true);
+  // The administrator is texted, with a link that opens the offer signed in.
+  await new Promise((res) => setTimeout(res, 200));
+  r = await admin.get('/admin/sms');
+  assert.match(r.text, /Réservation/);
+  assert.match(r.text, new RegExp(`lot 1 réservé par Église de la Grace\\.\\nPlateaux de sushis : 1 lot\\(s\\) encore libre\\(s\\)\\.\\n\\n${BASE}/o/${offerId}/[A-Za-z0-9_-]+`));
   // Second reservation blocked by max_per_contact
   const r2 = await marie.get(`/offres/${offerId}/lots`);
   assert.match(r2.text, /Votre lot/);
@@ -613,6 +618,9 @@ test('over HTTP: an admin reserves past the maximum, a contact is still stopped 
   const tok = /name="csrf" content="([^"]+)"/.exec(page.text)[1];
   assert.match((await take(admin, lots[0], tok)).text, /"ok":true/);
   assert.match((await take(admin, lots[1], tok)).text, /"ok":true/, 'a second lot despite max_per_contact = 1');
+  // Nobody texts the administrator about their own reservation.
+  await new Promise((res) => setTimeout(res, 200));
+  assert.doesNotMatch((await admin.get('/admin/sms')).text, /réservé par Centre Espoir/);
 
   // The same endpoint, the same offer, an ordinary contact: one lot and no more.
   // A contact created for this test: the others have reserved earlier in this

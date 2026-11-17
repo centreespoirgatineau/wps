@@ -336,6 +336,7 @@ export default {
   'sms.kind.test': 'Test',
   'sms.kind.link': 'Link',
   'sms.kind.other': 'Other',
+  'sms.kind.reserved': 'Reservation',
   'sms.status': 'Status',
   'sms.status.queued': 'Queued',
   'sms.status.sent': 'Sent',
@@ -377,6 +378,7 @@ export default {
   'sms.offer': 'Hello {first},\n\nSurplus available today:\n{title}, {n} lot(s).\n\n{url}',
   'sms.code': 'Your code: {code}. It expires in 10 minutes.',
   'sms.welcome': 'Hello {first}, you are now on the Centre Espoir surplus list. Your personal link: {url}',
+  'sms.reserved': '{host}: lot {lot} reserved by {org}.\n{title}: {left} lot(s) still free.\n\n{url}',
   'sms.link': 'Hello {first}, here is your personal link for Centre Espoir surplus offers: {url}',
   'sms.test': 'Test from the Centre Espoir surplus platform. Everything works.',
 };
