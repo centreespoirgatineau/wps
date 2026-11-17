@@ -355,7 +355,10 @@ Notes that have already caught me out:
   SPP"). `scripts/merge-jc-into-spp.js` added every jc contact and offer (lots,
   chat, photos) to spp and nothing else; a phone already on spp kept its spp
   record. It ran once on the server through `update.sh`, armed by
-  `deploy/merge-jc.requested`; `data-spp/merged-from-jc.json` maps old jc offer
+  `deploy/merge-jc.requested`, on 2026-11-17 at 23:04 UTC: 7 contacts added,
+  2 matched (David, Aurélie), 12 offers (jc 3–14 → spp 9–20), 177 lots. The
+  first attempt stopped at the backup, which had never worked (`docker compose
+  cp` cannot read the container's tmpfs `/tmp`; fixed in `backup.sh`); `data-spp/merged-from-jc.json` maps old jc offer
   numbers to new spp ones, for redirecting old links. Covered by
   `test/merge.test.js`. What becomes of jc.centreespoir.ca afterwards is still
   David's call.
