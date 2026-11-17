@@ -360,8 +360,12 @@ Notes that have already caught me out:
   first attempt stopped at the backup, which had never worked (`docker compose
   cp` cannot read the container's tmpfs `/tmp`; fixed in `backup.sh`); `data-spp/merged-from-jc.json` maps old jc offer
   numbers to new spp ones, for redirecting old links. Covered by
-  `test/merge.test.js`. What becomes of jc.centreespoir.ca afterwards is still
-  David's call.
+  `test/merge.test.js`. **jc.centreespoir.ca now reaches the spp container**
+  (Traefik rule in `deploy/docker-compose.override.traefik.yml`, David's call
+  2026-11-17), which answers every request for that host with a 302 to the same
+  thing on spp: offers by their new number, personal links kept when the token
+  came across (`src/lib/legacy.js`, `LEGACY_HOSTS`). The `wps` container still
+  runs with jc's data, but no address reaches it.
 
 Full operator documentation for David: `DEPLOYMENT_GUIDE.md` (English, written for
 a non-developer). Update it when operations change.

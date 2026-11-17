@@ -61,6 +61,9 @@ services:
       # Overrides the values .env sets for the church platform.
       - BRAND=spp
       - APP_URL=https://spp.centreespoir.ca
+      # The church platform was merged into this one (2026-11-17); its old
+      # address now arrives here and is redirected (src/lib/legacy.js).
+      - LEGACY_HOSTS=jc.centreespoir.ca
       # Empty on purpose: this instance generates and keeps its own cookie
       # secret in its own data directory rather than sharing one.
       - APP_SECRET=

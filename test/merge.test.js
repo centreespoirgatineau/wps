@@ -8,6 +8,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 const { openDb } = await import('../src/lib/db.js');
+const { legacyTarget } = await import('../src/lib/legacy.js');
 
 const now = Date.now();
 function instance(name) {
@@ -95,4 +96,22 @@ test('jc contacts and offers are added to spp, and nothing else', () => {
   assert.equal(spp.db.get('SELECT COUNT(*) n FROM offers').n, 2);
 
   for (const i of [jc, spp]) { i.db.raw.close(); fs.rmSync(i.dir, { recursive: true, force: true }); }
+});
+
+test('old jc links land on the same thing on spp', () => {
+  const opts = { offers: { 9: 15, 14: 20 }, tokenKnown: (t) => t === 'paultoken' };
+  const go = (p, s = '') => legacyTarget(p, s, opts);
+  // An offer, by its old number, whoever asks.
+  assert.equal(go('/offres/9'), '/offres/15');
+  assert.equal(go('/admin/offres/14/modifier'), '/offres/20');
+  assert.equal(go('/offres/2'), '/offres', 'an offer that never came across: the list');
+  // A personal link keeps signing its owner in when the token came across...
+  assert.equal(go('/o/14/paultoken'), '/o/20/paultoken');
+  assert.equal(go('/r/paultoken'), '/r/paultoken');
+  // ...and otherwise still opens the offer, behind the sign-in.
+  assert.equal(go('/o/14/oldtoken'), '/offres/20');
+  assert.equal(go('/r/oldtoken'), '/connexion');
+  // Everything else keeps its path and query.
+  assert.equal(go('/demande', '?phone=8195550000'), '/demande?phone=8195550000');
+  assert.equal(go('/'), '/');
 });

@@ -11,6 +11,7 @@ import { loadSession, isAdmin, adminFresh } from './lib/auth.js';
 import { isDemo } from './lib/demo.js';
 import { loadPublicUrl, publicUrl } from './lib/site.js';
 import { startScheduler } from './lib/scheduler.js';
+import { legacyRedirect } from './lib/legacy.js';
 import { formatPhone, normalizePhone } from './lib/phone.js';
 import { token } from './lib/crypto.js';
 import { formatDate, formatDateTimeShort, formatDateTimeLong, hmToH } from './lib/time.js';
@@ -68,6 +69,9 @@ if (config.bootstrapAdmin.phone && !db.get(`SELECT id FROM contacts WHERE role =
 }
 
 const app = new App();
+
+// Old addresses of a platform merged into this one (jc.centreespoir.ca).
+if (config.legacyHosts.length) app.use(legacyRedirect(db, { hosts: config.legacyHosts, dataDir: config.dataDir }));
 
 // --- security headers, language, view helpers ---
 app.use((ctx) => {

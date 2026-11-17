@@ -4,22 +4,18 @@
 # update.sh keeps this in step automatically, so routing and domain changes ship
 # by pushing to main.
 #
-# wps answers on jc.centreespoir.ca; wps-spp on spp.centreespoir.ca. The labels
-# for wps-spp do nothing until the service itself starts, which only happens
-# when deploy/spp.enabled exists.
+# wps-spp answers on spp.centreespoir.ca, and on jc.centreespoir.ca too since
+# the church platform was merged into it (2026-11-17): it redirects every old
+# jc link to the same thing on spp (src/lib/legacy.js). The jc container still
+# runs, with its data, but no address reaches it. To bring jc back, give the
+# `wps` router its Host rule again and drop jc from the rule below.
 services:
   wps:
     networks:
       - default
       - root_default
     labels:
-      - traefik.enable=true
-      - traefik.docker.network=root_default
-      - traefik.http.routers.wps.rule=Host(`jc.centreespoir.ca`)
-      - traefik.http.routers.wps.entrypoints=websecure
-      - traefik.http.routers.wps.tls.certresolver=mytlschallenge
-      - traefik.http.services.wps.loadbalancer.server.port=8080
-      - traefik.http.services.wps.loadbalancer.responseforwarding.flushinterval=-1
+      - traefik.enable=false
   wps-spp:
     networks:
       - default
@@ -27,7 +23,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=root_default
-      - traefik.http.routers.wps-spp.rule=Host(`spp.centreespoir.ca`)
+      - traefik.http.routers.wps-spp.rule=Host(`spp.centreespoir.ca`) || Host(`jc.centreespoir.ca`)
       - traefik.http.routers.wps-spp.entrypoints=websecure
       - traefik.http.routers.wps-spp.tls.certresolver=mytlschallenge
       - traefik.http.services.wps-spp.loadbalancer.server.port=8080

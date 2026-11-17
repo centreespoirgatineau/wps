@@ -24,6 +24,9 @@ export const config = {
   // spp.centreespoir.ca, for food banks and community organisations. Only the
   // wording differs — same rules, same code, separate database.
   brand: ['jc', 'spp'].includes(env.BRAND) ? env.BRAND : 'jc',
+  // Addresses of a platform merged into this one; their requests are redirected
+  // here (src/lib/legacy.js). spp sets jc.centreespoir.ca.
+  legacyHosts: (env.LEGACY_HOSTS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
   dataDir,
   dbPath: path.join(dataDir, 'wps.sqlite'),
   uploadsDir: path.join(dataDir, 'uploads'),
