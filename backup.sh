@@ -9,10 +9,14 @@ stamp="$(date +%Y-%m-%d_%H%M)"
 # service, label, host data directory
 snap() {
   local svc="$1" label="$2" dir="$3"
+  # The snapshot is written into the data volume, which the host sees directly.
+  # Not /tmp: that is a tmpfs inside the container, and `docker compose cp`
+  # cannot read a tmpfs — every backup failed that way until 2026-11-17.
   docker compose exec -T "$svc" node --no-warnings=ExperimentalWarning -e '
     const {DatabaseSync}=require("node:sqlite");
-    const d=new DatabaseSync("/data/wps.sqlite"); d.exec("VACUUM INTO \x27/tmp/backup.sqlite\x27");'
-  docker compose cp "$svc:/tmp/backup.sqlite" "backups/${label}_$stamp.sqlite"
+    require("node:fs").rmSync("/data/.backup.sqlite",{force:true});
+    const d=new DatabaseSync("/data/wps.sqlite"); d.exec("VACUUM INTO \x27/data/.backup.sqlite\x27");'
+  mv "$dir/.backup.sqlite" "backups/${label}_$stamp.sqlite"
   tar -czf "backups/${label}_uploads_$stamp.tgz" -C "$dir" uploads
   ls -1t "backups/${label}_"*.sqlite | tail -n +15 | xargs -r rm -f
   ls -1t "backups/${label}_uploads_"*.tgz | tail -n +15 | xargs -r rm -f
