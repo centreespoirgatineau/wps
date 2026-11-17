@@ -1,0 +1,7 @@
+Requested by David on 2026-11-17: add every contact and offer of the church
+platform (jc) to the food-bank platform (spp), and nothing else, so that only
+spp is maintained from now on.
+
+update.sh sees this file and runs scripts/merge-jc-into-spp.js once on the
+server (backup, stop, merge, restart). It never runs twice: the merge leaves
+data-spp/merged-from-jc.json behind, and the script refuses a second merge.

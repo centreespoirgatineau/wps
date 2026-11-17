@@ -351,6 +351,15 @@ Notes that have already caught me out:
   nothing. `backup.sh` snapshots both, keeping 14 of each; it skips the second
   when that container is not running.
 
+- **jc was merged into spp** (David, 2026-11-17: "only maintain one platform,
+  SPP"). `scripts/merge-jc-into-spp.js` added every jc contact and offer (lots,
+  chat, photos) to spp and nothing else; a phone already on spp kept its spp
+  record. It ran once on the server through `update.sh`, armed by
+  `deploy/merge-jc.requested`; `data-spp/merged-from-jc.json` maps old jc offer
+  numbers to new spp ones, for redirecting old links. Covered by
+  `test/merge.test.js`. What becomes of jc.centreespoir.ca afterwards is still
+  David's call.
+
 Full operator documentation for David: `DEPLOYMENT_GUIDE.md` (English, written for
 a non-developer). Update it when operations change.
 

@@ -23,6 +23,25 @@ fi
 PROFILE=()
 if [ -f deploy/spp.enabled ]; then PROFILE=(--profile spp); fi
 
+# One-time merge of the church platform into SPP (scripts/merge-jc-into-spp.js),
+# armed by committing deploy/merge-jc.requested. Backs up both databases, stops
+# both apps, merges with the freshly built image, then the line below starts
+# them again. data-spp/merged-from-jc.json marks it done, and the script itself
+# refuses a second merge. A failed merge changes nothing on spp (one
+# transaction), so the apps are restarted either way.
+if [ -f deploy/merge-jc.requested ] && [ ${#PROFILE[@]} -gt 0 ] && [ ! -f data-spp/merged-from-jc.json ]; then
+  echo "• merging jc into spp"
+  docker compose "${PROFILE[@]}" build
+  if bash backup.sh; then
+    docker compose "${PROFILE[@]}" stop wps wps-spp
+    docker compose "${PROFILE[@]}" run --rm --no-deps -v "$PWD/data:/jc" --entrypoint node wps-spp \
+      --no-warnings=ExperimentalWarning scripts/merge-jc-into-spp.js /jc /data \
+      || echo "✗ merge failed — nothing was changed on spp"
+  else
+    echo "✗ backup failed — merge not attempted"
+  fi
+fi
+
 docker compose "${PROFILE[@]}" up -d --build --remove-orphans
 
 check() {  # port, name
