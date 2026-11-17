@@ -26,8 +26,16 @@ async function page(url, { signedIn = true } = {}) {
     .replace(/<link rel="icon"[^>]*>/, '')
     .replace(/<script src="\/static\/app\.js[^>]*><\/script>/, '')
     .replace(/src="\/static\/mark\.svg[^"]*"/g, `src="data:image/svg+xml;base64,${mark}"`)
+    .replace(/ loading="lazy"/g, '')
     // The pages are decoration here: nothing should be clickable or scrollable.
     .replace('</head>', '<style>html{overflow:hidden}a{pointer-events:none}</style></head>');
+  // Offer photos are private media behind the session: inline them too.
+  for (const file of new Set([...html.matchAll(/src="\/media\/([^"]+)"/g)].map((m) => m[1]))) {
+    const img = await fetch(`${BASE}/media/${file}`, { headers: { Cookie: cookie } });
+    if (!img.ok) throw new Error(`photo ${file}: ${img.status}`);
+    const data = Buffer.from(await img.arrayBuffer()).toString('base64');
+    html = html.replaceAll(`src="/media/${file}"`, `src="data:${img.headers.get('content-type')};base64,${data}"`);
+  }
   return html;
 }
 

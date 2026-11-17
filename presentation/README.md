@@ -37,7 +37,15 @@ casse en vieillissant, mais avant une grande présentation, refaire le diaporama
 Les églises, les personnes et les offres qu'on y voit sont **inventées pour la
 démonstration** — d'où la mention « Exemple — données de démonstration » sous les
 téléphones. Aucune donnée réelle, aucun vrai contact, aucun vrai numéro de
-téléphone n'apparaît dans la présentation.
+téléphone n’apparaît dans la présentation.
+
+Seule exception : dans le diaporama des banques alimentaires (`spp`), l’offre du
+jour reprend une vraie offre du Centre, les raisins rouges de novembre 2026, avec
+deux de ses photos. Elles sont dans `build/photos-spp/` : pour en changer,
+remplacez-les par d’autres (même nom, environ 640 pixels de côté) et refaites le
+diaporama. Comme les photos allongent la page, les diapositives 7 et 8 indiquent
+dans `build/slides.spp.mjs` à quelle hauteur montrer la page (784 et 1524) :
+à ajuster si les lots ou la discussion n’apparaissent plus en haut du téléphone.
 
 ## La refaire
 

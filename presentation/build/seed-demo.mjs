@@ -108,13 +108,24 @@ function makeOffer({ title, lotDescription, lots, max = 1, daysAgo, publishedHou
 }
 
 // ---- Today: the live offer -------------------------------------------------
+// The spp deck shows a real offer the Centre published (red grapes, November
+// 2026) with its own photos, kept in photos-spp/, so the phone shows product.
+const LIVE = BRAND === 'spp'
+  ? { title: 'Raisins rouges', lotDescription: '10 caisses',
+      photos: ['raisins-1.jpg', 'raisins-2.jpg'] }
+  : { title: 'Plateaux de sushis et salades', lotDescription: '6 plateaux de sushis + 4 salades repas',
+      photos: [] };
 const live = makeOffer({
-  title: 'Plateaux de sushis et salades',
-  lotDescription: '6 plateaux de sushis + 4 salades repas',
+  title: LIVE.title,
+  lotDescription: LIVE.lotDescription,
   lots: 8, max: 1, daysAgo: 0, publishedHour: 2, status: 'active',
   // The viewer (Nouvelle Vie) deliberately has NOT reserved yet, so the slides
   // can show real « Réserver » buttons next to lots already taken by others.
   reservations: [O1, O2, O3, O4, O5],
+});
+LIVE.photos.forEach((file, i) => {
+  fs.copyFileSync(path.join(ROOT, 'presentation/build/photos-spp', file), path.join(DEMO, 'uploads', file));
+  db.run('INSERT INTO offer_photos(offer_id, file, position) VALUES (?, ?, ?)', live, file, i);
 });
 
 const chat = BRAND === 'jc' ? [
@@ -129,7 +140,7 @@ const chat = BRAND === 'jc' ? [
   [O2, 'Parfait. Est-ce que quelqu’un peut prendre mon lot ? Je suis pris jusqu’à 16H.'],
   [O1, 'Oui, je peux le prendre et te le laisser à ton comptoir en revenant.'],
   [O2, 'Merci beaucoup, ça me sauve la journée.'],
-  [O4, 'On sert un repas ce soir à 17H30, les salades vont être parfaites.'],
+  [O4, 'On sert la collation demain matin, les raisins vont faire des heureux.'],
   [VIEWER, 'Je serai sur place à 13H30 si quelqu’un veut partager le transport.'],
 ];
 let t = now - 100 * 60000;
@@ -156,7 +167,7 @@ for (const c of contacts) {
   db.run(`INSERT INTO sms_log(contact_id, offer_id, to_phone, kind, body, status, created_at, updated_at)
           VALUES (?, ?, ?, 'offer', ?, 'delivered', ?, ?)`,
     c.id, live, c.phone,
-    `Bonjour ${c.first_name},\n\nSurplus disponible aujourd'hui :\nPlateaux de sushis et salades, 8 lot(s).\n\nhttps://${BRAND}.centreespoir.ca/o/${live}/${c.token}`,
+    `Bonjour ${c.first_name},\n\nSurplus disponible aujourd'hui :\n${LIVE.title}, 8 lot(s).\n\nhttps://${BRAND}.centreespoir.ca/o/${live}/${c.token}`,
     now - 2 * H, now - 2 * H);
 }
 

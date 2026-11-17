@@ -92,7 +92,7 @@ export function slides({ phone, mark }) {
     <div class="col shot-col">
       <div class="sms">
         <p class="sms-head">Centre Espoir</p>
-        <p class="bubble">Bonjour Marie,<br><br>Surplus disponible aujourd’hui&nbsp;:<br>Plateaux de sushis et salades, 8 lot(s).<br><br><span class="link">__ORIGIN__/o/1/…</span></p>
+        <p class="bubble">Bonjour Marie,<br><br>Surplus disponible aujourd’hui&nbsp;:<br>Raisins rouges, 8 lot(s).<br><br><span class="link">__ORIGIN__/o/1/…</span></p>
         <p class="sms-time">aujourd’hui, 10H16</p>
       </div>
     </div>
@@ -129,7 +129,7 @@ export function slides({ phone, mark }) {
         <li>Réserver un lot, c’est s’engager à venir le chercher.</li>
       </ul>
     </div>
-    <div class="col shot-col">${phone('offer', 600)}</div>
+    <div class="col shot-col">${phone('offer', 784)}</div>
   </div>
 </section>`);
 
@@ -146,7 +146,7 @@ export function slides({ phone, mark }) {
         <li>Avant comme après le ramassage, tout se coordonne là.</li>
       </ul>
     </div>
-    <div class="col shot-col">${phone('offer', 1340)}</div>
+    <div class="col shot-col">${phone('offer', 1524)}</div>
   </div>
 </section>`);
 
